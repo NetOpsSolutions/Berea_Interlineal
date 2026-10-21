@@ -1,0 +1,77 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Backups and local notes
+*.zip
+*.bak
+*.tmp
+NOTAS
+Fixes/
+
+# Scraper raw data and intermediate dumps
+/data/
+/assets/data.bak/
+
+# Legacy raw JSON files superseded by the prebuilt SQLite database
+# (Only assets/data/logos_k_logos.db and assets/data/sample.json are bundled)
+/assets/data/interlinear_at.json
+/assets/data/interlinear_nt.json
+/assets/data/occurrences.json
+/assets/data/strong_greek.json
+/assets/data/strong_hebrew.json
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Android local files
+android/.gradle/
+android/.kotlin/
+android/local.properties
+android/**/GeneratedPluginRegistrant.java
+android/app/build/
+
+# Python
+__pycache__/
+tools/__pycache__/
+*.py[cod]
+
+# Windows desktop build artifacts
+windows/flutter/ephemeral/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Widget Preview related
+.widget_preview/

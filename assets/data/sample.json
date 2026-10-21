@@ -1,0 +1,183 @@
+{
+  "strong": [
+    {
+      "language": "hebrew",
+      "code": 430,
+      "lemma": "אֱלֹהִים",
+      "pronunciation": "Elohim",
+      "derivation": "de 433",
+      "definition": "dioses; Dios; seres divinos; ángeles; jueces",
+      "rv_definition": "ángeles, Dios, dioses, juez, poderoso, rey",
+      "stepbible": "Dios; dios; seres divinos; ángeles; jueces"
+    },
+    {
+      "language": "hebrew",
+      "code": 7225,
+      "lemma": "רֵאשִׁית",
+      "pronunciation": "reshith",
+      "derivation": "de 7218",
+      "definition": "principio, comienzo, primero",
+      "rv_definition": "principio",
+      "stepbible": "principio"
+    },
+    {
+      "language": "hebrew",
+      "code": 1254,
+      "lemma": "בָּרָא",
+      "pronunciation": "bara",
+      "derivation": "raíz primitiva",
+      "definition": "crear, formar, producir",
+      "rv_definition": "crear, criar, hacer",
+      "stepbible": "crear"
+    },
+    {
+      "language": "hebrew",
+      "code": 8064,
+      "lemma": "שָׁמַיִם",
+      "pronunciation": "shamayim",
+      "derivation": "dual masculino",
+      "definition": "cielos, cielo, atmósfera",
+      "rv_definition": "cielos",
+      "stepbible": "cielos"
+    },
+    {
+      "language": "hebrew",
+      "code": 776,
+      "lemma": "אֶרֶץ",
+      "pronunciation": "erets",
+      "derivation": "de 774",
+      "definition": "tierra, suelo, país",
+      "rv_definition": "tierra, país, suelo",
+      "stepbible": "tierra"
+    },
+    {
+      "language": "greek",
+      "code": 3056,
+      "lemma": "λόγος",
+      "pronunciation": "lógos",
+      "derivation": "de 3004",
+      "definition": "algo dicho; tema; razonamiento; cálculo; la Expresión Divina",
+      "rv_definition": "palabra, verbo, razón, asunto",
+      "stepbible": "palabra; asunto; razón"
+    },
+    {
+      "language": "greek",
+      "code": 2316,
+      "lemma": "θεός",
+      "pronunciation": "theós",
+      "derivation": "primaria",
+      "definition": "un ser supremo, Dios",
+      "rv_definition": "Dios",
+      "stepbible": "Dios"
+    }
+  ],
+  "verses": [
+    {
+      "book": "Gn",
+      "chapter": 1,
+      "verse": 1,
+      "translation": "En el principio creó Dios los cielos y la tierra.",
+      "words": [
+        {
+          "position": 1,
+          "strong_code": 9001,
+          "language": "hebrew",
+          "lemma": "בְּ",
+          "surface": "בְּ",
+          "parsing": "PREP",
+          "translation": "En"
+        },
+        {
+          "position": 2,
+          "strong_code": 7225,
+          "language": "hebrew",
+          "lemma": "רֵאשִׁית",
+          "surface": "רֵאשִׁ֖ית",
+          "parsing": "SUBS.F.SG.A",
+          "translation": "principio"
+        },
+        {
+          "position": 3,
+          "strong_code": 1254,
+          "language": "hebrew",
+          "lemma": "בָּרָא",
+          "surface": "בָּרָ֣א",
+          "parsing": "VERBO.QAL.PERF.P3.M.SG",
+          "translation": "creó"
+        },
+        {
+          "position": 4,
+          "strong_code": 430,
+          "language": "hebrew",
+          "lemma": "אֱלֹהִים",
+          "surface": "אֱלֹהִ֑ים",
+          "parsing": "SUBS.M.PL.A",
+          "translation": "Dios"
+        },
+        {
+          "position": 5,
+          "strong_code": 853,
+          "language": "hebrew",
+          "lemma": "אֵת",
+          "surface": "אֵ֥ת",
+          "parsing": "PREP",
+          "translation": "[marcador de objeto]"
+        },
+        {
+          "position": 6,
+          "strong_code": 9006,
+          "language": "hebrew",
+          "lemma": "הַ",
+          "surface": "הַ",
+          "parsing": "ART",
+          "translation": "los"
+        },
+        {
+          "position": 7,
+          "strong_code": 8064,
+          "language": "hebrew",
+          "lemma": "שָׁמַיִם",
+          "surface": "שָּׁמַ֖יִם",
+          "parsing": "SUBS.M.PL.A",
+          "translation": "cielos"
+        },
+        {
+          "position": 8,
+          "strong_code": 9005,
+          "language": "hebrew",
+          "lemma": "וְ",
+          "surface": "וְ",
+          "parsing": "CONJ",
+          "translation": "y"
+        },
+        {
+          "position": 9,
+          "strong_code": 853,
+          "language": "hebrew",
+          "lemma": "אֵת",
+          "surface": "אֵ֥ת",
+          "parsing": "PREP",
+          "translation": "[marcador de objeto]"
+        },
+        {
+          "position": 10,
+          "strong_code": 9006,
+          "language": "hebrew",
+          "lemma": "הַ",
+          "surface": "הָ",
+          "parsing": "ART",
+          "translation": "la"
+        },
+        {
+          "position": 11,
+          "strong_code": 776,
+          "language": "hebrew",
+          "lemma": "אֶרֶץ",
+          "surface": "אָֽרֶץ׃",
+          "parsing": "SUBS.U.SG.A",
+          "translation": "tierra"
+        }
+      ]
+    }
+  ]
+}
