@@ -25,8 +25,13 @@ class UpdateService extends ChangeNotifier {
 
   static const String githubOwner = 'NetOpsSolutions';
   static const String githubRepo = 'Logos_K_Logos';
-  static const String fallbackVersion = '1.3.0';
-  static const int fallbackBuildNumber = 4;
+  static const String fallbackVersion = '1.3.1';
+  static const int fallbackBuildNumber = 5;
+
+  /// Token opcional de GitHub para repositorios privados o rate limits ampliados.
+  /// Se puede suministrar por variable de compilación (--dart-define=GITHUB_TOKEN=...)
+  /// o asignando directamente `UpdateService.instance.githubToken = '...'`.
+  String? githubToken = const String.fromEnvironment('GITHUB_TOKEN', defaultValue: '');
 
   static const MethodChannel _channel = MethodChannel('com.example.logos_k_logos/updater');
 
@@ -115,6 +120,9 @@ class UpdateService extends ChangeNotifier {
       final request = await client.getUrl(url);
       request.headers.set(HttpHeaders.acceptHeader, 'application/vnd.github.v3+json');
       request.headers.set(HttpHeaders.userAgentHeader, 'LogosKLogos-MobileApp/1.0');
+      if (githubToken != null && githubToken!.isNotEmpty) {
+        request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $githubToken');
+      }
 
       final response = await request.close().timeout(const Duration(seconds: 12));
       final responseBody = await response.transform(utf8.decoder).join();
@@ -185,7 +193,7 @@ class UpdateService extends ChangeNotifier {
           status: UpdateStatus.noReleases,
           currentVersion: _cachedVersion,
           deviceArchitecture: deviceArch,
-          message: 'Aún no se han publicado releases en el repositorio oficial de GitHub.',
+          message: 'No se encontraron actualizaciones en GitHub. Si el repositorio es Privado, configúralo como Público en GitHub para permitir la consulta a los usuarios.',
         );
         _lastResult = res;
         _status = UpdateStatus.noReleases;
@@ -332,8 +340,37 @@ class UpdateService extends ChangeNotifier {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 15);
 
-      final uri = Uri.parse(release.apkDownloadUrl);
-      final request = await client.getUrl(uri);
+      final hasToken = githubToken != null && githubToken!.isNotEmpty;
+      final selectedApk = release.selectedApk;
+      final apiUrl = selectedApk?.apiUrl ?? '';
+
+      Uri targetUri;
+      if (hasToken && apiUrl.isNotEmpty) {
+        final apiUri = Uri.parse(apiUrl);
+        final initialReq = await client.getUrl(apiUri);
+        initialReq.followRedirects = false;
+        initialReq.headers.set(HttpHeaders.authorizationHeader, 'Bearer $githubToken');
+        initialReq.headers.set(HttpHeaders.acceptHeader, 'application/octet-stream');
+        initialReq.headers.set(HttpHeaders.userAgentHeader, 'LogosKLogos-MobileApp/1.0');
+
+        final initialRes = await initialReq.close();
+        if (initialRes.statusCode == 302 || initialRes.statusCode == 301) {
+          final redirectLocation = initialRes.headers.value(HttpHeaders.locationHeader);
+          if (redirectLocation != null && redirectLocation.isNotEmpty) {
+            targetUri = Uri.parse(redirectLocation);
+          } else {
+            targetUri = Uri.parse(release.apkDownloadUrl);
+          }
+        } else if (initialRes.statusCode == 200) {
+          targetUri = apiUri;
+        } else {
+          throw Exception('Error del servidor de releases de GitHub (${initialRes.statusCode})');
+        }
+      } else {
+        targetUri = Uri.parse(release.apkDownloadUrl);
+      }
+
+      final request = await client.getUrl(targetUri);
       request.followRedirects = true;
       request.maxRedirects = 8;
       request.headers.set(HttpHeaders.acceptHeader, 'application/octet-stream');

@@ -90,12 +90,14 @@ class DeviceArchitecture {
 class ReleaseApkAsset {
   final String fileName;
   final String downloadUrl;
+  final String apiUrl;
   final int sizeBytes;
   final String abi; // 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86', 'universal'
 
   const ReleaseApkAsset({
     required this.fileName,
     required this.downloadUrl,
+    this.apiUrl = '',
     required this.sizeBytes,
     required this.abi,
   });
@@ -256,6 +258,7 @@ class AppReleaseInfo {
         final aName = item['name'] as String? ?? '';
         if (aName.toLowerCase().endsWith('.apk')) {
           final url = item['browser_download_url'] as String? ?? '';
+          final apiUrl = item['url'] as String? ?? '';
           final size = (item['size'] as num?)?.toInt() ?? 0;
           final detectedAbi = ReleaseApkAsset.detectAbiFromFileName(aName);
 
@@ -263,6 +266,7 @@ class AppReleaseInfo {
             ReleaseApkAsset(
               fileName: aName,
               downloadUrl: url,
+              apiUrl: apiUrl,
               sizeBytes: size,
               abi: detectedAbi,
             ),

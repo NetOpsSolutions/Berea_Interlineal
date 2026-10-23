@@ -26,12 +26,13 @@ flowchart TD
 
 ---
 
-## 🚨 Fase 2: Persistencia Real de Datos Personales y Centro de Actualizaciones GitHub OTA (Prioridad Inmediata)
+## ✅ Fase 2: Persistencia Real de Datos Personales y Centro de Actualizaciones GitHub OTA (COMPLETADA)
 
-> [!IMPORTANT]
-> Estas dos características son la máxima prioridad operativa antes de expandir nuevas funciones:
-> 1. **Garantizar que el usuario nunca pierda sus notas, marcadores ni historial al reiniciar la app**.
-> 2. **Permitir actualizar la app directamente desde GitHub Releases sin necesidad de tiendas externas**.
+> [!NOTE]
+> Desplegada con éxito en la versión **1.3.1**:
+> 1. **Persistencia SQLite de Usuario**: Implementada en `logos_user_data.db` (separada de la base bíblica de solo lectura), con tablas dedicadas (`user_bookmarks`, `user_verse_notes`, `user_strong_notes`, `user_history`), soporte de transacciones ACID, y migrador automático desde `SharedPreferences`.
+> 2. **Centro de Actualizaciones GitHub OTA**: Integrado con soporte nativo de detección de arquitecturas (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`), cálculo de descargas con barra de progreso y auto-instalación mediante `FileProvider`.
+> 3. **Release Builds v1.3.1**: Compilados y empaquetados en `release_builds/v1.3.1/` con cálculo de checksums SHA-256.
 
 ```mermaid
 flowchart LR
@@ -178,8 +179,8 @@ flowchart TD
 
 | Hito | Alcance | Prioridad |
 |---|---|---|
-| **M1: Persistencia SQLite de Usuario** | Mover notas, marcadores e historial a tablas nativas SQLite permanentes | 🚨 Crítica / Inmediata |
-| **M2: Actualizador In-App GitHub OTA** | Conexión con GitHub Releases, visualización de notas de versión y descarga/instalación APK | 🚨 Crítica / Inmediata |
+| **M1: Persistencia SQLite de Usuario** | Mover notas, marcadores e historial a tablas nativas SQLite permanentes | ✅ Completada (v1.3.1) |
+| **M2: Actualizador In-App GitHub OTA** | Conexión con GitHub Releases, visualización de notas de versión y descarga/instalación APK | ✅ Completada (v1.3.1) |
 | **M3: Depuración final de Assets** | Excluir JSONs duplicados del bundle para dejar el APK en ~45 MB | ⭐⭐⭐ Alta |
 | **M4: Difusión en WhatsApp y Redes** | Compartir texto estilizado y generador de imágenes de versículos para Estados | ⭐⭐⭐ Alta |
 | **M5: Versículo del Día** | Notificación matutina, tarjeta devocional y salto al interlineal | ⭐⭐⭐ Alta |

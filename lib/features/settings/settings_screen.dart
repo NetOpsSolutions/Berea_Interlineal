@@ -259,7 +259,7 @@ class SettingsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Novedades en Versión 1.3:',
+                          'Novedades en Versión 1.3.1:',
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onSurface,
@@ -267,9 +267,21 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         _featureRow(
+                          icon: Icons.storage_rounded,
+                          title: 'Persistencia real en SQLite',
+                          desc: 'Notas, marcadores e historial ahora se guardan en una base de datos SQLite dedicada (logos_user_data.db). Tus datos son permanentes y nunca se pierden al cerrar o reiniciar la app.',
+                          theme: theme,
+                        ),
+                        _featureRow(
+                          icon: Icons.sync_rounded,
+                          title: 'Migrador automático',
+                          desc: 'Si tenías datos en la versión anterior (SharedPreferences), se importan automáticamente a SQLite sin pérdida de información.',
+                          theme: theme,
+                        ),
+                        _featureRow(
                           icon: Icons.system_update_rounded,
                           title: 'Actualizador In-App OTA',
-                          desc: 'Detección automática, descarga con barra de progreso e instalación de versiones desde GitHub Releases.',
+                          desc: 'Detección automática de arquitectura CPU, descarga con barra de progreso e instalación de versiones directamente desde GitHub Releases.',
                           theme: theme,
                         ),
                         _featureRow(
@@ -288,12 +300,6 @@ class SettingsScreen extends StatelessWidget {
                           icon: Icons.link,
                           title: 'Hipervínculos Strong',
                           desc: 'Toca referencias derivadas entre paréntesis (ej: (con 3588)) para abrir ese Strong directamente.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.format_paint,
-                          title: 'Dónde aparece desplegable',
-                          desc: 'Acordeón por libro con todos los versículos y la palabra resaltada en marcador sin cambiar el color de la fuente.',
                           theme: theme,
                         ),
                         _featureRow(
@@ -570,16 +576,16 @@ class _UpdaterCardState extends State<_UpdaterCard> {
             const Divider(height: 1, indent: 16, endIndent: 16),
             ListTile(
               leading: Icon(
-                Icons.preview_rounded,
+                Icons.science_outlined,
                 color: theme.colorScheme.onSurfaceVariant,
                 size: 22,
               ),
               title: const Text(
-                'Probar diálogo de novedades (Demo OTA)',
+                'Vista previa visual (Simulador de diseño)',
                 style: TextStyle(fontSize: 13.5),
               ),
               subtitle: const Text(
-                'Previsualiza la ventana interactiva y la descarga simulada',
+                'Demostración offline de cómo luce la ventana emergente',
                 style: TextStyle(fontSize: 12),
               ),
               trailing: const Icon(Icons.chevron_right, size: 20),
