@@ -17,7 +17,8 @@ class CancellationToken {
   }
 }
 
-/// Servicio integral para actualización In-App (OTA Updater) desde GitHub Releases.
+/// Servicio integral para actualización In-App (OTA Updater) desde GitHub Releases
+/// con autodetección de arquitectura de procesador (ABIs).
 class UpdateService extends ChangeNotifier {
   static final UpdateService instance = UpdateService._();
   UpdateService._();
@@ -33,6 +34,8 @@ class UpdateService extends ChangeNotifier {
   int _cachedBuildNumber = fallbackBuildNumber;
   bool _versionQueried = false;
 
+  DeviceArchitecture? _cachedArchitecture;
+
   UpdateStatus _status = UpdateStatus.idle;
   UpdateCheckResult? _lastResult;
   DownloadProgress? _currentProgress;
@@ -42,6 +45,27 @@ class UpdateService extends ChangeNotifier {
   DownloadProgress? get currentProgress => _currentProgress;
   String get currentVersion => _cachedVersion;
   int get currentBuildNumber => _cachedBuildNumber;
+  DeviceArchitecture? get currentArchitecture => _cachedArchitecture;
+
+  /// Detecta y obtiene la arquitectura nativa del procesador del dispositivo móvil
+  Future<DeviceArchitecture> getDeviceArchitecture() async {
+    if (_cachedArchitecture != null) return _cachedArchitecture!;
+
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        final res = await _channel.invokeMapMethod<String, dynamic>('getDeviceArchitecture');
+        if (res != null) {
+          _cachedArchitecture = DeviceArchitecture.fromMap(res);
+          return _cachedArchitecture!;
+        }
+      } catch (e) {
+        debugPrint('[UpdateService] Error consultando arquitectura nativa: $e');
+      }
+    }
+
+    _cachedArchitecture = DeviceArchitecture.generic();
+    return _cachedArchitecture!;
+  }
 
   /// Obtiene la versión actual de la aplicación desde la plataforma nativa
   Future<String> getAppVersion() async {
@@ -73,12 +97,14 @@ class UpdateService extends ChangeNotifier {
     return _cachedVersion;
   }
 
-  /// Consulta la API de GitHub Releases para verificar si hay una nueva versión.
+  /// Consulta la API de GitHub Releases para verificar si hay una nueva versión
+  /// y autoselecciona el paquete APK que coincide con la arquitectura de la CPU.
   Future<UpdateCheckResult> checkForUpdates({bool isManual = false}) async {
     _status = UpdateStatus.checking;
     notifyListeners();
 
     await getAppVersion();
+    final deviceArch = await getDeviceArchitecture();
 
     final url = Uri.parse('https://api.github.com/repos/$githubOwner/$githubRepo/releases/latest');
 
@@ -95,14 +121,15 @@ class UpdateService extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(responseBody) as Map<String, dynamic>;
-        final release = AppReleaseInfo.fromGitHubJson(data);
+        final release = AppReleaseInfo.fromGitHubJson(data, deviceArch: deviceArch);
 
-        if (release.apkDownloadUrl.isEmpty) {
+        if (release.apkAssets.isEmpty) {
           final res = UpdateCheckResult(
             status: UpdateStatus.noReleases,
             currentVersion: _cachedVersion,
             releaseInfo: release,
-            message: 'Hay una versión publicada (${release.tagName}), pero no contiene el instalador APK adjunto.',
+            deviceArchitecture: deviceArch,
+            message: 'Hay una versión publicada (${release.tagName}), pero no contiene instaladores APK adjuntos.',
           );
           _lastResult = res;
           _status = UpdateStatus.noReleases;
@@ -113,21 +140,39 @@ class UpdateService extends ChangeNotifier {
         final isNewer = isRemoteVersionNewer(_cachedVersion, release.version);
 
         if (isNewer) {
-          final res = UpdateCheckResult(
-            status: UpdateStatus.updateAvailable,
-            currentVersion: _cachedVersion,
-            releaseInfo: release,
-            message: '¡Nueva versión ${release.tagName} disponible!',
-          );
-          _lastResult = res;
-          _status = UpdateStatus.updateAvailable;
-          notifyListeners();
-          return res;
+          if (release.hasCompatibleApk) {
+            final chosenApk = release.selectedApk!;
+            final res = UpdateCheckResult(
+              status: UpdateStatus.updateAvailable,
+              currentVersion: _cachedVersion,
+              releaseInfo: release,
+              deviceArchitecture: deviceArch,
+              message: '¡Nueva versión ${release.tagName} compatible con tu arquitectura (${chosenApk.abi})!',
+            );
+            _lastResult = res;
+            _status = UpdateStatus.updateAvailable;
+            notifyListeners();
+            return res;
+          } else {
+            // Existe nueva versión, pero ninguno de sus APKs es compatible con el procesador del usuario
+            final res = UpdateCheckResult(
+              status: UpdateStatus.incompatibleArchitecture,
+              currentVersion: _cachedVersion,
+              releaseInfo: release,
+              deviceArchitecture: deviceArch,
+              message: 'Hay una versión ${release.tagName} disponible, pero ningún archivo publicado es compatible con tu procesador (${deviceArch.readableName}).',
+            );
+            _lastResult = res;
+            _status = UpdateStatus.incompatibleArchitecture;
+            notifyListeners();
+            return res;
+          }
         } else {
           final res = UpdateCheckResult(
             status: UpdateStatus.upToDate,
             currentVersion: _cachedVersion,
             releaseInfo: release,
+            deviceArchitecture: deviceArch,
             message: 'Logos K Logos está actualizado a la última versión disponible (v$_cachedVersion).',
           );
           _lastResult = res;
@@ -139,6 +184,7 @@ class UpdateService extends ChangeNotifier {
         final res = UpdateCheckResult(
           status: UpdateStatus.noReleases,
           currentVersion: _cachedVersion,
+          deviceArchitecture: deviceArch,
           message: 'Aún no se han publicado releases en el repositorio oficial de GitHub.',
         );
         _lastResult = res;
@@ -149,6 +195,7 @@ class UpdateService extends ChangeNotifier {
         final res = UpdateCheckResult(
           status: UpdateStatus.error,
           currentVersion: _cachedVersion,
+          deviceArchitecture: deviceArch,
           message: 'Límite de solicitudes de la API de GitHub alcanzado temporalmente. Inténtalo más tarde.',
         );
         _lastResult = res;
@@ -159,6 +206,7 @@ class UpdateService extends ChangeNotifier {
         final res = UpdateCheckResult(
           status: UpdateStatus.error,
           currentVersion: _cachedVersion,
+          deviceArchitecture: deviceArch,
           message: 'Respuesta inesperada del servidor de actualizaciones (${response.statusCode}).',
         );
         _lastResult = res;
@@ -170,6 +218,7 @@ class UpdateService extends ChangeNotifier {
       final res = UpdateCheckResult(
         status: UpdateStatus.error,
         currentVersion: _cachedVersion,
+        deviceArchitecture: deviceArch,
         message: 'Sin conexión a internet. Verifica tu red e inténtalo nuevamente.',
       );
       _lastResult = res;
@@ -180,6 +229,7 @@ class UpdateService extends ChangeNotifier {
       final res = UpdateCheckResult(
         status: UpdateStatus.error,
         currentVersion: _cachedVersion,
+        deviceArchitecture: deviceArch,
         message: 'Tiempo de espera agotado al conectar con GitHub Releases.',
       );
       _lastResult = res;
@@ -190,6 +240,7 @@ class UpdateService extends ChangeNotifier {
       final res = UpdateCheckResult(
         status: UpdateStatus.error,
         currentVersion: _cachedVersion,
+        deviceArchitecture: deviceArch,
         message: 'Error al comprobar actualizaciones: $e',
       );
       _lastResult = res;
@@ -225,7 +276,6 @@ class UpdateService extends ChangeNotifier {
   }
 
   static List<int> _parseVersionParts(String version) {
-    // Manejar formato "1.3.0+4" o "1.3.0-beta"
     final mainPart = version.split(RegExp(r'[+\-]')).first;
     final parts = mainPart.split('.');
     final result = <int>[];
@@ -233,7 +283,6 @@ class UpdateService extends ChangeNotifier {
       final parsed = int.tryParse(p) ?? 0;
       result.add(parsed);
     }
-    // Añadir número de compilación si existe ej. +5
     if (version.contains('+')) {
       final buildStr = version.split('+').last;
       final buildNum = int.tryParse(buildStr);
@@ -319,7 +368,6 @@ class UpdateService extends ChangeNotifier {
         sink.add(chunk);
         receivedBytes += chunk.length;
 
-        // Calcular velocidad de descarga cada 400ms
         final now = DateTime.now();
         final elapsedMs = now.difference(lastSampleTime).inMilliseconds;
         if (elapsedMs >= 400) {
@@ -405,18 +453,50 @@ class UpdateService extends ChangeNotifier {
     }
   }
 
-  /// Proporciona una release simulada con notas completas para demostración y verificación de UI.
-  AppReleaseInfo getSimulatedDemoRelease() {
-    return AppReleaseInfo(
+  /// Proporciona una release simulada multi-arquitectura para demostración y verificación de UI.
+  AppReleaseInfo getSimulatedDemoRelease({DeviceArchitecture? arch}) {
+    final targetArch = arch ?? _cachedArchitecture ?? DeviceArchitecture.generic();
+
+    final assets = [
+      const ReleaseApkAsset(
+        fileName: 'logos_k_logos_1.3.1_arm64-v8a.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_arm64-v8a.apk',
+        sizeBytes: 42467328, // ~40.5 MB
+        abi: 'arm64-v8a',
+      ),
+      const ReleaseApkAsset(
+        fileName: 'logos_k_logos_1.3.1_armeabi-v7a.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_armeabi-v7a.apk',
+        sizeBytes: 39845888, // ~38.0 MB
+        abi: 'armeabi-v7a',
+      ),
+      const ReleaseApkAsset(
+        fileName: 'logos_k_logos_1.3.1_x86_64.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_x86_64.apk',
+        sizeBytes: 46137344, // ~44.0 MB
+        abi: 'x86_64',
+      ),
+      const ReleaseApkAsset(
+        fileName: 'logos_k_logos_1.3.1_universal.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_universal.apk',
+        sizeBytes: 78643200, // ~75.0 MB
+        abi: 'universal',
+      ),
+    ];
+
+    final release = AppReleaseInfo(
       tagName: 'v1.3.1',
       version: '1.3.1',
       title: 'Logos K Logos v1.3.1 - Novedades y Mejoras',
       releaseNotes: '''
 ## 🚀 Novedades y Correcciones de la Versión 1.3.1
 
+### 🧠 Detección Inteligente de Arquitectura CPU
+- La aplicación autodetecta la arquitectura nativa de tu procesador (**${targetArch.readableName}**).
+- Descarga exclusivamente el paquete APK compilado para tu CPU, ahorrando datos y evitando fallos de incompatibilidad.
+
 ### ✨ Nuevas Características
 - **Actualizador In-App OTA**: Descarga e instala futuras versiones directamente desde GitHub Releases sin tiendas externas.
-- **Persistencia Optimizada**: Mejoras en la estabilidad del almacenamiento de notas y marcadores.
 - **Rendimiento**: Carga instantánea de versículos y reducción del consumo de memoria en dispositivos de gama media.
 
 ### 🐛 Correcciones de Errores
@@ -426,10 +506,11 @@ class UpdateService extends ChangeNotifier {
 ''',
       publishedAt: DateTime.now(),
       htmlUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/latest',
-      apkDownloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1.apk',
-      apkFileName: 'logos_k_logos_1.3.1.apk',
-      apkSizeBytes: 47185920, // ~45 MB
       isPrerelease: false,
+      apkAssets: assets,
     );
+
+    release.selectBestApk(targetArch);
+    return release;
   }
 }

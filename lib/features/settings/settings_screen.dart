@@ -411,6 +411,15 @@ class _UpdaterCard extends StatefulWidget {
 
 class _UpdaterCardState extends State<_UpdaterCard> {
   bool _isChecking = false;
+  DeviceArchitecture? _arch;
+
+  @override
+  void initState() {
+    super.initState();
+    UpdateService.instance.getDeviceArchitecture().then((arch) {
+      if (mounted) setState(() => _arch = arch);
+    });
+  }
 
   Future<void> _checkUpdates() async {
     if (_isChecking) return;
@@ -423,6 +432,20 @@ class _UpdaterCardState extends State<_UpdaterCard> {
 
       if (res.hasUpdate && res.releaseInfo != null) {
         showUpdateDialog(context, res.releaseInfo!);
+      } else if (res.isIncompatible) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.phonelink_erase_rounded, color: Colors.orangeAccent),
+                const SizedBox(width: 12),
+                Expanded(child: Text(res.message)),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 6),
+          ),
+        );
       } else if (res.status == UpdateStatus.upToDate) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -511,7 +534,27 @@ class _UpdaterCardState extends State<_UpdaterCard> {
                 'Buscar actualizaciones',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: Text('Versión actual: v$currentVer • GitHub Releases'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Versión actual: v$currentVer • GitHub Releases'),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Icon(Icons.memory_rounded, size: 13, color: theme.colorScheme.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        _arch != null ? 'CPU: ${_arch!.readableName}' : 'Detectando arquitectura...',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
               trailing: _isChecking
                   ? const SizedBox(
                       width: 22,

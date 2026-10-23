@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'update_model.dart';
 import 'update_service.dart';
 
-/// Muestra la hoja modal / diálogo interactivo de actualización OTA
+/// Muestra la hoja modal / diálogo interactivo de actualización OTA con soporte multi-arquitectura
 Future<void> showUpdateDialog(
   BuildContext context,
   AppReleaseInfo release, {
@@ -48,6 +48,8 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
   }
 
   Future<void> _startDownload() async {
+    if (!widget.release.hasCompatibleApk) return;
+
     setState(() {
       _status = UpdateStatus.downloading;
       _errorMessage = null;
@@ -58,14 +60,14 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
       // Simulación visual fluida para modo demostración
       for (int i = 1; i <= 100; i++) {
         if (_cancelToken?.isCancelled ?? false) return;
-        await Future.delayed(const Duration(milliseconds: 30));
+        await Future.delayed(const Duration(milliseconds: 25));
         if (!mounted) return;
         setState(() {
           _progress = DownloadProgress(
             receivedBytes: (widget.release.apkSizeBytes * (i / 100)).toInt(),
             totalBytes: widget.release.apkSizeBytes,
             progress: i / 100.0,
-            speedBytesPerSec: 3.8 * 1024 * 1024,
+            speedBytesPerSec: 4.2 * 1024 * 1024,
           );
         });
       }
@@ -118,9 +120,9 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
   Future<void> _proceedToInstall() async {
     if (widget.isDemo) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Simulación completada. En una actualización real, aquí se abriría el instalador nativo de Android.'),
-          duration: Duration(seconds: 4),
+        SnackBar(
+          content: Text('Simulación completada. En un dispositivo real, aquí se instalaría ${widget.release.apkFileName} para arquitectura ${widget.release.apkAbi}.'),
+          duration: const Duration(seconds: 4),
         ),
       );
       Navigator.pop(context);
@@ -155,7 +157,6 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
     await UpdateService.instance.openInstallPermissionSettings();
     if (!mounted) return;
 
-    // Al regresar de ajustes, verificar si ya se otorgó el permiso
     final canInstall = await UpdateService.instance.canRequestPackageInstalls();
     if (canInstall) {
       setState(() {
@@ -169,10 +170,12 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
+    final arch = widget.release.targetArchitecture;
+    final isCompatible = widget.release.hasCompatibleApk;
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: size.height * 0.88,
+        maxHeight: size.height * 0.90,
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -200,7 +203,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
           ),
           const SizedBox(height: 12),
 
-          // Encabezado
+          // Encabezado con información de versión y arquitectura
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -209,13 +212,17 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
+                    color: isCompatible
+                        ? theme.colorScheme.primaryContainer
+                        : theme.colorScheme.errorContainer.withAlpha(150),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
-                    Icons.system_update_rounded,
+                    isCompatible ? Icons.system_update_rounded : Icons.warning_amber_rounded,
                     size: 30,
-                    color: theme.colorScheme.onPrimaryContainer,
+                    color: isCompatible
+                        ? theme.colorScheme.onPrimaryContainer
+                        : theme.colorScheme.error,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -254,13 +261,60 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'Tamaño del paquete: ${widget.release.formattedApkSize}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                      const SizedBox(height: 4),
+
+                      // Insignia de arquitectura detectada
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.memory_rounded,
+                                  size: 13,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  arch != null ? arch.shortTag : 'auto',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isCompatible)
+                            Text(
+                              widget.release.formattedApkSize,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                        ],
                       ),
+                      if (isCompatible) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.release.apkFileName,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 11,
+                            color: theme.colorScheme.outline,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -275,6 +329,34 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
 
           const SizedBox(height: 12),
           const Divider(height: 1),
+
+          // Aviso de incompatibilidad si ningún APK coincide con la CPU
+          if (!isCompatible)
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.errorContainer.withAlpha(80),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.colorScheme.error.withAlpha(120)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.phonelink_erase_rounded, color: theme.colorScheme.error, size: 22),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Esta actualización no contiene paquetes compilados para tu procesador (${arch?.readableName ?? "CPU no compatible"}). Para evitar daños o cierres inesperados, la instalación se ha bloqueado.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onErrorContainer,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           // Cuerpo con notas de la versión (Scrollable)
           Flexible(
@@ -302,14 +384,27 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
           // Panel de acción según estado
           Padding(
             padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).padding.bottom + 16),
-            child: _buildActionSection(context, theme),
+            child: _buildActionSection(context, theme, isCompatible),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionSection(BuildContext context, ThemeData theme) {
+  Widget _buildActionSection(BuildContext context, ThemeData theme, bool isCompatible) {
+    if (!isCompatible) {
+      return Row(
+        children: [
+          Expanded(
+            child: FilledButton.tonal(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido'),
+            ),
+          ),
+        ],
+      );
+    }
+
     switch (_status) {
       case UpdateStatus.downloading:
         final prog = _progress;
@@ -324,7 +419,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Descargando actualización...',
+                  'Descargando ${widget.release.apkAbi}...',
                   style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -424,10 +519,10 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                 children: [
                   Icon(Icons.check_circle_outline, color: Colors.green.shade700),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Descarga completada con éxito. Pulsa el botón para actualizar la app.',
-                      style: TextStyle(fontSize: 13),
+                      'Descarga de ${widget.release.apkFileName} completada con éxito.',
+                      style: const TextStyle(fontSize: 13),
                     ),
                   ),
                 ],
@@ -506,7 +601,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
               child: FilledButton.icon(
                 onPressed: _startDownload,
                 icon: const Icon(Icons.download_rounded),
-                label: const Text('Actualizar Ahora'),
+                label: Text('Actualizar (${widget.release.apkAbi})'),
               ),
             ),
           ],
@@ -613,7 +708,6 @@ class _ReleaseNotesFormattedView extends StatelessWidget {
   }
 
   Widget _buildRichInline(String text, ThemeData theme) {
-    // Parsea sintaxis simple **negrita**
     final spans = <TextSpan>[];
     final parts = text.split('**');
 

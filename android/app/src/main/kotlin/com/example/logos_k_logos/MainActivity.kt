@@ -44,6 +44,28 @@ class MainActivity : FlutterActivity() {
                         result.error("VERSION_ERROR", e.message, null)
                     }
                 }
+                "getDeviceArchitecture" -> {
+                    try {
+                        val supportedAbis = if (Build.SUPPORTED_ABIS != null && Build.SUPPORTED_ABIS.isNotEmpty()) {
+                            Build.SUPPORTED_ABIS.toList()
+                        } else {
+                            @Suppress("DEPRECATION")
+                            listOfNotNull(Build.CPU_ABI, Build.CPU_ABI2).filter { it.isNotEmpty() }
+                        }
+                        val primaryAbi = if (supportedAbis.isNotEmpty()) supportedAbis[0] else "unknown"
+                        result.success(
+                            mapOf(
+                                "primaryAbi" to primaryAbi,
+                                "supportedAbis" to supportedAbis,
+                                "manufacturer" to (Build.MANUFACTURER ?: ""),
+                                "model" to (Build.MODEL ?: ""),
+                                "sdkInt" to Build.VERSION.SDK_INT
+                            )
+                        )
+                    } catch (e: Exception) {
+                        result.error("ARCH_ERROR", e.message, null)
+                    }
+                }
                 "getCacheDir" -> {
                     try {
                         result.success(cacheDir.absolutePath)

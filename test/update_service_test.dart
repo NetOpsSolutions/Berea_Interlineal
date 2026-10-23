@@ -25,38 +25,183 @@ void main() {
     });
   });
 
-  group('AppReleaseInfo JSON Parsing', () {
-    test('Parses GitHub Releases payload with APK asset correctly', () {
-      final json = {
-        'tag_name': 'v1.3.1',
-        'name': 'Logos K Logos 1.3.1',
-        'body': '## Novedades\n- Correcciones y mejoras',
-        'published_at': '2026-10-20T12:00:00Z',
-        'html_url': 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/tag/v1.3.1',
-        'prerelease': false,
-        'assets': [
-          {
-            'name': 'source.tar.gz',
-            'browser_download_url': 'https://example.com/source.tar.gz',
-            'size': 1024,
-          },
-          {
-            'name': 'logos_k_logos_1.3.1.apk',
-            'browser_download_url': 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1.apk',
-            'size': 47185920,
-          }
-        ],
-      };
+  group('DeviceArchitecture & ABI Matching', () {
+    test('Deduces ABI accurately from file names', () {
+      expect(ReleaseApkAsset.detectAbiFromFileName('app-arm64-v8a-release.apk'), equals('arm64-v8a'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('logos_k_logos_1.3.1_arm64.apk'), equals('arm64-v8a'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('app-armeabi-v7a-release.apk'), equals('armeabi-v7a'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('logos_k_logos_armv7.apk'), equals('armeabi-v7a'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('app-x86_64-release.apk'), equals('x86_64'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('logos_x86_64.apk'), equals('x86_64'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('app-x86-release.apk'), equals('x86'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('app-release.apk'), equals('universal'));
+      expect(ReleaseApkAsset.detectAbiFromFileName('logos_k_logos_1.3.1.apk'), equals('universal'));
+    });
 
-      final info = AppReleaseInfo.fromGitHubJson(json);
+    test('Device compatibility checks', () {
+      const arm64Device = DeviceArchitecture(
+        primaryAbi: 'arm64-v8a',
+        supportedAbis: ['arm64-v8a', 'armeabi-v7a'],
+      );
 
-      expect(info.tagName, equals('v1.3.1'));
-      expect(info.version, equals('1.3.1'));
-      expect(info.title, equals('Logos K Logos 1.3.1'));
-      expect(info.apkFileName, equals('logos_k_logos_1.3.1.apk'));
-      expect(info.apkDownloadUrl, contains('.apk'));
-      expect(info.apkSizeBytes, equals(47185920));
-      expect(info.formattedApkSize, contains('45.0 MB'));
+      expect(arm64Device.isCompatibleWith('arm64-v8a'), isTrue);
+      expect(arm64Device.isCompatibleWith('armeabi-v7a'), isTrue);
+      expect(arm64Device.isCompatibleWith('universal'), isTrue);
+      expect(arm64Device.isCompatibleWith('x86_64'), isFalse);
+      expect(arm64Device.isCompatibleWith('x86'), isFalse);
+
+      const x86Device = DeviceArchitecture(
+        primaryAbi: 'x86_64',
+        supportedAbis: ['x86_64', 'x86'],
+      );
+
+      expect(x86Device.isCompatibleWith('x86_64'), isTrue);
+      expect(x86Device.isCompatibleWith('x86'), isTrue);
+      expect(x86Device.isCompatibleWith('arm64-v8a'), isFalse);
+    });
+
+    test('Autoselects exact matching APK for ARM 64-bit device', () {
+      final assets = [
+        const ReleaseApkAsset(
+          fileName: 'app-armeabi-v7a-release.apk',
+          downloadUrl: 'https://example.com/armv7.apk',
+          sizeBytes: 39000000,
+          abi: 'armeabi-v7a',
+        ),
+        const ReleaseApkAsset(
+          fileName: 'app-x86_64-release.apk',
+          downloadUrl: 'https://example.com/x86_64.apk',
+          sizeBytes: 46000000,
+          abi: 'x86_64',
+        ),
+        const ReleaseApkAsset(
+          fileName: 'app-arm64-v8a-release.apk',
+          downloadUrl: 'https://example.com/arm64.apk',
+          sizeBytes: 42000000,
+          abi: 'arm64-v8a',
+        ),
+      ];
+
+      final release = AppReleaseInfo(
+        tagName: 'v1.3.1',
+        version: '1.3.1',
+        title: 'Logos v1.3.1',
+        releaseNotes: 'Notas',
+        publishedAt: DateTime.now(),
+        htmlUrl: 'https://example.com',
+        isPrerelease: false,
+        apkAssets: assets,
+      );
+
+      const arm64Device = DeviceArchitecture(
+        primaryAbi: 'arm64-v8a',
+        supportedAbis: ['arm64-v8a', 'armeabi-v7a'],
+      );
+
+      final selected = release.selectBestApk(arm64Device);
+      expect(selected, isNotNull);
+      expect(selected!.abi, equals('arm64-v8a'));
+      expect(selected.fileName, equals('app-arm64-v8a-release.apk'));
+    });
+
+    test('Autoselects exact matching APK for x86_64 device (Emulator/PC)', () {
+      final assets = [
+        const ReleaseApkAsset(
+          fileName: 'app-arm64-v8a-release.apk',
+          downloadUrl: 'https://example.com/arm64.apk',
+          sizeBytes: 42000000,
+          abi: 'arm64-v8a',
+        ),
+        const ReleaseApkAsset(
+          fileName: 'app-x86_64-release.apk',
+          downloadUrl: 'https://example.com/x86_64.apk',
+          sizeBytes: 46000000,
+          abi: 'x86_64',
+        ),
+      ];
+
+      final release = AppReleaseInfo(
+        tagName: 'v1.3.1',
+        version: '1.3.1',
+        title: 'Logos v1.3.1',
+        releaseNotes: 'Notas',
+        publishedAt: DateTime.now(),
+        htmlUrl: 'https://example.com',
+        isPrerelease: false,
+        apkAssets: assets,
+      );
+
+      const x86Device = DeviceArchitecture(
+        primaryAbi: 'x86_64',
+        supportedAbis: ['x86_64'],
+      );
+
+      final selected = release.selectBestApk(x86Device);
+      expect(selected, isNotNull);
+      expect(selected!.abi, equals('x86_64'));
+      expect(selected.fileName, equals('app-x86_64-release.apk'));
+    });
+
+    test('Prevents downloading incompatible architecture (e.g. only ARM on x86)', () {
+      final assets = [
+        const ReleaseApkAsset(
+          fileName: 'app-arm64-v8a-release.apk',
+          downloadUrl: 'https://example.com/arm64.apk',
+          sizeBytes: 42000000,
+          abi: 'arm64-v8a',
+        ),
+      ];
+
+      final release = AppReleaseInfo(
+        tagName: 'v1.3.1',
+        version: '1.3.1',
+        title: 'Logos v1.3.1',
+        releaseNotes: 'Notas',
+        publishedAt: DateTime.now(),
+        htmlUrl: 'https://example.com',
+        isPrerelease: false,
+        apkAssets: assets,
+      );
+
+      const x86Device = DeviceArchitecture(
+        primaryAbi: 'x86_64',
+        supportedAbis: ['x86_64'],
+      );
+
+      final selected = release.selectBestApk(x86Device);
+      expect(selected, isNull);
+      expect(release.hasCompatibleApk, isFalse);
+    });
+
+    test('Falls back to Universal APK when specific split is not present', () {
+      final assets = [
+        const ReleaseApkAsset(
+          fileName: 'app-release.apk',
+          downloadUrl: 'https://example.com/universal.apk',
+          sizeBytes: 80000000,
+          abi: 'universal',
+        ),
+      ];
+
+      final release = AppReleaseInfo(
+        tagName: 'v1.3.1',
+        version: '1.3.1',
+        title: 'Logos v1.3.1',
+        releaseNotes: 'Notas',
+        publishedAt: DateTime.now(),
+        htmlUrl: 'https://example.com',
+        isPrerelease: false,
+        apkAssets: assets,
+      );
+
+      const armDevice = DeviceArchitecture(
+        primaryAbi: 'arm64-v8a',
+        supportedAbis: ['arm64-v8a'],
+      );
+
+      final selected = release.selectBestApk(armDevice);
+      expect(selected, isNotNull);
+      expect(selected!.abi, equals('universal'));
     });
   });
 
@@ -81,11 +226,16 @@ void main() {
       expect(p.speedFormatted, contains('/s'));
     });
 
-    test('Simulated demo release is valid', () {
-      final demo = UpdateService.instance.getSimulatedDemoRelease();
+    test('Simulated demo release autoselects device architecture', () {
+      const arm64 = DeviceArchitecture(
+        primaryAbi: 'arm64-v8a',
+        supportedAbis: ['arm64-v8a', 'armeabi-v7a'],
+      );
+      final demo = UpdateService.instance.getSimulatedDemoRelease(arch: arm64);
       expect(demo.tagName, equals('v1.3.1'));
-      expect(demo.apkFileName, endsWith('.apk'));
-      expect(demo.releaseNotes, contains('Actualizador In-App OTA'));
+      expect(demo.apkAbi, equals('arm64-v8a'));
+      expect(demo.apkFileName, contains('arm64'));
+      expect(demo.releaseNotes, contains('arm64-v8a'));
     });
   });
 }
