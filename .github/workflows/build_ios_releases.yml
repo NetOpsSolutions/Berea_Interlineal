@@ -80,7 +80,7 @@ jobs:
         run: |
           flutter pub get
 
-      - name: "Asegurar Podfile sin firma obligatoria para CI"
+      - name: "Asegurar Podfile y sincronizar CocoaPods"
         run: |
           cd ios
           if [ ! -f "Podfile" ]; then
@@ -133,9 +133,12 @@ jobs:
             end
           end
           EOF
-            # Quitar indentación del archivo generado
             sed -i '' 's/^          //' Podfile
           fi
+          
+          echo "Sincronizando Pods..."
+          pod deintegrate || true
+          pod install --repo-update
           cd ..
 
       - name: "Compilar Runner de iOS (Release ARM64 sin firma)"
