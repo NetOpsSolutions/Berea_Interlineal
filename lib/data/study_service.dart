@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_print
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -43,14 +44,14 @@ class BookmarkItem {
       };
 
   factory BookmarkItem.fromMap(Map<String, dynamic> map) => BookmarkItem(
-        id: map['id'] as String? ?? '',
-        bookId: map['book_id'] as String? ?? '',
-        bookName: map['book_name'] as String? ?? '',
-        chapter: (map['chapter'] as int?) ?? 1,
-        verse: (map['verse'] as int?) ?? 1,
-        preview: map['preview'] as String? ?? '',
+        id: map['id']?.toString() ?? '',
+        bookId: map['book_id']?.toString() ?? '',
+        bookName: map['book_name']?.toString() ?? '',
+        chapter: (map['chapter'] as num?)?.toInt() ?? 1,
+        verse: (map['verse'] as num?)?.toInt() ?? 1,
+        preview: map['preview']?.toString() ?? '',
         createdAt: map['created_at'] != null
-            ? DateTime.tryParse(map['created_at'] as String) ?? DateTime.now()
+            ? DateTime.tryParse(map['created_at'].toString()) ?? DateTime.now()
             : DateTime.now(),
       );
 
@@ -98,14 +99,14 @@ class VerseNoteItem {
       };
 
   factory VerseNoteItem.fromMap(Map<String, dynamic> map) => VerseNoteItem(
-        id: map['id'] as String? ?? '',
-        bookId: map['book_id'] as String? ?? '',
-        bookName: map['book_name'] as String? ?? '',
-        chapter: (map['chapter'] as int?) ?? 1,
-        verse: (map['verse'] as int?) ?? 1,
-        note: map['note'] as String? ?? '',
+        id: map['id']?.toString() ?? '',
+        bookId: map['book_id']?.toString() ?? '',
+        bookName: map['book_name']?.toString() ?? '',
+        chapter: (map['chapter'] as num?)?.toInt() ?? 1,
+        verse: (map['verse'] as num?)?.toInt() ?? 1,
+        note: map['note']?.toString() ?? '',
         updatedAt: map['updated_at'] != null
-            ? DateTime.tryParse(map['updated_at'] as String) ?? DateTime.now()
+            ? DateTime.tryParse(map['updated_at'].toString()) ?? DateTime.now()
             : DateTime.now(),
       );
 
@@ -149,13 +150,13 @@ class StrongNoteItem {
       };
 
   factory StrongNoteItem.fromMap(Map<String, dynamic> map) => StrongNoteItem(
-        id: map['id'] as String? ?? '',
-        language: map['language'] as String? ?? 'greek',
-        code: (map['code'] as int?) ?? 0,
-        lemma: map['lemma'] as String? ?? '',
-        note: map['note'] as String? ?? '',
+        id: map['id']?.toString() ?? '',
+        language: map['language']?.toString() ?? 'greek',
+        code: (map['code'] as num?)?.toInt() ?? 0,
+        lemma: map['lemma']?.toString() ?? '',
+        note: map['note']?.toString() ?? '',
         updatedAt: map['updated_at'] != null
-            ? DateTime.tryParse(map['updated_at'] as String) ?? DateTime.now()
+            ? DateTime.tryParse(map['updated_at'].toString()) ?? DateTime.now()
             : DateTime.now(),
       );
 
@@ -201,14 +202,14 @@ class HistoryItem {
       };
 
   factory HistoryItem.fromMap(Map<String, dynamic> map) => HistoryItem(
-        id: map['id'] as String? ?? '',
-        bookId: map['book_id'] as String? ?? '',
-        bookName: map['book_name'] as String? ?? '',
-        chapter: (map['chapter'] as int?) ?? 1,
-        verse: (map['verse'] as int?) ?? 1,
-        preview: map['preview'] as String? ?? '',
+        id: map['id']?.toString() ?? '',
+        bookId: map['book_id']?.toString() ?? '',
+        bookName: map['book_name']?.toString() ?? '',
+        chapter: (map['chapter'] as num?)?.toInt() ?? 1,
+        verse: (map['verse'] as num?)?.toInt() ?? 1,
+        preview: map['preview']?.toString() ?? '',
         visitedAt: map['visited_at'] != null
-            ? DateTime.tryParse(map['visited_at'] as String) ?? DateTime.now()
+            ? DateTime.tryParse(map['visited_at'].toString()) ?? DateTime.now()
             : DateTime.now(),
       );
 
@@ -256,6 +257,8 @@ class StudyService extends ChangeNotifier {
 
   // ── Estado interno ─────────────────────────────────────────────────────────
   bool _initialized = false;
+  bool _sqliteAvailable = true;
+  Completer<void>? _initCompleter;
   Database? _userDb;
   SharedPreferences? _prefs;
 
@@ -291,48 +294,101 @@ class StudyService extends ChangeNotifier {
 
   Future<void> initialize() async {
     if (_initialized) return;
+    if (_initCompleter != null) {
+      return _initCompleter!.future;
+    }
+    _initCompleter = Completer<void>();
     try {
-      _prefs = await SharedPreferences.getInstance();
+      // 1. Preferencias de UI (aisladas para nunca bloquear SQLite si el plugin falla en release/R8)
+      try {
+        _prefs = await SharedPreferences.getInstance();
+        _fluentReadingMode = _prefs?.getBool(_keyFluentMode) ?? _fluentReadingMode;
+        final tRaw = _prefs?.getString(_keyThemeMode);
+        if (tRaw != null) {
+          _themeMode = tRaw == 'light' ? ThemeMode.light : ThemeMode.dark;
+        }
+      } catch (e) {
+        if (kDebugMode) debugPrint('[StudyService] SharedPreferences no disponible: $e');
+      }
 
-      // Preferencias de UI (siempre en SharedPreferences)
-      _fluentReadingMode = _prefs?.getBool(_keyFluentMode) ?? false;
-      final tRaw = _prefs?.getString(_keyThemeMode);
-      _themeMode = tRaw == 'light' ? ThemeMode.light : ThemeMode.dark;
-
-      // Abrir / crear la base de datos de usuario
+      // 2. Base de datos SQLite de usuario (completamente independiente de SharedPreferences)
       if (!kIsWeb) {
-        await _openUserDatabase();
-        await _createUserTables();
-        await _migrateLegacySharedPreferences();
-        await _loadAllFromDb();
+        final db = await _getDb();
+        if (db != null) {
+          await _migrateLegacySharedPreferences();
+          await _loadAllFromDb();
+        }
       }
     } catch (e) {
       if (kDebugMode) debugPrint('[StudyService] Error en initialize: $e');
     } finally {
       _initialized = true;
+      if (_initCompleter != null && !_initCompleter!.isCompleted) {
+        _initCompleter!.complete();
+      }
       notifyListeners();
     }
   }
 
+  /// Devuelve una conexión activa a `logos_user_data.db`, reabriéndola si es necesario.
+  Future<Database?> _getDb() async {
+    if (kIsWeb || !_sqliteAvailable) return null;
+    if (_userDb != null && _userDb!.isOpen) return _userDb;
+    try {
+      await _openUserDatabase();
+    } on StateError catch (e) {
+      // Entorno de pruebas host sin databaseFactory inicializado
+      _sqliteAvailable = false;
+      if (kDebugMode) debugPrint('[StudyService] SQLite no disponible en este entorno: $e');
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error reabriendo BD usuario: $e');
+    }
+    return _userDb;
+  }
+
   /// Abre logos_user_data.db en el directorio estándar de bases de datos.
+  ///
+  /// NOTA: En sqflite (Android), PRAGMAs que retornan filas como `journal_mode`
+  /// deben ejecutarse con `rawQuery` en `onOpen`, nunca con `execute` en `onConfigure`.
+  /// Cada PRAGMA opcional está aislado en su propio `try/catch` para que ninguna
+  /// restricción específica de dispositivo impida abrir o crear las tablas del usuario.
   Future<void> _openUserDatabase() async {
     final dbPath = join(await getDatabasesPath(), _userDbName);
     _userDb = await openDatabase(
       dbPath,
       version: _userDbVersion,
       onConfigure: (db) async {
-        await db.execute('PRAGMA foreign_keys = ON');
-        await db.execute('PRAGMA journal_mode = WAL');
-        await db.execute('PRAGMA synchronous = NORMAL');
+        try {
+          await db.execute('PRAGMA foreign_keys = ON');
+        } catch (e) {
+          if (kDebugMode) debugPrint('[StudyService] Ignorando PRAGMA foreign_keys: $e');
+        }
+      },
+      onCreate: _createUserTables,
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (kDebugMode) {
+          debugPrint('[StudyService] Migrando BD usuario de v$oldVersion a v$newVersion');
+        }
+        await _createUserTables(db, newVersion);
+      },
+      onOpen: (db) async {
+        // Garantizar siempre que las tablas e índices existan (auto-reparación si
+        // una instancia previa creó el archivo de BD sin completar el esquema).
+        await _createUserTables(db, _userDbVersion);
+        try {
+          await db.rawQuery('PRAGMA journal_mode = WAL');
+          await db.execute('PRAGMA synchronous = FULL');
+        } catch (e) {
+          if (kDebugMode) debugPrint('[StudyService] Ignorando PRAGMA WAL/sync: $e');
+        }
+        if (kDebugMode) debugPrint('[StudyService] BD usuario lista en modo ACID WAL');
       },
     );
   }
 
   /// Crea las tablas de usuario si no existen (idempotente).
-  Future<void> _createUserTables() async {
-    final db = _userDb;
-    if (db == null) return;
-
+  /// Firma compatible con los callbacks onCreate/onUpgrade de sqflite.
+  Future<void> _createUserTables(Database db, int version) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS user_bookmarks (
         id        TEXT PRIMARY KEY,
@@ -380,11 +436,20 @@ class StudyService extends ChangeNotifier {
       )
     ''');
 
-    // Índices para acelerar consultas de historial ordenado por fecha
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS user_settings (
+        key   TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    ''');
+
+    // Índices para acelerar consultas ordenadas por fecha
     await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_history_visited ON user_history(visited_at DESC)');
     await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_bookmarks_created ON user_bookmarks(created_at DESC)');
+
+    if (kDebugMode) debugPrint('[StudyService] Tablas de usuario creadas (v$version)');
   }
 
   /// Migra datos legacy de SharedPreferences → SQLite (se ejecuta solo una vez).
@@ -498,53 +563,105 @@ class StudyService extends ChangeNotifier {
     if (db == null) return;
 
     // Marcadores
-    _bookmarks.clear();
-    final bRows = await db.query('user_bookmarks');
-    for (final row in bRows) {
-      final b = BookmarkItem.fromMap(Map<String, dynamic>.from(row));
-      _bookmarks[b.id] = b;
+    try {
+      _bookmarks.clear();
+      final bRows = await db.query('user_bookmarks');
+      for (final row in bRows) {
+        final b = BookmarkItem.fromMap(Map<String, dynamic>.from(row));
+        if (b.id.isNotEmpty) _bookmarks[b.id] = b;
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error cargando marcadores: $e');
     }
 
     // Notas de versículos
-    _verseNotes.clear();
-    final vnRows = await db.query('user_verse_notes');
-    for (final row in vnRows) {
-      final vn = VerseNoteItem.fromMap(Map<String, dynamic>.from(row));
-      _verseNotes[vn.id] = vn;
+    try {
+      _verseNotes.clear();
+      final vnRows = await db.query('user_verse_notes');
+      for (final row in vnRows) {
+        final vn = VerseNoteItem.fromMap(Map<String, dynamic>.from(row));
+        if (vn.id.isNotEmpty) _verseNotes[vn.id] = vn;
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error cargando notas de versículo: $e');
     }
 
     // Notas Strong
-    _strongNotes.clear();
-    final snRows = await db.query('user_strong_notes');
-    for (final row in snRows) {
-      final sn = StrongNoteItem.fromMap(Map<String, dynamic>.from(row));
-      _strongNotes[sn.id] = sn;
+    try {
+      _strongNotes.clear();
+      final snRows = await db.query('user_strong_notes');
+      for (final row in snRows) {
+        final sn = StrongNoteItem.fromMap(Map<String, dynamic>.from(row));
+        if (sn.id.isNotEmpty) _strongNotes[sn.id] = sn;
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error cargando notas Strong: $e');
     }
 
     // Historial (ordenado por fecha de visita desc)
-    _history.clear();
-    final hRows = await db.query('user_history', orderBy: 'visited_at DESC', limit: 60);
-    for (final row in hRows) {
-      _history.add(HistoryItem.fromMap(Map<String, dynamic>.from(row)));
+    try {
+      _history.clear();
+      final hRows = await db.query('user_history', orderBy: 'visited_at DESC', limit: 60);
+      for (final row in hRows) {
+        final h = HistoryItem.fromMap(Map<String, dynamic>.from(row));
+        if (h.id.isNotEmpty) _history.add(h);
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error cargando historial: $e');
+    }
+
+    // Respaldo de preferencias UI desde SQLite (si SharedPreferences no tenía valor)
+    try {
+      final sRows = await db.query('user_settings');
+      for (final row in sRows) {
+        final k = row['key']?.toString();
+        final v = row['value']?.toString();
+        if (k == _keyFluentMode && _prefs?.getBool(_keyFluentMode) == null && v != null) {
+          _fluentReadingMode = v == 'true';
+        } else if (k == _keyThemeMode && _prefs?.getString(_keyThemeMode) == null && v != null) {
+          _themeMode = v == 'light' ? ThemeMode.light : ThemeMode.dark;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error cargando ajustes UI: $e');
     }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Preferencias de UI (SharedPreferences — no son datos de usuario)
+  // Preferencias de UI (SharedPreferences + respaldo SQLite)
   // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> setFluentReadingMode(bool value) async {
     if (_fluentReadingMode == value) return;
     _fluentReadingMode = value;
     notifyListeners();
-    await _prefs?.setBool(_keyFluentMode, value);
+    try {
+      await _prefs?.setBool(_keyFluentMode, value);
+    } catch (_) {}
+    await _saveUiSettingToDb(_keyFluentMode, value ? 'true' : 'false');
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     if (_themeMode == mode) return;
     _themeMode = mode;
     notifyListeners();
-    await _prefs?.setString(_keyThemeMode, mode == ThemeMode.light ? 'light' : 'dark');
+    final modeStr = mode == ThemeMode.light ? 'light' : 'dark';
+    try {
+      await _prefs?.setString(_keyThemeMode, modeStr);
+    } catch (_) {}
+    await _saveUiSettingToDb(_keyThemeMode, modeStr);
+  }
+
+  Future<void> _saveUiSettingToDb(String key, String value) async {
+    try {
+      final db = await _getDb();
+      if (db == null) return;
+      await db.insert(
+        'user_settings',
+        {'key': key, 'value': value},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (_) {}
   }
 
   Future<void> toggleTheme() async {
@@ -606,7 +723,9 @@ class StudyService extends ChangeNotifier {
 
   Future<void> _dbInsertBookmark(BookmarkItem item) async {
     try {
-      await _userDb?.insert(
+      final db = await _getDb();
+      if (db == null) return;
+      await db.insert(
         'user_bookmarks',
         item.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -618,7 +737,9 @@ class StudyService extends ChangeNotifier {
 
   Future<void> _dbDeleteBookmark(String id) async {
     try {
-      await _userDb?.delete('user_bookmarks', where: 'id = ?', whereArgs: [id]);
+      final db = await _getDb();
+      if (db == null) return;
+      await db.delete('user_bookmarks', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       if (kDebugMode) debugPrint('[StudyService] Error eliminando marcador: $e');
     }
@@ -669,7 +790,9 @@ class StudyService extends ChangeNotifier {
 
   Future<void> _dbUpsertVerseNote(VerseNoteItem item) async {
     try {
-      await _userDb?.insert(
+      final db = await _getDb();
+      if (db == null) return;
+      await db.insert(
         'user_verse_notes',
         item.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -681,7 +804,9 @@ class StudyService extends ChangeNotifier {
 
   Future<void> _dbDeleteVerseNote(String id) async {
     try {
-      await _userDb?.delete('user_verse_notes', where: 'id = ?', whereArgs: [id]);
+      final db = await _getDb();
+      if (db == null) return;
+      await db.delete('user_verse_notes', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       if (kDebugMode) debugPrint('[StudyService] Error eliminando nota de versículo: $e');
     }
@@ -732,7 +857,9 @@ class StudyService extends ChangeNotifier {
 
   Future<void> _dbUpsertStrongNote(StrongNoteItem item) async {
     try {
-      await _userDb?.insert(
+      final db = await _getDb();
+      if (db == null) return;
+      await db.insert(
         'user_strong_notes',
         item.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -744,7 +871,9 @@ class StudyService extends ChangeNotifier {
 
   Future<void> _dbDeleteStrongNote(String id) async {
     try {
-      await _userDb?.delete('user_strong_notes', where: 'id = ?', whereArgs: [id]);
+      final db = await _getDb();
+      if (db == null) return;
+      await db.delete('user_strong_notes', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       if (kDebugMode) debugPrint('[StudyService] Error eliminando nota Strong: $e');
     }
@@ -791,7 +920,9 @@ class StudyService extends ChangeNotifier {
     _history.clear();
     notifyListeners();
     try {
-      await _userDb?.delete('user_history');
+      final db = await _getDb();
+      if (db == null) return;
+      await db.delete('user_history');
     } catch (e) {
       if (kDebugMode) debugPrint('[StudyService] Error borrando historial: $e');
     }
@@ -799,8 +930,10 @@ class StudyService extends ChangeNotifier {
 
   Future<void> _dbUpsertHistory(HistoryItem item) async {
     try {
+      final db = await _getDb();
+      if (db == null) return;
       // REPLACE actualiza visited_at si ya existe el mismo id (deduplicación)
-      await _userDb?.insert(
+      await db.insert(
         'user_history',
         item.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -813,7 +946,9 @@ class StudyService extends ChangeNotifier {
   /// Mantiene únicamente los 60 registros más recientes en la BD.
   Future<void> _dbTrimHistory() async {
     try {
-      await _userDb?.execute('''
+      final db = await _getDb();
+      if (db == null) return;
+      await db.execute('''
         DELETE FROM user_history
         WHERE id NOT IN (
           SELECT id FROM user_history

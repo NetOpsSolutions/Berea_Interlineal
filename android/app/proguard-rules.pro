@@ -11,9 +11,14 @@
     native <methods>;
 }
 
-# Sqflite and SharedPreferences
+# Sqflite and SharedPreferences (including AndroidX DataStore & Protobuf)
 -keep class com.tekartik.sqflite.** { *; }
 -keep class io.flutter.plugins.sharedpreferences.** { *; }
+-keep class androidx.datastore.** { *; }
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+}
+-keep class kotlin.Metadata { *; }
 
 # Preserve annotations and attributes
 -keepattributes *Annotation*
