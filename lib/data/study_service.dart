@@ -8,6 +8,7 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../core/theme.dart';
 import 'book_catalog.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -226,6 +227,74 @@ class HistoryItem {
       );
 }
 
+class VerseHighlightItem {
+  final String id; // '${bookId}:${chapter}:${verse}'
+  final String bookId;
+  final String bookName;
+  final int chapter;
+  final int verse;
+  final String colorKey; // 'promesas', 'mandamientos', 'atributos', 'advertencias', 'profecia'
+  final List<String> selectedFragments; // vacío = versículo completo resaltado
+  final String preview;
+  final DateTime updatedAt;
+
+  VerseHighlightItem({
+    required this.id,
+    required this.bookId,
+    required this.bookName,
+    required this.chapter,
+    required this.verse,
+    required this.colorKey,
+    this.selectedFragments = const [],
+    required this.preview,
+    required this.updatedAt,
+  });
+
+  bool get isWholeVerse => selectedFragments.isEmpty;
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'book_id': bookId,
+        'book_name': bookName,
+        'chapter': chapter,
+        'verse': verse,
+        'color_key': colorKey,
+        'selected_text': selectedFragments.isEmpty ? '' : jsonEncode(selectedFragments),
+        'preview': preview,
+        'updated_at': updatedAt.toIso8601String(),
+      };
+
+  factory VerseHighlightItem.fromMap(Map<String, dynamic> map) {
+    final rawSel = map['selected_text']?.toString() ?? '';
+    List<String> fragments = const [];
+    if (rawSel.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawSel);
+        if (decoded is List) {
+          fragments = decoded.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+        } else {
+          fragments = [rawSel];
+        }
+      } catch (_) {
+        fragments = [rawSel];
+      }
+    }
+    return VerseHighlightItem(
+      id: map['id']?.toString() ?? '',
+      bookId: map['book_id']?.toString() ?? '',
+      bookName: map['book_name']?.toString() ?? '',
+      chapter: (map['chapter'] as num?)?.toInt() ?? 1,
+      verse: (map['verse'] as num?)?.toInt() ?? 1,
+      colorKey: map['color_key']?.toString() ?? 'promesas',
+      selectedFragments: fragments,
+      preview: map['preview']?.toString() ?? '',
+      updatedAt: map['updated_at'] != null
+          ? DateTime.tryParse(map['updated_at'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // StudyService — Persistencia real en SQLite (Fase 2)
 //
@@ -244,6 +313,11 @@ class StudyService extends ChangeNotifier {
   // ── Claves de SharedPreferences (solo UI / config) ─────────────────────────
   static const String _keyFluentMode = 'logos_fluent_mode_v1';
   static const String _keyThemeMode = 'logos_theme_mode_v1';
+  static const String _keyChapterMode = 'logos_chapter_mode_v1';
+  static const String _keyHebrewFont = 'logos_hebrew_font_v1';
+  static const String _keyGreekFont = 'logos_greek_font_v1';
+  static const String _keyFontScale = 'logos_font_scale_v1';
+  static const String _keyLastSeenTourVersion = 'logos_last_seen_tour_version_v1';
 
   // ── Claves legacy (solo para migración; se borran tras importar) ───────────
   static const String _legacyKeyBookmarks = 'logos_bookmarks_v1';
@@ -253,7 +327,7 @@ class StudyService extends ChangeNotifier {
 
   // ── Nombre de la BD de usuario (independiente de la bíblica) ──────────────
   static const String _userDbName = 'logos_user_data.db';
-  static const int _userDbVersion = 1;
+  static const int _userDbVersion = 2;
 
   // ── Estado interno ─────────────────────────────────────────────────────────
   bool _initialized = false;
@@ -264,21 +338,67 @@ class StudyService extends ChangeNotifier {
 
   // Caché en memoria para acceso reactivo desde la UI
   final Map<String, BookmarkItem> _bookmarks = {};
+  final Map<String, VerseHighlightItem> _highlights = {};
   final Map<String, VerseNoteItem> _verseNotes = {};
   final Map<String, StrongNoteItem> _strongNotes = {};
   final List<HistoryItem> _history = [];
 
   bool _fluentReadingMode = false;
+  bool _chapterReadingMode = true;
+  String _hebrewFontFamily = AcademicFonts.defaultHebrew;
+  String _greekFontFamily = AcademicFonts.defaultGreek;
+  double _readingFontScale = 1.0;
   ThemeMode _themeMode = ThemeMode.dark;
+  String _lastSeenTourVersion = '';
 
   // ── Getters públicos ───────────────────────────────────────────────────────
   bool get isInitialized => _initialized;
   bool get fluentReadingMode => _fluentReadingMode;
+  bool get chapterReadingMode => _chapterReadingMode;
+  String get hebrewFontFamily => _hebrewFontFamily;
+  String get greekFontFamily => _greekFontFamily;
+  double get readingFontScale => _readingFontScale;
   ThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _themeMode == ThemeMode.dark;
+  String get lastSeenTourVersion => _lastSeenTourVersion;
+
+  /// Retorna true únicamente si la guía interactiva aún no se ha mostrado
+  /// para la versión instalada actual (ej. después de actualizar a 1.3.2).
+  bool shouldShowVersionTour(String currentAppVersion) {
+    final clean = currentAppVersion.trim();
+    if (clean.isEmpty) return false;
+    return _lastSeenTourVersion.trim() != clean;
+  }
+
+  TextStyle originalScriptStyle({
+    required bool isHebrew,
+    double fontSize = 20,
+    FontWeight fontWeight = FontWeight.w600,
+    Color? color,
+    double height = 1.55,
+  }) {
+    return AcademicFonts.originalScriptStyle(
+      isHebrew: isHebrew,
+      hebrewFamily: _hebrewFontFamily,
+      greekFamily: _greekFontFamily,
+      fontSize: fontSize * _readingFontScale,
+      fontWeight: fontWeight,
+      color: color,
+      height: height,
+    );
+  }
 
   List<BookmarkItem> get bookmarks =>
       _bookmarks.values.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  List<VerseHighlightItem> get highlights =>
+      _highlights.values.toList()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+  List<VerseHighlightItem> highlightsByColor(String? colorKey) {
+    final all = highlights;
+    if (colorKey == null || colorKey.isEmpty || colorKey == 'all') return all;
+    return all.where((h) => h.colorKey == colorKey).toList();
+  }
 
   List<VerseNoteItem> get verseNotes =>
       _verseNotes.values.toList()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
@@ -303,6 +423,11 @@ class StudyService extends ChangeNotifier {
       try {
         _prefs = await SharedPreferences.getInstance();
         _fluentReadingMode = _prefs?.getBool(_keyFluentMode) ?? _fluentReadingMode;
+        _chapterReadingMode = _prefs?.getBool(_keyChapterMode) ?? _chapterReadingMode;
+        _hebrewFontFamily = _prefs?.getString(_keyHebrewFont) ?? _hebrewFontFamily;
+        _greekFontFamily = _prefs?.getString(_keyGreekFont) ?? _greekFontFamily;
+        _readingFontScale = (_prefs?.getDouble(_keyFontScale) ?? _readingFontScale).clamp(0.85, 1.45);
+        _lastSeenTourVersion = _prefs?.getString(_keyLastSeenTourVersion) ?? _lastSeenTourVersion;
         final tRaw = _prefs?.getString(_keyThemeMode);
         if (tRaw != null) {
           _themeMode = tRaw == 'light' ? ThemeMode.light : ThemeMode.dark;
@@ -443,11 +568,27 @@ class StudyService extends ChangeNotifier {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS user_highlights (
+        id            TEXT PRIMARY KEY,
+        book_id       TEXT NOT NULL,
+        book_name     TEXT NOT NULL,
+        chapter       INTEGER NOT NULL,
+        verse         INTEGER NOT NULL,
+        color_key     TEXT NOT NULL,
+        selected_text TEXT NOT NULL DEFAULT '',
+        preview       TEXT NOT NULL,
+        updated_at    TEXT NOT NULL
+      )
+    ''');
+
     // Índices para acelerar consultas ordenadas por fecha
     await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_history_visited ON user_history(visited_at DESC)');
     await db.execute(
         'CREATE INDEX IF NOT EXISTS idx_bookmarks_created ON user_bookmarks(created_at DESC)');
+    await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_highlights_updated ON user_highlights(updated_at DESC)');
 
     if (kDebugMode) debugPrint('[StudyService] Tablas de usuario creadas (v$version)');
   }
@@ -574,6 +715,18 @@ class StudyService extends ChangeNotifier {
       if (kDebugMode) debugPrint('[StudyService] Error cargando marcadores: $e');
     }
 
+    // Resaltados teológicos
+    try {
+      _highlights.clear();
+      final hlRows = await db.query('user_highlights');
+      for (final row in hlRows) {
+        final hl = VerseHighlightItem.fromMap(Map<String, dynamic>.from(row));
+        if (hl.id.isNotEmpty) _highlights[hl.id] = hl;
+      }
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error cargando resaltados: $e');
+    }
+
     // Notas de versículos
     try {
       _verseNotes.clear();
@@ -618,8 +771,21 @@ class StudyService extends ChangeNotifier {
         final v = row['value']?.toString();
         if (k == _keyFluentMode && _prefs?.getBool(_keyFluentMode) == null && v != null) {
           _fluentReadingMode = v == 'true';
+        } else if (k == _keyChapterMode && _prefs?.getBool(_keyChapterMode) == null && v != null) {
+          _chapterReadingMode = v == 'true';
+        } else if (k == _keyHebrewFont && _prefs?.getString(_keyHebrewFont) == null && v != null) {
+          _hebrewFontFamily = v;
+        } else if (k == _keyGreekFont && _prefs?.getString(_keyGreekFont) == null && v != null) {
+          _greekFontFamily = v;
+        } else if (k == _keyFontScale && _prefs?.getDouble(_keyFontScale) == null && v != null) {
+          final parsed = double.tryParse(v);
+          if (parsed != null) _readingFontScale = parsed.clamp(0.85, 1.45);
         } else if (k == _keyThemeMode && _prefs?.getString(_keyThemeMode) == null && v != null) {
           _themeMode = v == 'light' ? ThemeMode.light : ThemeMode.dark;
+        } else if (k == _keyLastSeenTourVersion && v != null && v.isNotEmpty) {
+          if (_lastSeenTourVersion.isEmpty) {
+            _lastSeenTourVersion = v;
+          }
         }
       }
     } catch (e) {
@@ -639,6 +805,47 @@ class StudyService extends ChangeNotifier {
       await _prefs?.setBool(_keyFluentMode, value);
     } catch (_) {}
     await _saveUiSettingToDb(_keyFluentMode, value ? 'true' : 'false');
+  }
+
+  Future<void> setChapterReadingMode(bool value) async {
+    if (_chapterReadingMode == value) return;
+    _chapterReadingMode = value;
+    notifyListeners();
+    try {
+      await _prefs?.setBool(_keyChapterMode, value);
+    } catch (_) {}
+    await _saveUiSettingToDb(_keyChapterMode, value ? 'true' : 'false');
+  }
+
+  Future<void> setHebrewFontFamily(String family) async {
+    if (_hebrewFontFamily == family || family.isEmpty) return;
+    _hebrewFontFamily = family;
+    notifyListeners();
+    try {
+      await _prefs?.setString(_keyHebrewFont, family);
+    } catch (_) {}
+    await _saveUiSettingToDb(_keyHebrewFont, family);
+  }
+
+  Future<void> setGreekFontFamily(String family) async {
+    if (_greekFontFamily == family || family.isEmpty) return;
+    _greekFontFamily = family;
+    notifyListeners();
+    try {
+      await _prefs?.setString(_keyGreekFont, family);
+    } catch (_) {}
+    await _saveUiSettingToDb(_keyGreekFont, family);
+  }
+
+  Future<void> setReadingFontScale(double scale) async {
+    final clamped = scale.clamp(0.85, 1.45);
+    if ((_readingFontScale - clamped).abs() < 0.005) return;
+    _readingFontScale = clamped;
+    notifyListeners();
+    try {
+      await _prefs?.setDouble(_keyFontScale, clamped);
+    } catch (_) {}
+    await _saveUiSettingToDb(_keyFontScale, clamped.toStringAsFixed(2));
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -667,6 +874,20 @@ class StudyService extends ChangeNotifier {
   Future<void> toggleTheme() async {
     final next = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     await setThemeMode(next);
+  }
+
+  /// Registra de forma atómica que el usuario ya visualizó la guía interactiva
+  /// correspondiente a [currentAppVersion], evitando que vuelva a mostrarse
+  /// hasta una futura actualización de versión.
+  Future<void> markVersionTourSeen(String currentAppVersion) async {
+    final clean = currentAppVersion.trim();
+    if (clean.isEmpty) return;
+    _lastSeenTourVersion = clean;
+    notifyListeners();
+    try {
+      await _prefs?.setString(_keyLastSeenTourVersion, clean);
+    } catch (_) {}
+    await _saveUiSettingToDb(_keyLastSeenTourVersion, clean);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -742,6 +963,107 @@ class StudyService extends ChangeNotifier {
       await db.delete('user_bookmarks', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       if (kDebugMode) debugPrint('[StudyService] Error eliminando marcador: $e');
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Resaltados Teológicos (Highlighters) — CRUD SQLite
+  // ─────────────────────────────────────────────────────────────────────────
+
+  VerseHighlightItem? getVerseHighlight(String bookId, int chapter, int verse) {
+    return _highlights[_verseKey(bookId, chapter, verse)];
+  }
+
+  /// Aplica o alterna un color de resaltado teológico sobre un versículo completo
+  /// o sobre un fragmento seleccionado por el usuario.
+  /// Retorna `true` si el resaltado quedó aplicado, o `false` si se quitó.
+  Future<bool> applyVerseHighlight({
+    required String bookId,
+    required int chapter,
+    required int verse,
+    required String colorKey,
+    required String preview,
+    String? selectedFragment,
+    bool toggleIfSameWholeVerse = true,
+  }) async {
+    final key = _verseKey(bookId, chapter, verse);
+    final existing = _highlights[key];
+    final cleanFragment = selectedFragment?.trim() ?? '';
+
+    // Si el usuario pulsa el mismo color en modo versículo completo y ya estaba en ese color completo -> quitar
+    if (cleanFragment.isEmpty &&
+        toggleIfSameWholeVerse &&
+        existing != null &&
+        existing.colorKey == colorKey &&
+        existing.isWholeVerse) {
+      await removeVerseHighlight(bookId, chapter, verse);
+      return false;
+    }
+
+    List<String> fragments = const [];
+    if (cleanFragment.isNotEmpty) {
+      if (existing != null && existing.colorKey == colorKey && !existing.isWholeVerse) {
+        final nextList = List<String>.from(existing.selectedFragments);
+        if (!nextList.any((f) => f.toLowerCase() == cleanFragment.toLowerCase())) {
+          nextList.add(cleanFragment);
+        }
+        fragments = nextList;
+      } else {
+        fragments = [cleanFragment];
+      }
+    }
+
+    final name = BookCatalog.nameById(bookId);
+    final item = VerseHighlightItem(
+      id: key,
+      bookId: bookId,
+      bookName: name.isNotEmpty ? name : bookId,
+      chapter: chapter,
+      verse: verse,
+      colorKey: colorKey,
+      selectedFragments: fragments,
+      preview: preview,
+      updatedAt: DateTime.now(),
+    );
+
+    _highlights[key] = item;
+    notifyListeners();
+    await _dbUpsertHighlight(item);
+    return true;
+  }
+
+  Future<void> removeVerseHighlight(String bookId, int chapter, int verse) async {
+    await removeHighlightById(_verseKey(bookId, chapter, verse));
+  }
+
+  Future<void> removeHighlightById(String key) async {
+    if (_highlights.remove(key) != null) {
+      notifyListeners();
+      await _dbDeleteHighlight(key);
+    }
+  }
+
+  Future<void> _dbUpsertHighlight(VerseHighlightItem item) async {
+    try {
+      final db = await _getDb();
+      if (db == null) return;
+      await db.insert(
+        'user_highlights',
+        item.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error guardando resaltado: $e');
+    }
+  }
+
+  Future<void> _dbDeleteHighlight(String id) async {
+    try {
+      final db = await _getDb();
+      if (db == null) return;
+      await db.delete('user_highlights', where: 'id = ?', whereArgs: [id]);
+    } catch (e) {
+      if (kDebugMode) debugPrint('[StudyService] Error eliminando resaltado: $e');
     }
   }
 

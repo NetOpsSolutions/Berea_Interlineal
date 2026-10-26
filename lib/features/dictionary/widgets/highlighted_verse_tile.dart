@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/book_catalog.dart';
 import '../../../data/models.dart';
+import '../../../data/study_service.dart';
 
 class HighlightedVerseTile extends StatelessWidget {
   final Verse verse;
@@ -92,11 +93,25 @@ class HighlightedVerseTile extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(color: theme.colorScheme.outlineVariant),
                     ),
-                    child: Text(
-                      '${w.surface} (${w.translation})',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontSize: 11,
-                        color: theme.colorScheme.onSurfaceVariant,
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: w.surface,
+                            style: StudyService.instance.originalScriptStyle(
+                              isHebrew: language == 'hebrew',
+                              fontSize: 14,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' (${w.translation})',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 11,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   );

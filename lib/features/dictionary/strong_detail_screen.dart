@@ -96,7 +96,9 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
                         child: Text(
                           entry.lemma,
                           textAlign: TextAlign.center,
-                          style: theme.textTheme.headlineMedium?.copyWith(
+                          style: StudyService.instance.originalScriptStyle(
+                            isHebrew: isHebrew,
+                            fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.onPrimaryContainer,
                           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme.dart';
 import '../../data/study_service.dart';
 import '../dictionary/strong_detail_screen.dart';
 
@@ -13,12 +14,16 @@ class StudyScreen extends StatefulWidget {
   final void Function(String bookId, int chapter, int verse)? onOpenVerse;
   final int initialIndex;
   final StudyNotesFilter initialNotesFilter;
+  final String initialHighlightColorFilter;
+  final GlobalKey? tourTabsKey;
 
   const StudyScreen({
     super.key,
     this.onOpenVerse,
     this.initialIndex = 0,
     this.initialNotesFilter = StudyNotesFilter.all,
+    this.initialHighlightColorFilter = 'all',
+    this.tourTabsKey,
   });
 
   @override
@@ -28,27 +33,34 @@ class StudyScreen extends StatefulWidget {
 class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late StudyNotesFilter _notesFilter;
+  late String _highlightFilter;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 3,
+      length: 4,
       vsync: this,
-      initialIndex: widget.initialIndex.clamp(0, 2),
+      initialIndex: widget.initialIndex.clamp(0, 3),
     );
     _notesFilter = widget.initialNotesFilter;
+    _highlightFilter = widget.initialHighlightColorFilter;
   }
 
   @override
   void didUpdateWidget(StudyScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialIndex != widget.initialIndex) {
-      _tabController.animateTo(widget.initialIndex.clamp(0, 2));
+      _tabController.animateTo(widget.initialIndex.clamp(0, 3));
     }
     if (oldWidget.initialNotesFilter != widget.initialNotesFilter) {
       setState(() {
         _notesFilter = widget.initialNotesFilter;
+      });
+    }
+    if (oldWidget.initialHighlightColorFilter != widget.initialHighlightColorFilter) {
+      setState(() {
+        _highlightFilter = widget.initialHighlightColorFilter;
       });
     }
   }
@@ -65,6 +77,7 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
       listenable: StudyService.instance,
       builder: (context, _) {
         final bookmarks = StudyService.instance.bookmarks;
+        final highlights = StudyService.instance.highlights;
         final verseNotes = StudyService.instance.verseNotes;
         final strongNotes = StudyService.instance.strongNotes;
         final history = StudyService.instance.history;
@@ -73,11 +86,18 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
           appBar: AppBar(
             title: const Text('Mi Estudio'),
             bottom: TabBar(
+              key: widget.tourTabsKey,
               controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
               tabs: [
                 Tab(
                   icon: const Icon(Icons.bookmark),
                   text: 'Marcadores (${bookmarks.length})',
+                ),
+                Tab(
+                  icon: const Icon(Icons.palette_rounded),
+                  text: 'Resaltados (${highlights.length})',
                 ),
                 Tab(
                   icon: const Icon(Icons.note_alt),
@@ -94,6 +114,7 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
             controller: _tabController,
             children: [
               _buildBookmarksTab(bookmarks),
+              _buildHighlightsTab(highlights),
               _buildNotesTab(verseNotes, strongNotes),
               _buildHistoryTab(history),
             ],
@@ -155,11 +176,11 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
           ),
           onDismissed: (_) {
             StudyService.instance.removeBookmark(b.id);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Marcador eliminado: ${b.bookName} ${b.chapter}:${b.verse}'),
-                duration: const Duration(seconds: 2),
-              ),
+            AppSnackBar.show(
+              context,
+              icon: Icons.delete_outline,
+              message: 'Marcador eliminado: ${b.bookName} ${b.chapter}:${b.verse}',
+              duration: const Duration(seconds: 2),
             );
           },
           child: Card(
@@ -203,7 +224,225 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
   }
 
   // ---------------------------------------------------------------------------
-  // Pestaña 2: NOTAS PERSONALES
+  // Pestaña 2: RESALTADOS TEOLÓGICOS
+  // ---------------------------------------------------------------------------
+  Widget _buildHighlightsTab(List<VerseHighlightItem> allHighlights) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (allHighlights.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.palette_outlined, size: 64, color: theme.colorScheme.outline),
+              const SizedBox(height: 12),
+              Text(
+                'Aún no tienes versículos resaltados',
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'En la lectura bíblica, toca un versículo o selecciona palabras para aplicar resaltadores teológicos (Promesas, Mandamientos, Atributos de Dios, Advertencias o Profecía).',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final filtered = StudyService.instance.highlightsByColor(_highlightFilter);
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ChoiceChip(
+                  label: Text('Todos (${allHighlights.length})'),
+                  selected: _highlightFilter == 'all',
+                  onSelected: (s) {
+                    if (s) setState(() => _highlightFilter = 'all');
+                  },
+                ),
+                const SizedBox(width: 8),
+                ...TheologicalHighlightPalette.values.map((colorDef) {
+                  final count = allHighlights.where((h) => h.colorKey == colorDef.key).length;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      avatar: CircleAvatar(
+                        radius: 7,
+                        backgroundColor: colorDef.swatchColor,
+                      ),
+                      label: Text('${colorDef.label} ($count)'),
+                      selected: _highlightFilter == colorDef.key,
+                      onSelected: (s) {
+                        if (s) setState(() => _highlightFilter = colorDef.key);
+                      },
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: filtered.isEmpty
+              ? Center(
+                  child: Text(
+                    'No hay versículos resaltados en esta categoría.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (ctx, i) {
+                    final hl = filtered[i];
+                    final palette = TheologicalHighlightPalette.byKey(hl.colorKey) ??
+                        TheologicalHighlightPalette.values.first;
+
+                    return Dismissible(
+                      key: Key('hl_${hl.id}'),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(Icons.delete, color: theme.colorScheme.onErrorContainer),
+                      ),
+                      onDismissed: (_) {
+                        StudyService.instance.removeHighlightById(hl.id);
+                      },
+                      child: Card(
+                        color: palette.cardBackground(isDark),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(color: palette.borderColor(isDark), width: 1.2),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            if (widget.onOpenVerse != null) {
+                              if (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              }
+                              widget.onOpenVerse!(hl.bookId, hl.chapter, hl.verse);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: palette.swatchColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${hl.bookName} ${hl.chapter}:${hl.verse}',
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: palette.swatchColor.withAlpha(isDark ? 65 : 40),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        palette.label,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    IconButton(
+                                      visualDensity: VisualDensity.compact,
+                                      icon: const Icon(Icons.delete_outline, size: 19),
+                                      tooltip: 'Quitar resaltado',
+                                      onPressed: () =>
+                                          StudyService.instance.removeHighlightById(hl.id),
+                                    ),
+                                  ],
+                                ),
+                                if (!hl.isWholeVerse) ...[
+                                  const SizedBox(height: 6),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: hl.selectedFragments.map((frag) {
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: palette.inlineMarkerColor(isDark),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '«$frag»',
+                                          style: const TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                                const SizedBox(height: 6),
+                                Text(
+                                  hl.preview,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pestaña 3: NOTAS PERSONALES
   // ---------------------------------------------------------------------------
   Widget _buildNotesTab(List<VerseNoteItem> verseNotes, List<StrongNoteItem> strongNotes) {
     final theme = Theme.of(context);
@@ -236,8 +475,10 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
       );
     }
 
-    final showVerses = _notesFilter == StudyNotesFilter.all || _notesFilter == StudyNotesFilter.verses;
-    final showStrong = _notesFilter == StudyNotesFilter.all || _notesFilter == StudyNotesFilter.strong;
+    final showVerses =
+        _notesFilter == StudyNotesFilter.all || _notesFilter == StudyNotesFilter.verses;
+    final showStrong =
+        _notesFilter == StudyNotesFilter.all || _notesFilter == StudyNotesFilter.strong;
 
     return Column(
       children: [
@@ -432,8 +673,9 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
   }
 
   Widget _buildStrongNoteTile(StrongNoteItem sn, ThemeData theme) {
-    final prefix = sn.language == 'hebrew' ? 'H' : 'G';
-    final langLabel = sn.language == 'hebrew' ? 'Hebreo' : 'Griego';
+    final isHebrew = sn.language == 'hebrew';
+    final prefix = isHebrew ? 'H' : 'G';
+    final langLabel = isHebrew ? 'Hebreo' : 'Griego';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -459,11 +701,20 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  sn.lemma,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Directionality(
+                    textDirection: isHebrew ? TextDirection.rtl : TextDirection.ltr,
+                    child: Text(
+                      sn.lemma,
+                      style: StudyService.instance.originalScriptStyle(
+                        isHebrew: isHebrew,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
                 ),
-                const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   tooltip: 'Editar nota',
@@ -518,7 +769,7 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
   }
 
   // ---------------------------------------------------------------------------
-  // Pestaña 3: HISTORIAL
+  // Pestaña 4: HISTORIAL
   // ---------------------------------------------------------------------------
   Widget _buildHistoryTab(List<HistoryItem> history) {
     final theme = Theme.of(context);

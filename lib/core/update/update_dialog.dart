@@ -3,21 +3,33 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
 import 'update_model.dart';
 import 'update_service.dart';
+
+bool _isUpdateModalActive = false;
 
 /// Muestra la hoja modal / diálogo interactivo de actualización OTA con soporte multi-arquitectura
 Future<void> showUpdateDialog(
   BuildContext context,
   AppReleaseInfo release, {
   bool isDemo = false,
-}) {
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (ctx) => UpdateModalSheet(release: release, isDemo: isDemo),
-  );
+}) async {
+  if (_isUpdateModalActive) return;
+  _isUpdateModalActive = true;
+  try {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => UpdateModalSheet(
+        release: release,
+        isDemo: isDemo || release.isDemo,
+      ),
+    );
+  } finally {
+    _isUpdateModalActive = false;
+  }
 }
 
 class UpdateModalSheet extends StatefulWidget {
@@ -49,6 +61,8 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
 
   Future<void> _startDownload() async {
     if (!widget.release.hasCompatibleApk) return;
+
+    UpdateService.instance.cancelSystemUpdateNotification();
 
     setState(() {
       _status = UpdateStatus.downloading;
@@ -119,13 +133,13 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
 
   Future<void> _proceedToInstall() async {
     if (widget.isDemo) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Simulación completada. En un dispositivo real, aquí se instalaría ${widget.release.apkFileName} para arquitectura ${widget.release.apkAbi}.'),
-          duration: const Duration(seconds: 4),
-        ),
-      );
       Navigator.pop(context);
+      AppSnackBar.show(
+        context,
+        icon: Icons.check_circle_rounded,
+        tone: AppSnackBarTone.success,
+        message: 'Simulación completada: ${widget.release.apkFileName} (${widget.release.apkAbi}).',
+      );
       return;
     }
 
@@ -171,7 +185,10 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final arch = widget.release.targetArchitecture;
-    final isCompatible = widget.release.hasCompatibleApk;
+    final isIOS = (!kIsWeb && Platform.isIOS) || theme.platform == TargetPlatform.iOS;
+    final isCompatible = isIOS
+        ? (widget.release.hasCompatibleIpa || widget.release.htmlUrl.isNotEmpty)
+        : widget.release.hasCompatibleApk;
 
     return Container(
       constraints: BoxConstraints(
@@ -218,7 +235,9 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
-                    isCompatible ? Icons.system_update_rounded : Icons.warning_amber_rounded,
+                    isIOS
+                        ? Icons.phone_iphone_rounded
+                        : (isCompatible ? Icons.system_update_rounded : Icons.warning_amber_rounded),
                     size: 30,
                     color: isCompatible
                         ? theme.colorScheme.onPrimaryContainer
@@ -245,16 +264,25 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: Colors.amber.withAlpha(40),
+                                color: theme.brightness == Brightness.dark
+                                    ? const Color(0xFF78350F)
+                                    : const Color(0xFFFEF3C7),
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: Colors.amber.shade700, width: 0.8),
+                                border: Border.all(
+                                  color: theme.brightness == Brightness.dark
+                                      ? const Color(0xFFFBBF24)
+                                      : const Color(0xFFD97706),
+                                  width: 0.9,
+                                ),
                               ),
                               child: Text(
                                 'DEMO',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.amber.shade800,
+                                  color: theme.brightness == Brightness.dark
+                                      ? const Color(0xFFFDE68A)
+                                      : const Color(0xFF92400E),
                                 ),
                               ),
                             ),
@@ -263,7 +291,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                       ),
                       const SizedBox(height: 4),
 
-                      // Insignia de arquitectura detectada
+                      // Insignia de arquitectura detectada o plataforma iOS
                       Wrap(
                         spacing: 6,
                         runSpacing: 4,
@@ -278,13 +306,13 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.memory_rounded,
+                                  isIOS ? Icons.phone_iphone_rounded : Icons.memory_rounded,
                                   size: 13,
                                   color: theme.colorScheme.primary,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  arch != null ? arch.shortTag : 'auto',
+                                  isIOS ? 'iOS (iPhone / iPad)' : (arch != null ? arch.shortTag : 'auto'),
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
@@ -294,7 +322,14 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                               ],
                             ),
                           ),
-                          if (isCompatible)
+                          if (isIOS && widget.release.hasCompatibleIpa)
+                            Text(
+                              widget.release.formattedIpaSize,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            )
+                          else if (!isIOS && isCompatible)
                             Text(
                               widget.release.formattedApkSize,
                               style: theme.textTheme.bodySmall?.copyWith(
@@ -303,7 +338,18 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                             ),
                         ],
                       ),
-                      if (isCompatible) ...[
+                      if (isIOS && widget.release.hasCompatibleIpa) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.release.ipaFileName,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 11,
+                            color: theme.colorScheme.outline,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ] else if (!isIOS && isCompatible) ...[
                         const SizedBox(height: 2),
                         Text(
                           widget.release.apkFileName,
@@ -330,8 +376,8 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
           const SizedBox(height: 12),
           const Divider(height: 1),
 
-          // Aviso de incompatibilidad si ningún APK coincide con la CPU
-          if (!isCompatible)
+          // Aviso de incompatibilidad si ningún APK coincide con la CPU (sólo Android)
+          if (!isIOS && !isCompatible)
             Container(
               margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
               padding: const EdgeInsets.all(12),
@@ -392,6 +438,11 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
   }
 
   Widget _buildActionSection(BuildContext context, ThemeData theme, bool isCompatible) {
+    final isIOS = (!kIsWeb && Platform.isIOS) || theme.platform == TargetPlatform.iOS;
+    if (isIOS) {
+      return _buildIosActionSection(context, theme);
+    }
+
     if (!isCompatible) {
       return Row(
         children: [
@@ -504,6 +555,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
         );
 
       case UpdateStatus.downloadCompleted:
+        final isDark = theme.brightness == Brightness.dark;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -511,18 +563,28 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                color: Colors.green.withAlpha(40),
+                color: isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.shade600, width: 0.8),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669),
+                  width: 0.9,
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.check_circle_outline, color: Colors.green.shade700),
+                  Icon(
+                    Icons.check_circle_outline,
+                    color: isDark ? const Color(0xFF6EE7B7) : const Color(0xFF047857),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Descarga de ${widget.release.apkFileName} completada con éxito.',
-                      style: const TextStyle(fontSize: 13),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.white : const Color(0xFF064E3B),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -587,26 +649,137 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
 
       case UpdateStatus.idle:
       default:
-        return Row(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withAlpha(180),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.help_outline_rounded,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '¿Deseas descargar e instalar la versión ${widget.release.version} (${widget.release.formattedApkSize}) ahora?',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Más tarde'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    onPressed: _startDownload,
+                    icon: const Icon(Icons.download_rounded),
+                    label: Text('Sí, descargar (${widget.release.apkAbi})'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+    }
+  }
+
+  Widget _buildIosActionSection(BuildContext context, ThemeData theme) {
+    final ipaUrl = widget.release.hasCompatibleIpa
+        ? widget.release.ipaDownloadUrl
+        : widget.release.htmlUrl;
+    final hasIpa = widget.release.hasCompatibleIpa;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withAlpha(180),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.phone_iphone_rounded,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  hasIpa
+                      ? 'Instalador .ipa (${widget.release.formattedIpaSize}) disponible. En iOS puedes instalarlo fácilmente usando AltStore, Sideloadly o TrollStore.'
+                      : 'Puedes descargar la versión ${widget.release.version} directamente desde la página oficial de releases en GitHub.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Row(
           children: [
             Expanded(
               child: OutlinedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Más tarde'),
+                child: const Text('Cerrar'),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               flex: 2,
               child: FilledButton.icon(
-                onPressed: _startDownload,
-                icon: const Icon(Icons.download_rounded),
-                label: Text('Actualizar (${widget.release.apkAbi})'),
+                onPressed: () async {
+                  if (widget.isDemo) {
+                    Navigator.pop(context);
+                    AppSnackBar.show(
+                      context,
+                      icon: Icons.check_circle_rounded,
+                      tone: AppSnackBarTone.success,
+                      message: 'Simulación iOS: Abriendo paquete ${widget.release.ipaFileName.isNotEmpty ? widget.release.ipaFileName : "Logos_K_Logos.ipa"}.',
+                    );
+                    return;
+                  }
+                  await UpdateService.instance.openUrl(ipaUrl);
+                },
+                icon: const Icon(Icons.open_in_browser_rounded),
+                label: Text(
+                  hasIpa ? 'Descargar .IPA iOS' : 'Ver Release en GitHub',
+                ),
               ),
             ),
           ],
-        );
-    }
+        ),
+      ],
+    );
   }
 }
 

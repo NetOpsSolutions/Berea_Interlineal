@@ -104,6 +104,22 @@ class ReleaseApkAsset {
 
   String get formattedSize => formatBytes(sizeBytes);
 
+  Map<String, dynamic> toMap() => {
+        'fileName': fileName,
+        'downloadUrl': downloadUrl,
+        'apiUrl': apiUrl,
+        'sizeBytes': sizeBytes,
+        'abi': abi,
+      };
+
+  factory ReleaseApkAsset.fromMap(Map<String, dynamic> map) => ReleaseApkAsset(
+        fileName: map['fileName']?.toString() ?? '',
+        downloadUrl: map['downloadUrl']?.toString() ?? '',
+        apiUrl: map['apiUrl']?.toString() ?? '',
+        sizeBytes: (map['sizeBytes'] as num?)?.toInt() ?? 0,
+        abi: map['abi']?.toString() ?? 'universal',
+      );
+
   String get readableAbiLabel {
     switch (abi) {
       case 'arm64-v8a':
@@ -155,6 +171,37 @@ class ReleaseApkAsset {
   }
 }
 
+/// Representa un paquete instalador .ipa para iOS (iPhone / iPad) adjunto en una release de GitHub.
+class ReleaseIpaAsset {
+  final String fileName;
+  final String downloadUrl;
+  final String apiUrl;
+  final int sizeBytes;
+
+  const ReleaseIpaAsset({
+    required this.fileName,
+    required this.downloadUrl,
+    this.apiUrl = '',
+    required this.sizeBytes,
+  });
+
+  String get formattedSize => formatBytes(sizeBytes);
+
+  Map<String, dynamic> toMap() => {
+        'fileName': fileName,
+        'downloadUrl': downloadUrl,
+        'apiUrl': apiUrl,
+        'sizeBytes': sizeBytes,
+      };
+
+  factory ReleaseIpaAsset.fromMap(Map<String, dynamic> map) => ReleaseIpaAsset(
+        fileName: map['fileName']?.toString() ?? '',
+        downloadUrl: map['downloadUrl']?.toString() ?? '',
+        apiUrl: map['apiUrl']?.toString() ?? '',
+        sizeBytes: (map['sizeBytes'] as num?)?.toInt() ?? 0,
+      );
+}
+
 /// Información detallada de una release publicada en GitHub con soporte multi-arquitectura.
 class AppReleaseInfo {
   final String tagName;
@@ -164,7 +211,9 @@ class AppReleaseInfo {
   final DateTime publishedAt;
   final String htmlUrl;
   final bool isPrerelease;
+  final bool isDemo;
   final List<ReleaseApkAsset> apkAssets;
+  final ReleaseIpaAsset? ipaAsset;
 
   ReleaseApkAsset? _selectedApk;
   DeviceArchitecture? _targetArchitecture;
@@ -177,7 +226,9 @@ class AppReleaseInfo {
     required this.publishedAt,
     required this.htmlUrl,
     required this.isPrerelease,
+    this.isDemo = false,
     required this.apkAssets,
+    this.ipaAsset,
     ReleaseApkAsset? selectedApk,
     DeviceArchitecture? targetArchitecture,
   })  : _selectedApk = selectedApk,
@@ -189,6 +240,15 @@ class AppReleaseInfo {
 
   /// Retorna verdadero si hay un APK compatible para el dispositivo
   bool get hasCompatibleApk => _selectedApk != null;
+
+  /// Retorna verdadero si existe un instalador para iOS (.ipa) en la release
+  bool get hasCompatibleIpa => ipaAsset != null;
+
+  /// Propiedades delegadas al instalador .ipa para iOS
+  String get ipaDownloadUrl => ipaAsset?.downloadUrl ?? '';
+  String get ipaFileName => ipaAsset?.fileName ?? '';
+  int get ipaSizeBytes => ipaAsset?.sizeBytes ?? 0;
+  String get formattedIpaSize => ipaAsset != null ? ipaAsset!.formattedSize : '';
 
   /// Propiedades delegadas al APK seleccionado (con fallback seguro)
   String get apkDownloadUrl => _selectedApk?.downloadUrl ?? (apkAssets.isNotEmpty ? apkAssets.first.downloadUrl : '');
@@ -249,19 +309,20 @@ class AppReleaseInfo {
     final html = json['html_url'] as String? ?? '';
     final prerelease = json['prerelease'] as bool? ?? false;
 
-    // Recolectar todos los assets de extensión .apk
+    // Recolectar todos los assets de extensión .apk y paquetes .ipa para iOS
     final assets = json['assets'] as List<dynamic>? ?? [];
     final apkAssets = <ReleaseApkAsset>[];
+    ReleaseIpaAsset? ipaAsset;
 
     for (final item in assets) {
       if (item is Map<String, dynamic>) {
         final aName = item['name'] as String? ?? '';
-        if (aName.toLowerCase().endsWith('.apk')) {
-          final url = item['browser_download_url'] as String? ?? '';
-          final apiUrl = item['url'] as String? ?? '';
-          final size = (item['size'] as num?)?.toInt() ?? 0;
-          final detectedAbi = ReleaseApkAsset.detectAbiFromFileName(aName);
+        final url = item['browser_download_url'] as String? ?? '';
+        final apiUrl = item['url'] as String? ?? '';
+        final size = (item['size'] as num?)?.toInt() ?? 0;
 
+        if (aName.toLowerCase().endsWith('.apk')) {
+          final detectedAbi = ReleaseApkAsset.detectAbiFromFileName(aName);
           apkAssets.add(
             ReleaseApkAsset(
               fileName: aName,
@@ -270,6 +331,13 @@ class AppReleaseInfo {
               sizeBytes: size,
               abi: detectedAbi,
             ),
+          );
+        } else if (aName.toLowerCase().endsWith('.ipa')) {
+          ipaAsset = ReleaseIpaAsset(
+            fileName: aName,
+            downloadUrl: url,
+            apiUrl: apiUrl,
+            sizeBytes: size,
           );
         }
       }
@@ -284,6 +352,7 @@ class AppReleaseInfo {
       htmlUrl: html,
       isPrerelease: prerelease,
       apkAssets: apkAssets,
+      ipaAsset: ipaAsset,
     );
 
     if (deviceArch != null) {
@@ -293,6 +362,71 @@ class AppReleaseInfo {
     }
 
     return releaseInfo;
+  }
+
+  /// Resumen limpio en texto plano para mostrar en el Centro de Notificaciones de Android
+  String get plainNotesPreview {
+    final lines = releaseNotes
+        .split('\n')
+        .map((l) => l
+            .replaceAll(RegExp(r'^#+\s*'), '')
+            .replaceAll('**', '')
+            .replaceAll(RegExp(r'^[\-\*]\s+'), '• ')
+            .trim())
+        .where((l) => l.isNotEmpty)
+        .take(3)
+        .toList();
+    if (lines.isEmpty) {
+      return 'Incluye mejoras de rendimiento, experiencia de lectura y herramientas de estudio.';
+    }
+    return lines.join('\n');
+  }
+
+  Map<String, dynamic> toMap() => {
+        'tagName': tagName,
+        'version': version,
+        'title': title,
+        'releaseNotes': releaseNotes,
+        'publishedAt': publishedAt.toIso8601String(),
+        'htmlUrl': htmlUrl,
+        'isPrerelease': isPrerelease,
+        'isDemo': isDemo,
+        'apkAssets': apkAssets.map((a) => a.toMap()).toList(),
+        if (ipaAsset != null) 'ipaAsset': ipaAsset!.toMap(),
+      };
+
+  factory AppReleaseInfo.fromPersistedMap(
+    Map<String, dynamic> map, {
+    DeviceArchitecture? deviceArch,
+  }) {
+    final rawAssets = map['apkAssets'] as List<dynamic>? ?? const [];
+    final assets = rawAssets
+        .whereType<Map>()
+        .map((m) => ReleaseApkAsset.fromMap(Map<String, dynamic>.from(m)))
+        .toList();
+
+    final ipaMap = map['ipaAsset'] as Map<String, dynamic>?;
+    final ipaAsset = ipaMap != null ? ReleaseIpaAsset.fromMap(ipaMap) : null;
+
+    final info = AppReleaseInfo(
+      tagName: map['tagName']?.toString() ?? '',
+      version: map['version']?.toString() ?? '',
+      title: map['title']?.toString() ?? '',
+      releaseNotes: map['releaseNotes']?.toString() ?? '',
+      publishedAt: DateTime.tryParse(map['publishedAt']?.toString() ?? '') ?? DateTime.now(),
+      htmlUrl: map['htmlUrl']?.toString() ?? '',
+      isPrerelease: map['isPrerelease'] == true,
+      isDemo: map['isDemo'] == true,
+      apkAssets: assets,
+      ipaAsset: ipaAsset,
+    );
+
+    if (deviceArch != null) {
+      info.selectBestApk(deviceArch);
+    } else if (assets.isNotEmpty) {
+      info._selectedApk = assets.first;
+    }
+    return info;
   }
 }
 

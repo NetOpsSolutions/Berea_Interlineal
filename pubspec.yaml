@@ -1,7 +1,7 @@
 name: logos_k_logos
 description: Biblia interlineal con diccionarios Strong griego y hebreo.
 publish_to: 'none'
-version: 1.3.1+5
+version: 1.3.2+6
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -23,3 +23,21 @@ flutter:
   assets:
     - assets/data/logos_k_logos.db
     - assets/data/sample.json
+
+  fonts:
+    - family: EzraSIL
+      fonts:
+        - asset: assets/fonts/EzraSIL-Regular.ttf
+    - family: FrankRuhlLibre
+      fonts:
+        - asset: assets/fonts/FrankRuhlLibre-Regular.ttf
+    - family: Cardo
+      fonts:
+        - asset: assets/fonts/Cardo-Regular.ttf
+        - asset: assets/fonts/Cardo-Bold.ttf
+          weight: 700
+    - family: GentiumPlus
+      fonts:
+        - asset: assets/fonts/GentiumPlus-Regular.ttf
+        - asset: assets/fonts/GentiumPlus-Bold.ttf
+          weight: 700

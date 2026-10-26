@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme.dart';
 import '../../core/update/update_dialog.dart';
 import '../../core/update/update_model.dart';
 import '../../core/update/update_service.dart';
@@ -7,17 +8,50 @@ import '../../data/study_service.dart';
 import '../splash/splash_screen.dart';
 import '../study/study_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   final ThemeMode themeMode;
   final VoidCallback onToggleTheme;
   final void Function(String bookId, int chapter, int verse)? onOpenVerse;
+  final VoidCallback? onStartInteractiveGuide;
 
   const SettingsScreen({
     super.key,
     required this.themeMode,
     required this.onToggleTheme,
     this.onOpenVerse,
+    this.onStartInteractiveGuide,
   });
+
+  @override
+  State<SettingsScreen> createState() => SettingsScreenState();
+}
+
+class SettingsScreenState extends State<SettingsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  final GlobalKey tourReadingSectionKey = GlobalKey(debugLabel: 'tourSettingsReading');
+  final GlobalKey tourUpdaterKey = GlobalKey(debugLabel: 'tourSettingsUpdater');
+  final GlobalKey tourReplayGuideKey = GlobalKey(debugLabel: 'tourReplayGuide');
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Desplaza suavemente la vista de Ajustes hasta dejar visible el bloque requerido por la guía
+  Future<void> scrollToTourTarget(GlobalKey targetKey, {double alignment = 0.08}) async {
+    if (!mounted) return;
+    final ctx = targetKey.currentContext;
+    if (ctx != null) {
+      await Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        alignment: alignment,
+      );
+    }
+  }
 
   void _openStudy(
     BuildContext context, {
@@ -28,7 +62,7 @@ class SettingsScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => StudyScreen(
-          onOpenVerse: onOpenVerse,
+          onOpenVerse: widget.onOpenVerse,
           initialIndex: initialIndex,
           initialNotesFilter: notesFilter,
         ),
@@ -43,322 +77,435 @@ class SettingsScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: StudyService.instance,
       builder: (context, _) {
-        final bookmarksCount = StudyService.instance.bookmarks.length;
-        final verseNotesCount = StudyService.instance.verseNotes.length;
-        final strongNotesCount = StudyService.instance.strongNotes.length;
-        final historyCount = StudyService.instance.history.length;
-        final isFluentDefault = StudyService.instance.fluentReadingMode;
+        final study = StudyService.instance;
+        final bookmarksCount = study.bookmarks.length;
+        final highlightsCount = study.highlights.length;
+        final verseNotesCount = study.verseNotes.length;
+        final strongNotesCount = study.strongNotes.length;
+        final historyCount = study.history.length;
+        final isFluentDefault = study.fluentReadingMode;
+        final isChapterMode = study.chapterReadingMode;
+        final scale = study.readingFontScale;
+        final scalePercent = (scale * 100).round();
 
         return Scaffold(
           appBar: AppBar(title: const Text('Ajustes')),
-          body: ListView(
+          body: SingleChildScrollView(
+            controller: _scrollController,
             padding: const EdgeInsets.symmetric(vertical: 8),
-            children: [
-              // Apariencia y Lectura
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Text(
-                  'Lectura y Visualización',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              SwitchListTile(
-                title: const Text('Modo oscuro'),
-                subtitle: const Text('Alterna entre tema claro y tema oscuro'),
-                secondary: Icon(
-                  themeMode == ThemeMode.dark
-                      ? Icons.dark_mode
-                      : Icons.light_mode,
-                ),
-                value: themeMode == ThemeMode.dark,
-                onChanged: (_) => onToggleTheme(),
-              ),
-              SwitchListTile(
-                title: const Text('Modo lectura fluida'),
-                subtitle: const Text(
-                  'Oculta el interlineal por defecto y subraya discretamente palabras Strong',
-                ),
-                secondary: const Icon(Icons.auto_stories),
-                value: isFluentDefault,
-                onChanged: (val) =>
-                    StudyService.instance.setFluentReadingMode(val),
-              ),
-
-              const Divider(),
-
-              // Estadísticas de datos personales
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Text(
-                  'Mi Estudio Personal',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.bookmark_outline),
-                title: const Text('Marcadores guardados'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Apariencia, Lectura y Tipografías Académicas (Fase 3) ──────
+                Column(
+                  key: tourReadingSectionKey,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      '$bookmarksCount',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: Text(
+                        'Lectura y Visualización',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: theme.colorScheme.outline,
+                    SwitchListTile(
+                      title: const Text('Modo oscuro'),
+                      subtitle: const Text('Alterna entre tema claro y tema oscuro'),
+                      secondary: Icon(
+                        widget.themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+                      ),
+                      value: widget.themeMode == ThemeMode.dark,
+                      onChanged: (_) => widget.onToggleTheme(),
+                    ),
+                    SwitchListTile(
+                      title: const Text('Lectura por capítulo completo'),
+                      subtitle: const Text(
+                        'Vista corrida con scroll vertical fluido, swipe lateral e interlineal expandible',
+                      ),
+                      secondary: const Icon(Icons.menu_book_rounded),
+                      value: isChapterMode,
+                      onChanged: (val) => study.setChapterReadingMode(val),
+                    ),
+                    SwitchListTile(
+                      title: const Text('Modo lectura fluida'),
+                      subtitle: const Text(
+                        'Oculta el interlineal por defecto y subraya discretamente palabras Strong',
+                      ),
+                      secondary: const Icon(Icons.auto_stories),
+                      value: isFluentDefault,
+                      onChanged: (val) => study.setFluentReadingMode(val),
                     ),
                   ],
                 ),
-                onTap: () => _openStudy(context, initialIndex: 0),
-              ),
-              ListTile(
-                leading: const Icon(Icons.edit_note),
-                title: const Text('Notas en versículos'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$verseNotesCount',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: theme.colorScheme.outline,
-                    ),
-                  ],
-                ),
-                onTap: () => _openStudy(
-                  context,
-                  initialIndex: 1,
-                  notesFilter: StudyNotesFilter.verses,
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.translate),
-                title: const Text('Notas en palabras Strong'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$strongNotesCount',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: theme.colorScheme.outline,
-                    ),
-                  ],
-                ),
-                onTap: () => _openStudy(
-                  context,
-                  initialIndex: 1,
-                  notesFilter: StudyNotesFilter.strong,
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.history),
-                title: const Text('Historial de visitas'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$historyCount',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: theme.colorScheme.outline,
-                    ),
-                  ],
-                ),
-                onTap: () => _openStudy(context, initialIndex: 2),
-              ),
 
-              const Divider(),
-
-              // Actualizaciones OTA GitHub
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Text(
-                  'Actualizaciones del Sistema (OTA)',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              const _UpdaterCard(),
-
-              const Divider(),
-
-              // Información y novedades v1.3
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Text(
-                  'Acerca de la Aplicación',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              ListTile(
-                title: const Text('Versión instalada'),
-                subtitle: Text('Logos K Logos v${UpdateService.instance.currentVersion} • Edición Oficial'),
-                leading: const Icon(Icons.info_outline),
-              ),
-              ListTile(
-                leading: const Icon(Icons.play_circle_outline),
-                title: const Text('Ver animación de bienvenida'),
-                subtitle: const Text('Reproducir presentación de inicio y logo'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SplashScreen(
-                        themeMode: themeMode,
-                        onToggleTheme: onToggleTheme,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Novedades en Versión 1.3.1:',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
+                // Control de tamaño de fuente y fuentes académicas SIL OFL
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.format_size_rounded,
+                                    size: 18,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Tamaño de letra bíblica',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                '$scalePercent%',
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        _featureRow(
-                          icon: Icons.storage_rounded,
-                          title: 'Persistencia real en SQLite',
-                          desc: 'Notas, marcadores e historial ahora se guardan en una base de datos SQLite dedicada (logos_user_data.db). Tus datos son permanentes y nunca se pierden al cerrar o reiniciar la app.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.sync_rounded,
-                          title: 'Migrador automático',
-                          desc: 'Si tenías datos en la versión anterior (SharedPreferences), se importan automáticamente a SQLite sin pérdida de información.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.system_update_rounded,
-                          title: 'Actualizador In-App OTA',
-                          desc: 'Detección automática de arquitectura CPU, descarga con barra de progreso e instalación de versiones directamente desde GitHub Releases.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.touch_app,
-                          title: 'Accesos directos en Mi Estudio',
-                          desc: 'Toca Marcadores, Notas de versículo, Notas Strong o Historial desde Ajustes para abrirlos al instante.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.auto_awesome,
-                          title: 'Pantalla de bienvenida',
-                          desc: 'Animación inicial elegante con logo, lema de estudio, idiomas y barra de carga fluida.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.link,
-                          title: 'Hipervínculos Strong',
-                          desc: 'Toca referencias derivadas entre paréntesis (ej: (con 3588)) para abrir ese Strong directamente.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.bookmark,
-                          title: 'Marcadores',
-                          desc: 'Guarda tus versículos favoritos con un solo toque.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.edit_note,
-                          title: 'Notas personales',
-                          desc: 'Anotaciones teológicas por versículo o por palabra Strong.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.history,
-                          title: 'Historial',
-                          desc: 'Registro automático de las últimas referencias visitadas.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.auto_stories,
-                          title: 'Modo lectura fluida',
-                          desc: 'Lectura limpia en español con términos Strong subrayados discretamente.',
-                          theme: theme,
-                        ),
-                        _featureRow(
-                          icon: Icons.search,
-                          title: 'Búsqueda global',
-                          desc: 'Búsqueda simultánea en Biblia y diccionarios Strong desde una sola barra.',
-                          theme: theme,
-                        ),
-                      ],
+                          Slider(
+                            value: scale,
+                            min: 0.85,
+                            max: 1.45,
+                            divisions: 12,
+                            label: '$scalePercent%',
+                            onChanged: (v) => study.setReadingFontScale(v),
+                          ),
+                          const Divider(height: 16),
+                          Text(
+                            'Tipografía Hebrea (Antiguo Testamento)',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SegmentedButton<String>(
+                            segments: AcademicFonts.hebrewOptions
+                                .map((o) => ButtonSegment(
+                                      value: o.family,
+                                      label: Text(o.name, style: const TextStyle(fontSize: 12)),
+                                    ))
+                                .toList(),
+                            selected: {study.hebrewFontFamily},
+                            onSelectionChanged: (s) => study.setHebrewFontFamily(s.first),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest.withAlpha(140),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: Text(
+                                AcademicFonts.hebrewOptions.first.sampleText,
+                                style: study.originalScriptStyle(
+                                  isHebrew: true,
+                                  fontSize: 19,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            'Tipografía Griega (Nuevo Testamento)',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SegmentedButton<String>(
+                            segments: AcademicFonts.greekOptions
+                                .map((o) => ButtonSegment(
+                                      value: o.family,
+                                      label: Text(o.name, style: const TextStyle(fontSize: 12)),
+                                    ))
+                                .toList(),
+                            selected: {study.greekFontFamily},
+                            onSelectionChanged: (s) => study.setGreekFontFamily(s.first),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest.withAlpha(140),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              AcademicFonts.greekOptions.first.sampleText,
+                              style: study.originalScriptStyle(
+                                isHebrew: false,
+                                fontSize: 17,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const ListTile(
-                title: Text('Repositorio Oficial'),
-                subtitle: Text('https://github.com/NetOpsSolutions/Logos_K_Logos'),
-                leading: Icon(Icons.code_rounded),
-              ),
-              const ListTile(
-                title: Text('Fuentes textuales'),
-                subtitle: Text(
-                  'BHS (Hebreo), Tischendorf (Griego), Concordancia y Diccionarios Strong, STEPBible',
+                const Divider(),
+
+                // ── Estadísticas de datos personales ────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Text(
+                    'Mi Estudio Personal',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
                 ),
-                leading: Icon(Icons.source_outlined),
-              ),
-              const ListTile(
-                title: Text('Licencias y créditos'),
-                subtitle: Text('Recursos de dominio público y licencias académicas abiertas'),
-                leading: Icon(Icons.gavel_outlined),
-              ),
-            ],
+                _buildStudyCounterTile(
+                  theme: theme,
+                  icon: Icons.bookmark_outline,
+                  title: 'Marcadores guardados',
+                  count: bookmarksCount,
+                  onTap: () => _openStudy(context, initialIndex: 0),
+                ),
+                _buildStudyCounterTile(
+                  theme: theme,
+                  icon: Icons.palette_outlined,
+                  title: 'Versículos resaltados',
+                  count: highlightsCount,
+                  onTap: () => _openStudy(context, initialIndex: 1),
+                ),
+                _buildStudyCounterTile(
+                  theme: theme,
+                  icon: Icons.edit_note,
+                  title: 'Notas en versículos',
+                  count: verseNotesCount,
+                  onTap: () => _openStudy(
+                    context,
+                    initialIndex: 2,
+                    notesFilter: StudyNotesFilter.verses,
+                  ),
+                ),
+                _buildStudyCounterTile(
+                  theme: theme,
+                  icon: Icons.translate,
+                  title: 'Notas en palabras Strong',
+                  count: strongNotesCount,
+                  onTap: () => _openStudy(
+                    context,
+                    initialIndex: 2,
+                    notesFilter: StudyNotesFilter.strong,
+                  ),
+                ),
+                _buildStudyCounterTile(
+                  theme: theme,
+                  icon: Icons.history,
+                  title: 'Historial de visitas',
+                  count: historyCount,
+                  onTap: () => _openStudy(context, initialIndex: 3),
+                ),
+
+                const Divider(),
+
+                // ── Actualizaciones OTA GitHub ──────────────────────────────────
+                Column(
+                  key: tourUpdaterKey,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: Text(
+                        'Actualizaciones del Sistema (OTA)',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const _UpdaterCard(),
+                  ],
+                ),
+
+                const Divider(),
+
+                // ── Información y novedades v1.3.2 ──────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Text(
+                    'Acerca de la Aplicación',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                ListTile(
+                  title: const Text('Versión instalada'),
+                  subtitle: Text('Logos K Logos v${UpdateService.instance.currentVersion} • Edición Oficial'),
+                  leading: const Icon(Icons.info_outline),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.play_circle_outline),
+                  title: const Text('Ver animación de bienvenida'),
+                  subtitle: const Text('Reproducir presentación de inicio y logo'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SplashScreen(
+                          themeMode: widget.themeMode,
+                          onToggleTheme: widget.onToggleTheme,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  key: tourReplayGuideKey,
+                  leading: const Icon(Icons.explore_outlined),
+                  title: const Text('Ver guía de uso'),
+                  subtitle: const Text(
+                    'Iniciar recorrido interactivo animado y novedades de la versión',
+                  ),
+                  onTap: widget.onStartInteractiveGuide,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Novedades en Versión 1.3.2:',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          _featureRow(
+                            icon: Icons.explore_rounded,
+                            title: 'Guía visual interactiva post-actualización',
+                            desc: 'Recorrido guiado paso a paso que aparece automáticamente una sola vez tras actualizar y puede repetirse desde «Ver guía de uso».',
+                            theme: theme,
+                          ),
+                          _featureRow(
+                            icon: Icons.menu_book_rounded,
+                            title: 'Lectura por capítulo completo',
+                            desc: 'Scroll continuo del capítulo entero, expansión interlineal al instante sobre cualquier versículo y gestos swipe laterales para cambiar de capítulo.',
+                            theme: theme,
+                          ),
+                          _featureRow(
+                            icon: Icons.font_download_outlined,
+                            title: 'Tipografías académicas SIL OFL',
+                            desc: 'Fuentes especializadas Ezra SIL y Frank Ruhl Libre para Hebreo BHS (nikud y cantilaciones) y Cardo / Gentium Plus para Griego Koiné.',
+                            theme: theme,
+                          ),
+                          _featureRow(
+                            icon: Icons.palette_rounded,
+                            title: 'Resaltadores teológicos',
+                            desc: 'Selecciona palabras o versículos y aplica marcado en 5 categorías teológicas (Promesas, Mandamientos, Atributos de Dios, Advertencias y Profecía) guardadas en SQLite.',
+                            theme: theme,
+                          ),
+                          _featureRow(
+                            icon: Icons.notifications_active_outlined,
+                            title: 'Notificaciones nativas de actualización',
+                            desc: 'Aviso directo en el Centro de Notificaciones de Android cuando hay nueva versión disponible, mostrando notas de versión y consulta de confirmación de descarga.',
+                            theme: theme,
+                          ),
+                          _featureRow(
+                            icon: Icons.contrast_rounded,
+                            title: 'Contraste visual optimizado',
+                            desc: 'Corrección integral de colores en avisos emergentes para máxima legibilidad en temas claro y oscuro.',
+                            theme: theme,
+                          ),
+                          _featureRow(
+                            icon: Icons.storage_rounded,
+                            title: 'Persistencia permanente SQLite',
+                            desc: 'Marcadores, resaltados, notas e historial respaldados de forma atómica en logos_user_data.db.',
+                            theme: theme,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const ListTile(
+                  title: Text('Repositorio Oficial'),
+                  subtitle: Text('https://github.com/NetOpsSolutions/Logos_K_Logos'),
+                  leading: Icon(Icons.code_rounded),
+                ),
+                const ListTile(
+                  title: Text('Fuentes textuales y tipográficas'),
+                  subtitle: Text(
+                    'BHS (Hebreo), Tischendorf (Griego), Strong, STEPBible • Tipografías Ezra SIL, Gentium Plus, Cardo y Frank Ruhl Libre (SIL OFL)',
+                  ),
+                  leading: Icon(Icons.source_outlined),
+                ),
+                const ListTile(
+                  title: Text('Licencias y créditos'),
+                  subtitle: Text('Recursos de dominio público y licencias académicas abiertas'),
+                  leading: Icon(Icons.gavel_outlined),
+                ),
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildStudyCounterTile({
+    required ThemeData theme,
+    required IconData icon,
+    required String title,
+    required int count,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$count',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: theme.colorScheme.outline,
+          ),
+        ],
+      ),
+      onTap: onTap,
     );
   }
 
@@ -407,7 +554,7 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-/// Tarjeta interactiva de control para el sistema de actualizaciones OTA
+/// Tarjeta limpia de producción para el sistema de actualizaciones OTA
 class _UpdaterCard extends StatefulWidget {
   const _UpdaterCard();
 
@@ -437,62 +584,43 @@ class _UpdaterCardState extends State<_UpdaterCard> {
       if (!mounted) return;
 
       if (res.hasUpdate && res.releaseInfo != null) {
+        await UpdateService.instance.showSystemUpdateNotification(
+          res.releaseInfo!,
+          force: true,
+        );
+        if (!mounted) return;
         showUpdateDialog(context, res.releaseInfo!);
       } else if (res.isIncompatible) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.phonelink_erase_rounded, color: Colors.orangeAccent),
-                const SizedBox(width: 12),
-                Expanded(child: Text(res.message)),
-              ],
-            ),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 6),
-          ),
+        AppSnackBar.show(
+          context,
+          icon: Icons.phonelink_erase_rounded,
+          tone: AppSnackBarTone.warning,
+          message: res.message,
+          duration: const Duration(seconds: 6),
         );
       } else if (res.status == UpdateStatus.upToDate) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle, color: Colors.greenAccent),
-                const SizedBox(width: 12),
-                Expanded(child: Text(res.message)),
-              ],
-            ),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
+        AppSnackBar.show(
+          context,
+          icon: Icons.check_circle_rounded,
+          tone: AppSnackBarTone.success,
+          message: res.message,
+          duration: const Duration(seconds: 4),
         );
       } else if (res.status == UpdateStatus.noReleases) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.info_outline, color: Colors.lightBlueAccent),
-                const SizedBox(width: 12),
-                Expanded(child: Text(res.message)),
-              ],
-            ),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
+        AppSnackBar.show(
+          context,
+          icon: Icons.info_outline_rounded,
+          tone: AppSnackBarTone.info,
+          message: res.message,
+          duration: const Duration(seconds: 4),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent),
-                const SizedBox(width: 12),
-                Expanded(child: Text(res.message)),
-              ],
-            ),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
+        AppSnackBar.show(
+          context,
+          icon: Icons.warning_amber_rounded,
+          tone: AppSnackBarTone.warning,
+          message: res.message,
+          duration: const Duration(seconds: 4),
         );
       }
     } finally {
@@ -500,11 +628,6 @@ class _UpdaterCardState extends State<_UpdaterCard> {
         setState(() => _isChecking = false);
       }
     }
-  }
-
-  void _openDemo() {
-    final demoRelease = UpdateService.instance.getSimulatedDemoRelease();
-    showUpdateDialog(context, demoRelease, isDemo: true);
   }
 
   @override
@@ -519,79 +642,94 @@ class _UpdaterCardState extends State<_UpdaterCard> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: theme.colorScheme.outlineVariant.withAlpha(120),
+            color: theme.colorScheme.outlineVariant.withAlpha(140),
           ),
         ),
-        child: Column(
-          children: [
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withAlpha(150),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.cloud_sync_rounded,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              title: const Text(
-                'Buscar actualizaciones',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Column(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Versión actual: v$currentVer • GitHub Releases'),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      Icon(Icons.memory_rounded, size: 13, color: theme.colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        _arch != null ? 'CPU: ${_arch!.readableName}' : 'Detectando arquitectura...',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.primary,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withAlpha(160),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.cloud_sync_rounded,
+                      color: theme.colorScheme.primary,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Buscar actualizaciones',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 3),
+                        Text(
+                          'Versión actual: v$currentVer • GitHub Releases',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.memory_rounded,
+                              size: 14,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                _arch != null
+                                    ? 'CPU: ${_arch!.readableName}'
+                                    : 'Detectando arquitectura...',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-              trailing: _isChecking
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2.2),
-                    )
-                  : FilledButton.tonal(
-                      onPressed: _checkUpdates,
-                      child: const Text('Comprobar'),
-                    ),
-              onTap: _isChecking ? null : _checkUpdates,
-            ),
-            const Divider(height: 1, indent: 16, endIndent: 16),
-            ListTile(
-              leading: Icon(
-                Icons.science_outlined,
-                color: theme.colorScheme.onSurfaceVariant,
-                size: 22,
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.tonalIcon(
+                  onPressed: _isChecking ? null : _checkUpdates,
+                  icon: _isChecking
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2.2),
+                        )
+                      : const Icon(Icons.system_update_rounded, size: 19),
+                  label: Text(
+                    _isChecking ? 'Comprobando en GitHub...' : 'Comprobar actualizaciones',
+                  ),
+                ),
               ),
-              title: const Text(
-                'Vista previa visual (Simulador de diseño)',
-                style: TextStyle(fontSize: 13.5),
-              ),
-              subtitle: const Text(
-                'Demostración offline de cómo luce la ventana emergente',
-                style: TextStyle(fontSize: 12),
-              ),
-              trailing: const Icon(Icons.chevron_right, size: 20),
-              onTap: _openDemo,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

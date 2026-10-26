@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-collect_release.py — Script de empaquetado para release_builds/v1.3.1
-Copia los APKs desde build/app/outputs/flutter-apk/ a release_builds/v1.3.1/
+collect_release.py — Script de empaquetado para release_builds/v1.3.2
+Copia los APKs desde build/app/outputs/flutter-apk/ a release_builds/v1.3.2/
 y renombra con el esquema logos_k_logos_{VERSION}_{ABI}.apk.
 Genera checksums SHA-256 para verificación de integridad.
 
@@ -16,8 +16,8 @@ import shutil
 import sys
 from pathlib import Path
 
-VERSION = "1.3.1"
-BUILD_NUMBER = "5"
+VERSION = "1.3.2"
+BUILD_NUMBER = "6"
 
 # Carpetas
 ROOT = Path(__file__).parent.parent
@@ -26,11 +26,11 @@ DEST = ROOT / "release_builds" / f"v{VERSION}"
 
 # Mapa de nombres originales → nombres de lanzamiento
 APK_MAP = {
-    "app-arm64-v8a-release.apk":  f"logos_k_logos_{VERSION}_arm64-v8a.apk",
+    "app-arm64-v8a-release.apk":   f"logos_k_logos_{VERSION}_arm64-v8a.apk",
     "app-armeabi-v7a-release.apk": f"logos_k_logos_{VERSION}_armeabi-v7a.apk",
-    "app-x86_64-release.apk":     f"logos_k_logos_{VERSION}_x86_64.apk",
-    "app-universal-release.apk":  f"logos_k_logos_{VERSION}_universal.apk",
-    "app-release.apk":            f"logos_k_logos_{VERSION}_universal.apk",
+    "app-x86_64-release.apk":      f"logos_k_logos_{VERSION}_x86_64.apk",
+    "app-universal-release.apk":   f"logos_k_logos_{VERSION}_universal.apk",
+    "app-release.apk":             f"logos_k_logos_{VERSION}_universal.apk",
 }
 
 
@@ -57,6 +57,18 @@ def main():
         checksum = sha256(dest_path)
         collected.append((dest_name, size_mb, checksum))
         print(f"[OK] {dest_name}  ({size_mb:.1f} MB)")
+
+    # Buscar e incluir paquete .ipa para iOS si está presente
+    ipa_dir = ROOT / "build" / "ios" / "iphoneos"
+    if ipa_dir.exists():
+        for ipa_file in ipa_dir.glob("*.ipa"):
+            dest_ipa = DEST / f"Logos_K_Logos_{VERSION}.ipa"
+            shutil.copy2(ipa_file, dest_ipa)
+            size_mb = dest_ipa.stat().st_size / (1024 * 1024)
+            checksum = sha256(dest_ipa)
+            collected.append((dest_ipa.name, size_mb, checksum))
+            print(f"[OK] {dest_ipa.name}  ({size_mb:.1f} MB) [iOS Package]")
+            break
 
     if not collected:
         print("[ERROR] No se encontraron APKs. Ejecuta 'flutter build apk --release --split-per-abi' primero.")

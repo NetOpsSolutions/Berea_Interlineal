@@ -25,8 +25,8 @@ class UpdateService extends ChangeNotifier {
 
   static const String githubOwner = 'NetOpsSolutions';
   static const String githubRepo = 'Logos_K_Logos';
-  static const String fallbackVersion = '1.3.1';
-  static const int fallbackBuildNumber = 5;
+  static const String fallbackVersion = '1.3.2';
+  static const int fallbackBuildNumber = 6;
 
   /// Token opcional de GitHub para repositorios privados o rate limits ampliados.
   /// Se puede suministrar por variable de compilación (--dart-define=GITHUB_TOKEN=...)
@@ -34,6 +34,134 @@ class UpdateService extends ChangeNotifier {
   String? githubToken = const String.fromEnvironment('GITHUB_TOKEN', defaultValue: '');
 
   static const MethodChannel _channel = MethodChannel('com.example.logos_k_logos/updater');
+
+  final StreamController<AppReleaseInfo> _notificationTapController =
+      StreamController<AppReleaseInfo>.broadcast();
+  bool _bridgeInitialized = false;
+  String? _lastNotifiedTag;
+
+  Stream<AppReleaseInfo> get onNotificationTapStream => _notificationTapController.stream;
+
+  /// Inicializa el puente bidireccional con Android para capturar pulsaciones
+  /// en la notificación del Centro de Notificaciones del sistema operativo.
+  void initializeNotificationBridge() {
+    if (_bridgeInitialized || kIsWeb || !Platform.isAndroid) return;
+    _bridgeInitialized = true;
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onUpdateNotificationTapped') {
+        final rawPayload = call.arguments?.toString() ?? '';
+        // Consumir también el pendiente nativo para evitar duplicados
+        try {
+          await _channel.invokeMethod<String>('consumePendingUpdatePayload');
+        } catch (_) {}
+        final release = await _decodeNotificationPayload(rawPayload);
+        if (release != null) {
+          _notificationTapController.add(release);
+        }
+      }
+    });
+  }
+
+  Future<AppReleaseInfo?> _decodeNotificationPayload(String? rawPayload) async {
+    if (rawPayload != null && rawPayload.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawPayload);
+        if (decoded is Map) {
+          final arch = await getDeviceArchitecture();
+          return AppReleaseInfo.fromPersistedMap(
+            Map<String, dynamic>.from(decoded),
+            deviceArch: arch,
+          );
+        }
+      } catch (e) {
+        debugPrint('[UpdateService] Error decodificando payload OTA: $e');
+      }
+    }
+    return _lastResult?.releaseInfo;
+  }
+
+  /// Consume cualquier intención pendiente cuando la app se abrió desde cero
+  /// al pulsar la notificación de actualización en la barra de estado de Android.
+  Future<AppReleaseInfo?> consumePendingNotificationRelease() async {
+    initializeNotificationBridge();
+    if (kIsWeb || !Platform.isAndroid) return null;
+    try {
+      final rawPayload = await _channel.invokeMethod<String>('consumePendingUpdatePayload');
+      if (rawPayload != null && rawPayload.isNotEmpty) {
+        return await _decodeNotificationPayload(rawPayload);
+      }
+    } catch (e) {
+      debugPrint('[UpdateService] Error consumiendo payload OTA pendiente: $e');
+    }
+    return null;
+  }
+
+  /// Verifica si las notificaciones del sistema están activas en Android.
+  Future<bool> areNotificationsEnabled() async {
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        final res = await _channel.invokeMethod<bool>('areNotificationsEnabled');
+        return res ?? false;
+      } catch (_) {}
+    }
+    return false;
+  }
+
+  /// Solicita permiso POST_NOTIFICATIONS en Android 13+ si aún no fue concedido.
+  Future<bool> requestNotificationPermissionIfNeeded() async {
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        final enabled = await areNotificationsEnabled();
+        if (enabled) return true;
+        final res = await _channel.invokeMethod<bool>('requestNotificationPermission');
+        return res ?? false;
+      } catch (e) {
+        debugPrint('[UpdateService] Error solicitando permiso de notificaciones: $e');
+      }
+    }
+    return false;
+  }
+
+  /// Publica una notificación nativa en el Centro de Notificaciones de Android
+  /// para que el usuario pueda pulsarla, ver las notas de la versión y confirmar descarga.
+  Future<bool> showSystemUpdateNotification(
+    AppReleaseInfo release, {
+    bool force = false,
+  }) async {
+    initializeNotificationBridge();
+    if (kIsWeb || !Platform.isAndroid) return false;
+    if (!force && _lastNotifiedTag == release.tagName) return true;
+
+    try {
+      final hasPerm = await requestNotificationPermissionIfNeeded();
+      if (!hasPerm) return false;
+
+      final payloadJson = jsonEncode(release.toMap());
+      final shown = await _channel.invokeMethod<bool>('showUpdateNotification', {
+        'tagName': release.tagName,
+        'version': release.version,
+        'abi': release.apkAbi,
+        'size': release.formattedApkSize,
+        'notesPreview': release.plainNotesPreview,
+        'payloadJson': payloadJson,
+      });
+      if (shown == true && !release.isDemo) {
+        _lastNotifiedTag = release.tagName;
+      }
+      return shown ?? false;
+    } catch (e) {
+      debugPrint('[UpdateService] Error mostrando notificación del sistema: $e');
+      return false;
+    }
+  }
+
+  /// Limpia la notificación activa del Centro de Notificaciones de Android.
+  Future<void> cancelSystemUpdateNotification() async {
+    if (kIsWeb || !Platform.isAndroid) return;
+    try {
+      await _channel.invokeMethod<bool>('cancelUpdateNotification');
+    } catch (_) {}
+  }
 
   String _cachedVersion = fallbackVersion;
   int _cachedBuildNumber = fallbackBuildNumber;
@@ -490,61 +618,86 @@ class UpdateService extends ChangeNotifier {
     }
   }
 
+  /// Abre una URL externa en el navegador del sistema o aplicación asociada (Android e iOS).
+  Future<bool> openUrl(String url) async {
+    if (url.trim().isEmpty) return false;
+    try {
+      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+        final res = await _channel.invokeMethod<bool>('openUrl', {'url': url});
+        if (res == true) return true;
+      }
+    } catch (e) {
+      debugPrint('[UpdateService] Error abriendo enlace externo: $e');
+    }
+    return false;
+  }
+
   /// Proporciona una release simulada multi-arquitectura para demostración y verificación de UI.
   AppReleaseInfo getSimulatedDemoRelease({DeviceArchitecture? arch}) {
     final targetArch = arch ?? _cachedArchitecture ?? DeviceArchitecture.generic();
 
     final assets = [
       const ReleaseApkAsset(
-        fileName: 'logos_k_logos_1.3.1_arm64-v8a.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_arm64-v8a.apk',
+        fileName: 'logos_k_logos_1.3.2_arm64-v8a.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.2/logos_k_logos_1.3.2_arm64-v8a.apk',
         sizeBytes: 42467328, // ~40.5 MB
         abi: 'arm64-v8a',
       ),
       const ReleaseApkAsset(
-        fileName: 'logos_k_logos_1.3.1_armeabi-v7a.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_armeabi-v7a.apk',
+        fileName: 'logos_k_logos_1.3.2_armeabi-v7a.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.2/logos_k_logos_1.3.2_armeabi-v7a.apk',
         sizeBytes: 39845888, // ~38.0 MB
         abi: 'armeabi-v7a',
       ),
       const ReleaseApkAsset(
-        fileName: 'logos_k_logos_1.3.1_x86_64.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_x86_64.apk',
+        fileName: 'logos_k_logos_1.3.2_x86_64.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.2/logos_k_logos_1.3.2_x86_64.apk',
         sizeBytes: 46137344, // ~44.0 MB
         abi: 'x86_64',
       ),
       const ReleaseApkAsset(
-        fileName: 'logos_k_logos_1.3.1_universal.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.1/logos_k_logos_1.3.1_universal.apk',
+        fileName: 'logos_k_logos_1.3.2_universal.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.2/logos_k_logos_1.3.2_universal.apk',
         sizeBytes: 78643200, // ~75.0 MB
         abi: 'universal',
       ),
     ];
 
+    const ipa = ReleaseIpaAsset(
+      fileName: 'Logos_K_Logos_1.3.2.ipa',
+      downloadUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/download/v1.3.2/Logos_K_Logos_1.3.2.ipa',
+      sizeBytes: 38240000, // ~36.5 MB
+    );
+
     final release = AppReleaseInfo(
-      tagName: 'v1.3.1',
-      version: '1.3.1',
-      title: 'Logos K Logos v1.3.1 - Novedades y Mejoras',
+      tagName: 'v1.3.2',
+      version: '1.3.2',
+      title: 'Logos K Logos v1.3.2 - Fase 3 UI/UX y Notificaciones OTA',
       releaseNotes: '''
-## 🚀 Novedades y Correcciones de la Versión 1.3.1
+## 🚀 Novedades de la Versión 1.3.2
 
-### 🧠 Detección Inteligente de Arquitectura CPU
-- La aplicación autodetecta la arquitectura nativa de tu procesador (**${targetArch.readableName}**).
-- Descarga exclusivamente el paquete APK compilado para tu CPU, ahorrando datos y evitando fallos de incompatibilidad.
+### 📖 Experiencia de Lectura por Capítulo Completo (Fase 3)
+- **Scroll vertical continuo** de capítulos completos con expansión interlineal al instante al tocar cualquier versículo.
+- **Gestos laterales (Swipe)** para avanzar o retroceder entre capítulos con fluidez.
+- **Tipografías Académicas SIL OFL**: Soporte nativo de **Ezra SIL** y **Frank Ruhl Libre** para Hebreo (con nikud y cantilaciones) y **Cardo** / **Gentium Plus** para Griego politónico.
+- **Resaltadores Teológicos**: Selección de texto y marcado visual en 5 categorías teológicas persistentes en SQLite.
 
-### ✨ Nuevas Características
-- **Actualizador In-App OTA**: Descarga e instala futuras versiones directamente desde GitHub Releases sin tiendas externas.
-- **Rendimiento**: Carga instantánea de versículos y reducción del consumo de memoria en dispositivos de gama media.
+### 📱 Distribución para iPhone & iPad (iOS)
+- Soporte oficial de empaquetado `.ipa` mediante GitHub Actions macOS.
+- Compatible con **iOS 15.0 o superior** (iPhone 6s hasta iPhone 16 Pro Max e iPads).
+- Instalación libre vía AltStore, Sideloadly y TrollStore.
 
-### 🐛 Correcciones de Errores
-- Corrección de sincronización de modo lectura fluida al reiniciar.
-- Ajuste en el espaciado tipográfico para acentos en griego y cantilaciones en hebreo.
-- Optimización de caché de búsqueda global.
+### 🔔 Centro de Notificaciones Android y Contraste OTA
+- Notificaciones nativas en Android cuando existe una nueva versión disponible (**${targetArch.readableName}**).
+- Al pulsar la notificación, se despliega la consulta de confirmación junto con las notas de la versión antes de iniciar la descarga.
+- Corrección de contraste visual WCAG AAA en avisos emergentes para temas claro y oscuro.
 ''',
       publishedAt: DateTime.now(),
       htmlUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/latest',
       isPrerelease: false,
+      isDemo: true,
       apkAssets: assets,
+      ipaAsset: ipa,
     );
 
     release.selectBestApk(targetArch);

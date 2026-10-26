@@ -3,12 +3,18 @@ import 'package:flutter/material.dart';
 
 import '../../data/database_service.dart';
 import '../../data/models.dart';
+import '../../data/study_service.dart';
 import '../dictionary/strong_detail_screen.dart';
 
 class GlobalSearchScreen extends StatefulWidget {
   final void Function(String bookId, int chapter, int verse)? onOpenVerse;
+  final GlobalKey? tourSearchBarKey;
 
-  const GlobalSearchScreen({super.key, this.onOpenVerse});
+  const GlobalSearchScreen({
+    super.key,
+    this.onOpenVerse,
+    this.tourSearchBarKey,
+  });
 
   @override
   State<GlobalSearchScreen> createState() => _GlobalSearchScreenState();
@@ -83,6 +89,7 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
           children: [
             // Barra de búsqueda unificada
             Padding(
+              key: widget.tourSearchBarKey,
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: TextField(
                 controller: _controller,
@@ -436,8 +443,11 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
                 textDirection: isHebrew ? TextDirection.rtl : TextDirection.ltr,
                 child: Text(
                   e.lemma,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: StudyService.instance.originalScriptStyle(
+                    isHebrew: isHebrew,
+                    fontSize: 19,
                     fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
