@@ -6,7 +6,17 @@ Biblia interlineal de estudio (BHS Hebreo / Tischendorf Griego / Reina-Valera 19
 
 ## 🚀 Historial de Versiones y Novedades
 
-### Versión 1.3 (Actual)
+### Versión 1.3.1 (Actual)
+* **Persistencia Real de Datos Personales en SQLite (`logos_user_data.db`)**:
+  * Base de datos SQLite dedicada e independiente de `logos_k_logos.db` para almacenar de forma permanente marcadores (`user_bookmarks`), notas de versículos (`user_verse_notes`), notas Strong (`user_strong_notes`), historial (`user_history`) y respaldo de preferencias (`user_settings`).
+  * Modo ACID (`WAL` + `synchronous = FULL`), auto-reparación de esquema al abrir conexión y protección ProGuard/R8 para builds `--release`.
+  * Migrador automático desde `SharedPreferences` sin pérdida de datos previos.
+* **Centro de Actualizaciones In-App OTA Multi-Arquitectura**:
+  * Autodetección nativa de procesador (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`) para descargar e instalar directamente desde GitHub Releases el paquete exacto del dispositivo.
+
+---
+
+### Versión 1.3.0
 * **Pantalla de bienvenida animada (Splash Screen)**:
   * Presentación elegante con logotipo central iluminado, libro sagrado y caracteres originales en griego ($\text{A} \cdot \Omega$) y hebreo ($\beth$).
   * Lemas oficiales de estudio:
@@ -85,7 +95,7 @@ flutter analyze
 flutter build apk --split-per-abi --release
 ```
 
-> 📖 Para saber qué APK instalar en cada teléfono (Galaxy A33, Honor, Xiaomi, etc.), consulta la [Guía de Arquitecturas y Dispositivos](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/GUIA_ARQUITECTURAS_Y_DISPOSITIVOS.md).
+> 📖 Para saber qué APK instalar en cada teléfono (Galaxy A33, Honor, Xiaomi, etc.), consulta la [Guía de Arquitecturas y Dispositivos](GUIA_ARQUITECTURAS_Y_DISPOSITIVOS.md).
 
 ---
 

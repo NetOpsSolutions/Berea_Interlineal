@@ -3,7 +3,7 @@
 **Biblia Interlineal de Estudio** — BHS Hebreo · Tischendorf Griego · Reina-Valera 1960  
 Con diccionarios Strong griego y hebreo, análisis morfológico, concordancia cruzada y herramientas de estudio personal.
 
-> 📦 Repositorio oficial: [NetOpsSolutions/Logos_K_Logos](https://github.com/NetOpsSolutions/Logos_K_Logos) · **Distribución directa vía GitHub Releases (OTA)**
+> 📦 Repositorio oficial: [NetOpsSolutions/Logos_K_Logos](https://github.com/NetOpsSolutions/Logos_K_Logos) · **Última versión estable:** [v1.3.1 (Descargar APK)](https://github.com/NetOpsSolutions/Logos_K_Logos/releases/tag/1.3.1) · **Distribución directa vía GitHub Releases (OTA)**
 
 ---
 
@@ -15,15 +15,21 @@ Con diccionarios Strong griego y hebreo, análisis morfológico, concordancia cr
 | 🔤 **Diccionarios Strong** | 8.674 palabras griegas + 8.674 hebreas con lemma, definición, morfología y ocurrencias |
 | 🔍 **Búsqueda Global** | Búsqueda simultánea en texto bíblico y diccionarios Strong |
 | 🔗 **Hipervínculos Strong** | Referencias cruzadas entre palabras relacionadas táctiles y navegables |
-| 🔖 **Mi Estudio Personal** | Marcadores, notas de versículo, notas Strong e historial de visitas persistentes |
+| 🔖 **Mi Estudio Personal** | Marcadores, notas de versículo, notas Strong e historial con persistencia ACID en SQLite (`logos_user_data.db`) |
 | 📚 **Modo Lectura Fluida** | Texto limpio en español con términos Strong subrayados discretamente |
-| 🔄 **Actualizador OTA** | Detección automática de nuevas versiones desde GitHub Releases, descarga e instalación sin tiendas |
+| 🔄 **Actualizador OTA** | Autodetección de arquitectura CPU (`arm64-v8a`, `armeabi-v7a`, `x86_64`), descarga e instalación directa desde GitHub Releases |
 
 ---
 
 ## 🚀 Historial de Versiones
 
-### Versión 1.3.0 (Actual) — OTA Updater + Splash
+### Versión 1.3.1 (Actual) — Persistencia Real SQLite ACID + OTA Multi-Arquitectura
+- **🗄️ Persistencia Real en SQLite (`logos_user_data.db`)**: Marcadores, notas de versículos, notas léxicas Strong, historial de visitas y respaldo de preferencias de interfaz ahora se almacenan en una base SQLite dedicada con transacciones ACID (`WAL` + `synchronous = FULL`), completamente independiente de la base bíblica de solo lectura.
+- **🛡️ Blindaje para Producción (`--release` / R8)**: Reglas ProGuard/R8 reforzadas para `androidx.datastore` y desacoplamiento total entre SQLite y `SharedPreferences`, garantizando persistencia tras cierres forzados o reinicios del dispositivo.
+- **🔁 Migrador Automático**: Importación transparente de datos previos desde `SharedPreferences` hacia SQLite sin pérdida de información.
+- **🧠 Autodetección Inteligente de CPU en OTA**: Detección nativa del procesador del dispositivo para seleccionar y descargar únicamente el APK compatible (`arm64-v8a`, `armeabi-v7a`, `x86_64` o `universal`).
+
+### Versión 1.3.0 — OTA Updater + Splash
 - **🔄 Sistema de Actualización In-App (OTA)**: Detecta, descarga e instala actualizaciones directamente desde GitHub Releases sin necesidad de tiendas externas.
 - **🎬 Splash Screen animado**: Logo central con animaciones, lemas de estudio y barra de progreso fluida (~1.6 s).
 - **⚡ Accesos directos en Ajustes**: Toca Marcadores, Notas o Historial para abrirlos directamente.
@@ -59,7 +65,10 @@ flutter build apk --split-per-abi --release
 # Compilar APK universal
 flutter build apk --release
 
-# Ejecutar pruebas automatizadas (10 tests)
+# Empaquetar release multi-ABI con checksums SHA-256
+python tools/collect_release.py
+
+# Ejecutar pruebas automatizadas (15 tests)
 flutter test
 
 # Análisis estático de código
@@ -114,10 +123,10 @@ Consulta el [Plan de Implementación completo](Archivos_md/PLAN_IMPLEMENTACION.m
 
 | Hito | Estado |
 |---|---|
-| M1: Persistencia SQLite de Usuario | 🔲 Próximo |
-| M2: Actualizador In-App GitHub OTA | ✅ Completado |
-| M3: Depuración final de Assets (APK ~45 MB) | 🔲 Pendiente |
-| M4: Difusión en WhatsApp y Redes | 🔲 Pendiente |
+| M1: Persistencia SQLite de Usuario (`logos_user_data.db`) | ✅ Completado (v1.3.1) |
+| M2: Actualizador In-App GitHub OTA + Autodetección ABI | ✅ Completado (v1.3.1) |
+| M3: Depuración final de Assets (APKs por ABI ~36–40 MB) | ✅ Completado |
+| M4: Difusión en WhatsApp y Redes | 🔲 Próximo |
 | M5: Versículo del Día | 🔲 Pendiente |
 
 ---

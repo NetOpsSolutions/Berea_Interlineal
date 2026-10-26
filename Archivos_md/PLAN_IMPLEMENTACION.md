@@ -8,8 +8,8 @@ Este plan detalla la hoja de ruta técnica y funcional para consolidar **Logos K
 
 ```mermaid
 flowchart TD
-    Fase1["✅ Fase 1: Optimización de Base de Datos y Arranque (COMPLETADA)"] --> Fase2["🚨 Fase 2: Persistencia Real en SQLite y Actualizador GitHub OTA (PRIORIDAD ACTUAL)"]
-    Fase2 --> Fase3["Fase 3: Experiencia de Lectura por Capítulo Completo"]
+    Fase1["✅ Fase 1: Optimización de Base de Datos y Arranque (COMPLETADA)"] --> Fase2["✅ Fase 2: Persistencia Real en SQLite y Actualizador GitHub OTA (COMPLETADA v1.3.1)"]
+    Fase2 --> Fase3["🚀 Fase 3: Experiencia de Lectura por Capítulo Completo (PRÓXIMA FASE)"]
     Fase3 --> Fase4["Fase 4: Herramientas de Estudio Bíblico e Interlineal"]
     Fase4 --> Fase5["Fase 5: Difusión en WhatsApp y Versículo Diario"]
     Fase5 --> Fase6["Fase 6: Búsqueda Morfológica, Respaldo y Multiplataforma"]

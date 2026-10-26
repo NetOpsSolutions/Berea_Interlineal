@@ -6,10 +6,10 @@ Esta guía técnica explica qué versión de APK instalar en cada teléfono, con
 
 ## 🎯 Respuesta Rápida: Tus Dispositivos
 
-| Dispositivo | Procesador | Arquitectura | APK Recomendado | Alternativa Compatible |
+| Dispositivo | Procesador | Arquitectura | APK Recomendado (Release v1.3.1) | Alternativa Compatible |
 |---|---|---|---|---|
-| **Samsung Galaxy A33 5G** | Exynos 1280 (64-bit) | `arm64-v8a` | **`app-arm64-v8a-release.apk`** (38.0 MB) | `app-armeabi-v7a-release.apk` |
-| **Honor X6c / X6 / X6a** | MediaTek Helio G36 / G25 | `arm64-v8a` / `armeabi-v7a`* | **`app-arm64-v8a-release.apk`** (38.0 MB) | **`app-armeabi-v7a-release.apk`** (35.6 MB) |
+| **Samsung Galaxy A33 5G** | Exynos 1280 (64-bit) | `arm64-v8a` | **`logos_k_logos_1.3.1_arm64-v8a.apk`** (38.7 MB) | `logos_k_logos_1.3.1_armeabi-v7a.apk` |
+| **Honor X6c / X6 / X6a** | MediaTek Helio G36 / G25 | `arm64-v8a` / `armeabi-v7a`* | **`logos_k_logos_1.3.1_arm64-v8a.apk`** (38.7 MB) | **`logos_k_logos_1.3.1_armeabi-v7a.apk`** (36.3 MB) |
 
 > [!TIP]
 > **Detalle sobre el Honor X6c:**  
