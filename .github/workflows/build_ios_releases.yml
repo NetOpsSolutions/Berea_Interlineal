@@ -1,16 +1,16 @@
-name: Build iOS Release (IPA)
+name: "Build iOS Release (IPA)"
 
 on:
   # 1. Ejecución retroactiva manual para compilar cualquier release existente (ej. 1.3.1, 1.3.0, 1.3.2)
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Tag de la release a compilar y empaquetar (ej: 1.3.1, 1.3.0, 1.3.2)'
+        description: "Tag de la release a compilar y empaquetar (ej: 1.3.1, 1.3.0, 1.3.2)"
         required: true
-        default: '1.3.1'
+        default: "1.3.1"
         type: string
       upload_to_release:
-        description: 'Adjuntar automáticamente el archivo .ipa a la GitHub Release'
+        description: "Adjuntar automáticamente el archivo .ipa a la GitHub Release"
         required: true
         default: true
         type: boolean
@@ -18,8 +18,8 @@ on:
   # 2. Ejecución automática cada vez que se cree un tag de versión
   push:
     tags:
-      - 'v*'
-      - '[0-9]+.[0-9]+.[0-9]+*'
+      - "v*"
+      - "[0-9]*.[0-9]*.[0-9]*"
 
 # Permisos requeridos para que GITHUB_TOKEN pueda adjuntar assets a las Releases
 permissions:
@@ -27,12 +27,12 @@ permissions:
 
 jobs:
   build-ios:
-    name: Build & Package iOS IPA
+    name: "Build & Package iOS IPA"
     # macos-14 utiliza runners Apple Silicon (M2) de alto rendimiento
     runs-on: macos-14
 
     steps:
-      - name: 🏷️ Resolver Tag y Nombre del Paquete
+      - name: "Resolver Tag y Nombre del Paquete"
         id: vars
         run: |
           RAW_TAG="${{ github.event.inputs.release_tag || github.ref_name }}"
@@ -45,25 +45,25 @@ jobs:
 
           echo "=================================================="
           echo " Compilando Logos K Logos para iOS (iPhone / iPad)"
-          echo " Tag objetivo : $RAW_TAG"
+          echo " Tag objetivo  : $RAW_TAG"
           echo " Versión limpia: $CLEAN_TAG"
           echo " Nombre de IPA : $IPA_NAME"
           echo "=================================================="
 
-      - name: 📥 Checkout del Código Fuente (Ref: ${{ steps.vars.outputs.raw_tag }})
+      - name: "Checkout del Código Fuente"
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.vars.outputs.raw_tag }}
           fetch-depth: 0
 
-      - name: 📱 Configurar Flutter SDK
+      - name: "Configurar Flutter SDK"
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: "stable"
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
 
-      - name: 🔍 Diagnóstico del Entorno (Flutter, Xcode y CocoaPods)
+      - name: "Diagnóstico del Entorno (Flutter, Xcode y CocoaPods)"
         run: |
           echo "--- Versión de Flutter ---"
           flutter --version
@@ -74,11 +74,11 @@ jobs:
           echo "--- Versión de CocoaPods ---"
           pod --version
 
-      - name: 📦 Instalar Dependencias de Flutter
+      - name: "Instalar Dependencias de Flutter"
         run: |
           flutter pub get
 
-      - name: 🍎 Configurar Dependencias Nativas (CocoaPods)
+      - name: "Configurar Dependencias Nativas (CocoaPods)"
         run: |
           cd ios
           if [ ! -f "Podfile" ]; then
@@ -91,12 +91,12 @@ jobs:
           pod install --repo-update
           cd ..
 
-      - name: 🔨 Compilar Runner de iOS (Release ARM64)
+      - name: "Compilar Runner de iOS (Release ARM64)"
         run: |
           echo "Iniciando compilación nativa con Xcode..."
           flutter build ios --release --no-codesign
 
-      - name: 📦 Empaquetar Payload a Formato .IPA Universal
+      - name: "Empaquetar Payload a Formato .IPA Universal"
         run: |
           IPA_NAME="${{ steps.vars.outputs.ipa_name }}"
           BUILD_DIR="build/ios/iphoneos"
@@ -116,7 +116,7 @@ jobs:
           ls -lh "${IPA_NAME}"*
           cat "${IPA_NAME}.sha256"
 
-      - name: ☁️ Subir IPA como Artefacto de GitHub Actions
+      - name: "Subir IPA como Artefacto de GitHub Actions"
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.vars.outputs.ipa_name }}
@@ -126,7 +126,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: 🚀 Adjuntar IPA a la GitHub Release (${{ steps.vars.outputs.raw_tag }})
+      - name: "Adjuntar IPA a la GitHub Release"
         if: ${{ github.event_name == 'push' || github.event.inputs.upload_to_release == 'true' || github.event.inputs.upload_to_release == true }}
         uses: softprops/action-gh-release@v2
         with:
