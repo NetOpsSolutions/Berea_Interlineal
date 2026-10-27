@@ -19,7 +19,7 @@ import UIKit
   private func setupMethodChannel() {
     guard let controller = window?.rootViewController as? FlutterViewController else { return }
     let channel = FlutterMethodChannel(
-      name: "com.example.logos_k_logos/updater",
+      name: "com.netopssolutions.berea_interlineal/updater",
       binaryMessenger: controller.binaryMessenger
     )
 

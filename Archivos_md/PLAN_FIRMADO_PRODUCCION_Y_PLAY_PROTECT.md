@@ -269,7 +269,7 @@ Abrir el formulario oficial de desarrolladores de Google:
 ### 4.2. Campos a Diligenciar en el Formulario:
 1. **Developer Name**: `NetOps Solutions`
 2. **Developer Email**: Tu correo de contacto.
-3. **Application Package Name**: `com.example.logos_k_logos`
+3. **Application Package Name**: `com.netopssolutions.berea_interlineal`
 4. **Certificate Fingerprint (SHA-256)**:
    * Pegar la huella oficial generada:  
      `72:A9:9B:19:6F:45:3A:6B:84:79:5E:17:9B:DC:EB:5D:1E:70:FE:0C:D5:15:29:EE:F9:3F:CF:5D:29:FE:7D:78`

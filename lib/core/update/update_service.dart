@@ -33,7 +33,7 @@ class UpdateService extends ChangeNotifier {
   /// o asignando directamente `UpdateService.instance.githubToken = '...'`.
   String? githubToken = const String.fromEnvironment('GITHUB_TOKEN', defaultValue: '');
 
-  static const MethodChannel _channel = MethodChannel('com.example.logos_k_logos/updater');
+  static const MethodChannel _channel = MethodChannel('com.netopssolutions.berea_interlineal/updater');
 
   final StreamController<AppReleaseInfo> _notificationTapController =
       StreamController<AppReleaseInfo>.broadcast();

@@ -1,4 +1,4 @@
-package com.example.logos_k_logos
+﻿package com.netopssolutions.berea_interlineal
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -24,11 +24,11 @@ import java.io.File
 
 class MainActivity : FlutterActivity() {
     companion object {
-        private const val CHANNEL = "com.example.logos_k_logos/updater"
-        private const val NOTIFICATION_CHANNEL_ID = "logos_ota_updates"
+        private const val CHANNEL = "com.netopssolutions.berea_interlineal/updater"
+        private const val NOTIFICATION_CHANNEL_ID = "berea_ota_updates"
         private const val NOTIFICATION_ID_OTA = 1001
         private const val REQ_POST_NOTIFICATIONS = 2001
-        private const val ACTION_OPEN_OTA_UPDATE = "com.example.logos_k_logos.ACTION_OPEN_OTA_UPDATE"
+        private const val ACTION_OPEN_OTA_UPDATE = "com.netopssolutions.berea_interlineal.ACTION_OPEN_OTA_UPDATE"
         private const val EXTRA_OTA_PAYLOAD = "ota_payload"
     }
 
