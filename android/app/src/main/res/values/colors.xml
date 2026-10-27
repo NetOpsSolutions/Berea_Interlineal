@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fondo profundo para SplashScreen de Android sin destello blanco -->
+    <color name="splash_background">#0B132B</color>
+    <!-- Fondo para iconos adaptativos de Android (API 26+) -->
+    <color name="ic_launcher_background">#06112D</color>
+</resources>

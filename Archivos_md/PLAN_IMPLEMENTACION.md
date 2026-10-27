@@ -14,7 +14,8 @@ Este plan detalla la hoja de ruta técnica y funcional para consolidar **Berea I
 flowchart TD
     Fase1["✅ Fase 1: Optimización de Base de Datos y Arranque (COMPLETADA)"] --> Fase2["✅ Fase 2: Persistencia Real en SQLite y Actualizador GitHub OTA (COMPLETADA v1.3.1 / Pulida v1.3.2)"]
     Fase2 --> Fase3["✅ Fase 3: Experiencia de Lectura e Interfaz UI/UX (COMPLETADA v1.3.2)"]
-    Fase3 --> Fase4["🚀 Fase 4: Herramientas de Estudio Bíblico e Interlineal (PRÓXIMA FASE)"]
+    Fase3 --> ResumenBiblico["📜 Módulo: Resumen Bíblico y Biografías de Escritores (AT y NT)"]
+    ResumenBiblico --> Fase4["🚀 Fase 4: Herramientas de Estudio Bíblico e Interlineal (PRÓXIMA FASE)"]
     Fase4 --> Fase5["Fase 5: Difusión en WhatsApp y Versículo Diario"]
     Fase5 --> Fase6["Fase 6: Búsqueda Morfológica, Respaldo y Multiplataforma"]
 ```
@@ -140,6 +141,242 @@ flowchart TD
 
 ---
 
+## 📜 Módulo Especial: Resumen Bíblico y Biografías de Escritores (AT y NT)
+
+> [!NOTE]
+> Este módulo dota a **Berea Interlineal** de una base enciclopédica, histórica y pastoral profunda. Permite al usuario comprender el trasfondo exacto de cada libro antes o durante su lectura, así como profundizar en la vida, llamamiento y ministerio de los escritores inspirados por Dios.
+> Aprovecha la totalidad de la base de datos de Antiguo y Nuevo Testamento (`logos_k_logos.db`) para vincular cada resumen directamente con el texto hebreo, griego e interlineal.
+
+```mermaid
+flowchart TD
+    subgraph UI["1. Acceso en la Aplicación"]
+        Lector["Lector Bíblico (AppBar / Botón Ficha)"] --> Modal["Hoja Modal Deslizable (BottomSheet)"]
+        MenuNav["Menú Principal (Módulo Resumen Bíblico)"] --> PantallaCentral["Pantalla Central de Resúmenes y Personajes"]
+    end
+    subgraph Modulo["2. Contenido del Resumen Bíblico"]
+        Modal & PantallaCentral --> TabLibros["66 Libros (AT y NT)"]
+        Modal & PantallaCentral --> TabPersonajes["Biografías de Escritores y Personajes Clave"]
+    end
+    subgraph DetalleLibro["3. Estructura de Cada Libro"]
+        TabLibros --> C1["👤 Escritor / Autor"]
+        TabLibros --> C2["🎯 Destinatarios Originales"]
+        TabLibros --> C3["📅 Fecha y Año de Redacción"]
+        TabLibros --> C4["🏛️ Contexto Histórico y Político"]
+        TabLibros --> C5["⭐ Puntos Resaltantes y Temas Clave"]
+        TabLibros --> C6["🌱 Aplicación Práctica para Hoy"]
+    end
+    subgraph DB["4. Capa de Datos (SQLite Local Offline)"]
+        TabLibros & TabPersonajes --> SQLite["logos_k_logos.db (Tablas indexadas < 1 ms)"]
+        SQLite --> Interlineal["Navegación al Texto Bíblico / Interlineal"]
+    end
+```
+
+---
+
+### 1. Estructura Obligatoria para los 66 Libros de la Biblia
+
+Cada libro del Antiguo y Nuevo Testamento contará con una ficha técnica exhaustiva y redactada con rigor histórico-gramatical y calidez pastoral, compuesta por los 6 campos esenciales:
+
+1. **👤 Escritor / Autor**: Identidad del escritor según la evidencia bíblica e histórica, su profesión, oficio original y antecedentes espirituales.
+2. **🎯 Destinatarios Originales**: Audiencia inmediata a la que fue remitido el libro (el pueblo de Israel en el desierto, comunidades bajo el imperio babilónico, iglesias gentiles de Asia Menor, o individuos como Teófilo, Timoteo y Tito).
+3. **📅 Fecha y Año de Redacción**: Cronología precisa o rango estimado de redacción (a.C. o d.C.).
+4. **🏛️ Contexto Histórico, Político y Cultural**: Situación del pueblo de Dios, imperios dominantes de la época (Egipto, Asiria, Babilonia, Medo-Persia, Grecia ptolemaica/seléucida, Imperio Romano), y los desafíos espirituales o herejías que se enfrentaban.
+5. **⭐ Puntos Más Resaltantes y Temas Clave**: Estructura temática condensada, eventos culminantes, palabras y doctrinas cardinales, junto con su **versículo lema / clave** con hipervínculo interactivo.
+6. **🌱 Aplicación Práctica y Pastoral para Nuestra Vida**: Lecciones espirituales, éticas y devocionales aplicables al creyente contemporáneo, respondiendo a la pregunta: *«¿Cómo impacta este libro mi vida diaria hoy?»*.
+
+---
+
+### 2. Clasificación Canónica de los 66 Libros en el Sistema
+
+#### Antiguo Testamento (39 Libros en Hebreo/Arameo BHS):
+* **El Pentateuco / La Ley (Torá) [5 Libros]**:
+  * *Génesis*: El libro de los orígenes (creación, caída, diluvio, pacto abrahámico y los patriarcas).
+  * *Éxodo*: Redención de la esclavitud en Egipto, la pascua, travesía del mar y el pacto de la Ley en el Sinaí.
+  * *Levítico*: La santidad de Dios, el sistema sacrificial, las fiestas solemnes y el sacerdocio aarónico.
+  * *Números*: El censo y la peregrinación en el desierto de Sinaí a Moab; lealtad e incredulidad.
+  * *Deuteronomio*: La repetición y renovación del pacto a la nueva generación antes de entrar a Canaán; el gran mandamiento (*Shemá*).
+* **Libros Históricos [12 Libros]**:
+  * *Josué*: Conquista y repartición de la Tierra Prometida; fidelidad de Dios.
+  * *Jueces*: El ciclo continuo de apostasía, opresión, clamor y liberación.
+  * *Rut*: La providencia divina, la redención del pariente cercano y el linaje de David.
+  * *1 y 2 Samuel*: La transición de la teocracia a la monarquía; Saúl y el reinado de David.
+  * *1 y 2 Reyes*: El reino unido bajo Salomón, la construcción del Templo, la división del reino (Israel y Judá) y el posterior cautiverio.
+  * *1 y 2 Crónicas*: Perspectiva sacerdotal de la historia sagrada centrada en el pacto davídico y el culto.
+  * *Esdras y Nehemías*: El retorno del remanente del exilio babilónico, la reconstrucción del altar, del Templo y de los muros de Jerusalén.
+  * *Ester*: La providencia y soberanía oculta de Dios preservando a su pueblo en el Imperio Persa.
+* **Libros Poéticos y Sapienciales [5 Libros]**:
+  * *Job*: El misterio del sufrimiento del justo, la soberanía inescrutable de Dios y la fe inquebrantable.
+  * *Salmos*: El himnario y devocional de Israel; oraciones, lamentos, alabanzas mesiánicas y adoración.
+  * *Proverbios*: Sabiduría práctica inspirada para la vida diaria fundada en el temor de Jehová.
+  * *Eclesiastés*: La vanidad de la vida terrenal separada de Dios («debajo del sol») y el deber supremo del hombre.
+  * *Cantares*: La belleza, pureza y fidelidad del amor conyugal como reflejo del amor divino.
+* **Profetas Mayores [5 Libros]**:
+  * *Isaías*: Juicio a las naciones y gloriosa consolación; el profeta evangélico y los cantos del Siervo Sufriente.
+  * *Jeremías*: El profeta de lágrimas advirtiendo la caída de Jerusalén y profetizando el Nuevo Pacto interior.
+  * *Lamentaciones*: Cinco elegías acrósticas de dolor desgarrador sobre la ruina de Sion y la fidelidad matutina de Dios.
+  * *Ezequiel*: Visiones sacerdotales y apocalípticas entre los exiliados junto al río Quebar; el valle de los huesos secos y el nuevo corazón.
+  * *Daniel*: La soberanía universal de Dios sobre los imperios humanos, fidelidad bajo persecución y profecías del reino eterno del Mesías.
+* **Profetas Menores [12 Libros]**:
+  * *Oseas, Joel, Amós, Abdías, Jonás, Miqueas, Nahúm, Habacuc, Sofonías, Hageo, Zacarías y Malaquías*.
+
+#### Nuevo Testamento (27 Libros en Griego Koiné Tischendorf):
+* **Evangelios y Hechos [5 Libros]**:
+  * *Mateo*: Presentación de Jesús como el Rey Mesiánico prometido, cumplimiento de las profecías del AT.
+  * *Marcos*: Jesús como el Siervo de Dios obediente y lleno de poder en acción inmediata.
+  * *Lucas*: Jesús como el Hijo del Hombre compasivo, salvador de los marginados y redentor de la humanidad.
+  * *Juan*: Jesús como el Verbo eterno de Dios encarnado; señales milagrosas para creer y tener vida.
+  * *Hechos de los Apóstoles*: El derramamiento del Espíritu Santo en Pentecostés y la expansión indetenible de la iglesia primitiva desde Jerusalén hasta Roma.
+* **Epístolas Paulinas [14 Libros]**:
+  * *Romanos*: La magna exposición doctrinal de la justificación por la fe, la gracia y la vida en el Espíritu.
+  * *1 y 2 Corintios*: Solución a divisiones eclesiásticas, dones espirituales, la resurrección y el ministerio de consolación.
+  * *Gálatas*: La carta magna de la libertad cristiana frente al legalismo de la ley.
+  * *Efesios*: La iglesia como cuerpo de Cristo y las riquezas de la gracia en los lugares celestiales.
+  * *Filipenses*: La epístola del gozo constante y la mente humilde de Cristo en medio de la adversidad.
+  * *Colosenses*: La supremacía absoluta y suficiencia de Cristo sobre toda filosofía humana.
+  * *1 y 2 Tesalonicenses*: La esperanza viva de la segunda venida de Cristo y la santificación diaria.
+  * *1 y 2 Timoteo & Tito*: Epístolas pastorales sobre el orden eclesiástico, sana doctrina y liderazgo piadoso.
+  * *Filemón*: La reconciliación cristiana y la hermandad en Cristo por encima de las barreras sociales.
+  * *Hebreos*: La superioridad absoluta de Cristo como sumo sacerdote y mediador de un pacto mejor que el levítico.
+* **Epístolas Generales [7 Libros]**:
+  * *Santiago*: La fe viva demostrada por las obras prácticas y el control de la lengua.
+  * *1 y 2 Pedro*: Esperanza viva en medio del sufrimiento y advertencia solemne contra falsos maestros.
+  * *1, 2 y 3 Juan*: Comunión con Dios en luz y amor, discernimiento de espíritus y verdad encarnada.
+  * *Judas*: Llamado urgente a contender ardientemente por la fe dada una vez a los santos.
+* **Profecía Apocalíptica [1 Libro]**:
+  * *Apocalipsis*: La revelación triunfal de Jesucristo, la victoria final del Cordero sobre el mal, el juicio universal y los cielos nuevos y tierra nueva.
+
+---
+
+### 3. Galería Biográfica: Escritores Bíblicos y Personajes Clave
+
+Dentro de la misma sección se integrarán perfiles biográficos completos de los principales escritores y líderes del relato bíblico:
+
+```mermaid
+classDiagram
+    class PersonajeBiblico {
+        +int id
+        +String nombre
+        +String nombreOriginalHebreoGriego
+        +String oficioRol
+        +String epocaHistorica
+        +List~String~ librosEscritos
+        +String biografiaYMinisterio
+        +String pasajesClave
+        +String leccionesDeVida
+    }
+```
+
+#### Perfiles Principales a Incluir:
+1. **Moisés**:
+   * *Trasfondo*: Nacido bajo decreto de muerte, criado en la corte real de Egipto, 40 años en Madián como pastor.
+   * *Llamamiento*: La zarza ardiente en Horeb; libertador de Israel de la esclavitud faraónica.
+   * *Obras escritas*: El Pentateuco (Génesis a Deuteronomio) y el Salmo 90.
+   * *Lección de vida*: Mansedumbre, intercesión apasionada por el pueblo y dependencia de la presencia de Dios.
+2. **David**:
+   * *Trasfondo*: El menor de la casa de Isaí, pastor en Belén, arpista ante Saúl, vencedor de Goliat.
+   * *Llamamiento*: Ungido por Samuel como rey sobre Israel; hombre conforme al corazón de Dios.
+   * *Obras escritas*: Más de 73 Salmos inspirados.
+   * *Lección de vida*: Arrepentimiento genuino ante el pecado (Salmo 51), adoración en la adversidad y confianza en el pacto eterno.
+3. **Salomón**:
+   * *Trasfondo*: Hijo de David y Betsabé; tercer rey de Israel en la era dorada de paz y esplendor.
+   * *Llamamiento*: Petición de sabiduría para gobernar; edificador del Templo en Jerusalén.
+   * *Obras escritas*: Proverbios, Eclesiastés y Cantares (y los Salmos 72 y 127).
+   * *Lección de vida*: El peligro de las componendas mundanas y la conclusión suprema de que «temer a Dios y guardar sus mandamientos es el todo del hombre».
+4. **Los Profetas Mayores**:
+   * **Isaías**: De linaje noble en Jerusalén; vio la santidad de Dios en el Templo (Is 6); proclamó al Mesías sufriente y resucitado (Is 53).
+   * **Jeremías**: Hijo del sacerdote Hilcías de Anatot; profeta desde su juventud; padeció calabozos y rechazo; proclamó el Nuevo Pacto (Jer 31:31).
+   * **Ezequiel**: Sacerdote transportado al cautiverio en Babilonia; profeta de visiones celestiales portentosas y del renacimiento espiritual del pueblo (Ez 36-37).
+   * **Daniel**: Príncipe de Judá llevado cautivo a Babilonia; mantuvo su fidelidad alimentaria y de oración; primer ministro en los imperios Babilónico y Persa; vidente del reino eterno de Dios.
+5. **Los Evangelistas y Apóstoles**:
+   * **Mateo (Leví)**: Publicano marginado llamado en su mesa de recaudación; testigo ocular que demostró a los judíos que Jesús es el Rey prometido.
+   * **Marcos (Juan Marcos)**: Joven discípulo restaurado tras abandonar el primer viaje misionero; compañero de Pedro y Pablo; cronista dinámico del Siervo en acción.
+   * **Lucas**: «El médico amado»; gentil e historiador meticuloso; compañero de viajes de Pablo; autor de Lucas y Hechos.
+   * **Juan**: Pescador del mar de Galilea («hijo del trueno»); el discípulo a quien Jesús amaba; testigo al pie de la cruz; autor del Evangelio de Juan, 1, 2, 3 Juan y Apocalipsis en Patmos.
+   * **Pedro (Simón Pedro)**: Pescador de Capernaúm; líder impetuoso de los doce; restaurado por Jesús junto al mar; pilar en Pentecostés y apóstol a los judíos; autor de 1 y 2 Pedro.
+   * **Pablo (Saulo de Tarso)**: Fariseo instruido a los pies de Gamaliel; perseguidor de la iglesia transformado camino a Damasco; apóstol a los gentiles, plantador de iglesias y redactor de 13 o 14 epístolas.
+   * **Santiago y Judas**: Hermanos del Señor Jesús; líderes de la iglesia primitiva en Jerusalén; redactores de cartas de profunda exigencia ética y celo doctrinal.
+
+---
+
+### 4. Modelo Técnico en Base de Datos SQLite (`logos_k_logos.db`)
+
+Para garantizar que el módulo funcione **100% offline**, con carga inmediata (< 1 milisegundo) y sin consumo de red:
+
+```sql
+-- Tabla de Introducciones y Resúmenes de los 66 Libros
+CREATE TABLE IF NOT EXISTS biblical_book_introductions (
+    book_id INTEGER PRIMARY KEY,           -- 1 a 66 (Mapeado con la tabla 'books')
+    book_name TEXT NOT NULL,               -- Nombre del libro (ej: 'Génesis', 'Romanos')
+    testament TEXT NOT NULL,               -- 'AT' o 'NT'
+    category TEXT NOT NULL,                -- 'Pentateuco', 'Evangelios', etc.
+    author TEXT NOT NULL,                  -- 'Moisés', 'Pablo', etc.
+    recipients TEXT NOT NULL,              -- Destinatarios originales
+    date_written TEXT NOT NULL,            -- Año o rango cronológico
+    historical_context TEXT NOT NULL,      -- Contexto histórico y político
+    key_themes TEXT NOT NULL,              -- Temas cardinales y puntos resaltantes
+    key_verse_ref TEXT NOT NULL,           -- Cita del versículo lema (ej: 'Hechos 17:11')
+    key_verse_text TEXT NOT NULL,          -- Texto del versículo en RV1960
+    practical_application TEXT NOT NULL    -- Aplicación para la vida actual
+);
+
+-- Tabla de Personajes y Escritores Bíblicos
+CREATE TABLE IF NOT EXISTS biblical_characters (
+    character_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,                    -- Nombre en español (ej: 'Moisés')
+    original_name TEXT,                    -- Nombre en hebreo/griego original (ej: 'מֹשֶׁה')
+    role_title TEXT NOT NULL,              -- 'Libertador y Legislador de Israel'
+    era TEXT NOT NULL,                     -- Época (ej: 'c. 1526 – 1406 a.C.')
+    authored_books TEXT,                   -- Lista de libros que escribió
+    biography TEXT NOT NULL,               -- Reseña biográfica estructurada
+    character_traits TEXT NOT NULL,        -- Virtudes y rasgos espirituales
+    life_lessons TEXT NOT NULL,            -- Lecciones para el creyente
+    icon_symbol TEXT                       -- Identificador de icono o arte temático
+);
+
+-- Índices de consulta ultrarrápida
+CREATE INDEX IF NOT EXISTS idx_book_intro_testament ON biblical_book_introductions(testament);
+CREATE INDEX IF NOT EXISTS idx_book_intro_category ON biblical_book_introductions(category);
+CREATE INDEX IF NOT EXISTS idx_characters_name ON biblical_characters(name);
+```
+
+---
+
+### 5. Experiencia de Usuario e Integración en la Interfaz (UI/UX)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant Lector as Lector Bíblico (Berea)
+    participant Sheet as Modal Resumen Bíblico
+    participant DB as SQLite (logos_k_logos.db)
+
+    Usuario->>Lector: Toca ícono de pergamino / Ficha en AppBar
+    Lector->>DB: Consulta getBookIntroduction(bookId)
+    DB-->>Lector: Retorna datos del libro en < 1 ms
+    Lector->>Sheet: Despliega BottomSheet interactivo con pestañas
+    Usuario->>Sheet: Lee "Contexto", "Puntos Clave" y "Aplicación"
+    Usuario->>Sheet: Toca "Sobre el Escritor"
+    Sheet->>DB: Consulta getCharacterInfo(authorName)
+    DB-->>Sheet: Retorna biografía, trasfondo y lecciones
+    Usuario->>Sheet: Toca el versículo lema
+    Sheet->>Lector: Salta directamente al versículo con su interlineal
+```
+
+* **Acceso Contextual en el Lector Bíblico**:
+  * En la cabecera superior de cada capítulo aparecerá un icono elegante de pergamino sagrado.
+  * Al pulsarlo, se despliega una hoja inferior fluida (*DraggableScrollableSheet*) con navegación por 4 pestañas:
+    1. 🏷️ **Ficha Técnica**: Autor, destinatarios, fecha estimada y mapa/esquema del contexto político.
+    2. ⭐ **Puntos Clave**: Bosquejo condensado, versículo lema resaltado con enlace interactivo.
+    3. 🌱 **Aplicación para Hoy**: Tres lecciones devocionales y prácticas directamente aplicables a la vida diaria.
+    4. 👤 **El Escritor**: Acceso directo a la biografía del autor del libro que se está leyendo.
+* **Módulo Independiente en el Menú Principal**:
+  * Entrada dedicada en la navegación: **«Resumen Bíblico»**.
+  * Permite explorar los 66 libros clasificados por testamento y género literario, con buscador en tiempo real por nombre, autor o tema.
+  * Pestaña complementaria **«Escritores Bíblicos»** para explorar las biografías completas con cronología visual.
+
+---
+
 ## 🔍 Fase 4: Herramientas de Estudio Bíblico e Interlineal
 
 ### 1. Referencias Cruzadas (Cross-References)
@@ -251,3 +488,4 @@ flowchart TD
 | **M5: Versículo del Día** | Notificación matutina, tarjeta devocional y salto al interlineal | ⭐⭐⭐ Alta |
 | **M8: Referencias Cruzadas & Audio** | Dataset TSK de referencias cruzadas, vista paralela y pronunciación fonética | ⭐⭐ Media |
 | **M9: Empaquetado y Pipeline iOS (iPhone)** | GitHub Actions con runner macOS para compilar y adjuntar `.ipa` en cada Release | ⭐⭐ Media |
+| **M10: Resumen Bíblico y Biografías** | Fichas técnicas de los 66 libros (autor, fecha, destinatarios, contexto, puntos clave, aplicación) y perfiles biográficos de escritores | ⭐⭐⭐ Alta |
