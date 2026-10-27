@@ -5,6 +5,7 @@ Este plan detalla la hoja de ruta técnica y funcional para consolidar **Berea I
 > [!NOTE] Planes de Despliegue Específicos:
 > * **Despliegue v1.3.2 y Rebranding**: Consultar [PLAN_DESPLIEGUE_V1.3.2_BEREA.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_DESPLIEGUE_V1.3.2_BEREA.md) para los pasos de migración de repositorio, nuevo logo y actualización OTA.
 > * **Empaquetado y Distribución iPhone**: Consultar [PLAN_IMPLEMENTACION_IPHONE.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_IMPLEMENTACION_IPHONE.md) para el pipeline de iOS (.ipa).
+> * **Firmado Oficial y Play Protect**: Consultar [PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md) para el keystore oficial, refirmado de v1.3.0/v1.3.1/v1.3.2 y certificación contra falsos positivos en Android.
 
 ---
 
