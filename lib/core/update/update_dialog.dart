@@ -531,7 +531,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Android requiere que autorices la instalación de aplicaciones para Logos K Logos.',
+                      'Android requiere que autorices la instalación de aplicaciones para Berea Interlineal.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onErrorContainer,
                       ),
@@ -764,7 +764,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                       context,
                       icon: Icons.check_circle_rounded,
                       tone: AppSnackBarTone.success,
-                      message: 'Simulación iOS: Abriendo paquete ${widget.release.ipaFileName.isNotEmpty ? widget.release.ipaFileName : "Logos_K_Logos.ipa"}.',
+                      message: 'Simulación iOS: Abriendo paquete ${widget.release.ipaFileName.isNotEmpty ? widget.release.ipaFileName : "Berea_Interlineal.ipa"}.',
                     );
                     return;
                   }

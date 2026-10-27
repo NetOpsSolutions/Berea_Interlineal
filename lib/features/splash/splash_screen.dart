@@ -237,7 +237,7 @@ class _SplashScreenState extends State<SplashScreen>
                             child: Column(
                               children: [
                                 Text(
-                                  'LOGOS K LOGOS',
+                                  'BEREA INTERLINEAL',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 30,
@@ -405,20 +405,7 @@ class _SplashScreenState extends State<SplashScreen>
       width: 124,
       height: 124,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  const Color(0xFF1E3A8A),
-                  const Color(0xFF0F172A),
-                ]
-              : [
-                  const Color(0xFF3B82F6),
-                  const Color(0xFF1D4ED8),
-                ],
-        ),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
             color: isDark
@@ -437,66 +424,26 @@ class _SplashScreenState extends State<SplashScreen>
         ],
         border: Border.all(
           color: const Color(0xFFF59E0B).withAlpha(160),
-          width: 2.5,
+          width: 2.0,
         ),
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Letras griegas y hebreas decorativas sutiles
-          Positioned(
-            left: 18,
-            top: 24,
-            child: Text(
-              'ב',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFFFCD34D).withAlpha(160),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(26),
+        child: Image.asset(
+          'assets/images/berea_interlineal_icon.jpg',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: const Color(0xFF0B132B),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.auto_stories_rounded,
+                size: 58,
+                color: Color(0xFFFCD34D),
               ),
-            ),
-          ),
-          Positioned(
-            right: 18,
-            top: 24,
-            child: Text(
-              'Ω',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFFFCD34D).withAlpha(160),
-              ),
-            ),
-          ),
-
-          // Ícono central del libro sagrado abierto
-          const Icon(
-            Icons.auto_stories_rounded,
-            size: 58,
-            color: Colors.white,
-          ),
-
-          // Cinta de marcador dorada
-          Positioned(
-            bottom: 22,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text(
-                'Α • Ω',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.5,
-                  color: Color(0xFF1E293B),
-                ),
-              ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }

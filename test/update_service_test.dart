@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:logos_k_logos/core/update/update_model.dart';
-import 'package:logos_k_logos/core/update/update_service.dart';
+import 'package:berea_interlineal/core/update/update_model.dart';
+import 'package:berea_interlineal/core/update/update_service.dart';
 
 void main() {
   group('UpdateService Version Comparison', () {
@@ -86,7 +86,7 @@ void main() {
       final release = AppReleaseInfo(
         tagName: 'v1.3.2',
         version: '1.3.2',
-        title: 'Logos v1.3.2',
+        title: 'Berea Interlineal v1.3.2',
         releaseNotes: 'Notas',
         publishedAt: DateTime.now(),
         htmlUrl: 'https://example.com',
@@ -124,7 +124,7 @@ void main() {
       final release = AppReleaseInfo(
         tagName: 'v1.3.2',
         version: '1.3.2',
-        title: 'Logos v1.3.2',
+        title: 'Berea Interlineal v1.3.2',
         releaseNotes: 'Notas',
         publishedAt: DateTime.now(),
         htmlUrl: 'https://example.com',
@@ -156,7 +156,7 @@ void main() {
       final release = AppReleaseInfo(
         tagName: 'v1.3.2',
         version: '1.3.2',
-        title: 'Logos v1.3.2',
+        title: 'Berea Interlineal v1.3.2',
         releaseNotes: 'Notas',
         publishedAt: DateTime.now(),
         htmlUrl: 'https://example.com',
@@ -187,7 +187,7 @@ void main() {
       final release = AppReleaseInfo(
         tagName: 'v1.3.2',
         version: '1.3.2',
-        title: 'Logos v1.3.2',
+        title: 'Berea Interlineal v1.3.2',
         releaseNotes: 'Notas',
         publishedAt: DateTime.now(),
         htmlUrl: 'https://example.com',
@@ -235,15 +235,15 @@ void main() {
       final original = AppReleaseInfo(
         tagName: 'v1.3.2',
         version: '1.3.2',
-        title: 'Logos K Logos v1.3.2',
+        title: 'Berea Interlineal v1.3.2',
         releaseNotes: '## Novedades\n- **Lectura por capítulo completo**\n- Fuentes Ezra SIL y Cardo',
         publishedAt: DateTime.utc(2026, 10, 26, 12, 0),
-        htmlUrl: 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/tag/v1.3.2',
+        htmlUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/tag/v1.3.2',
         isPrerelease: false,
         apkAssets: const [
           ReleaseApkAsset(
-            fileName: 'logos_k_logos_1.3.2_arm64-v8a.apk',
-            downloadUrl: 'https://example.com/logos_k_logos_1.3.2_arm64-v8a.apk',
+            fileName: 'berea_interlineal_1.3.2_arm64-v8a.apk',
+            downloadUrl: 'https://example.com/berea_interlineal_1.3.2_arm64-v8a.apk',
             sizeBytes: 43000000,
             abi: 'arm64-v8a',
           ),
@@ -260,7 +260,7 @@ void main() {
       expect(restored.version, equals('1.3.2'));
       expect(restored.hasCompatibleApk, isTrue);
       expect(restored.apkAbi, equals('arm64-v8a'));
-      expect(restored.apkFileName, equals('logos_k_logos_1.3.2_arm64-v8a.apk'));
+      expect(restored.apkFileName, equals('berea_interlineal_1.3.2_arm64-v8a.apk'));
     });
 
     test('Simulated demo release autoselects device architecture for v1.3.2', () {
@@ -283,7 +283,7 @@ void main() {
         'name': 'Logos K Logos 1.3.1',
         'body': 'Notes for iOS and Android',
         'published_at': '2026-10-23T17:55:31Z',
-        'html_url': 'https://github.com/NetOpsSolutions/Logos_K_Logos/releases/tag/1.3.1',
+        'html_url': 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/tag/1.3.1',
         'assets': [
           {
             'name': 'logos_k_logos_1.3.1_arm64-v8a.apk',
@@ -292,8 +292,8 @@ void main() {
             'size': 40000000,
           },
           {
-            'name': 'Logos_K_Logos_1.3.1.ipa',
-            'browser_download_url': 'https://example.com/Logos_K_Logos_1.3.1.ipa',
+            'name': 'Berea_Interlineal_1.3.1.ipa',
+            'browser_download_url': 'https://example.com/Berea_Interlineal_1.3.1.ipa',
             'url': 'https://api.github.com/assets/2',
             'size': 38000000,
           }
@@ -302,8 +302,8 @@ void main() {
 
       final info = AppReleaseInfo.fromGitHubJson(json);
       expect(info.hasCompatibleIpa, isTrue);
-      expect(info.ipaFileName, equals('Logos_K_Logos_1.3.1.ipa'));
-      expect(info.ipaDownloadUrl, equals('https://example.com/Logos_K_Logos_1.3.1.ipa'));
+      expect(info.ipaFileName, equals('Berea_Interlineal_1.3.1.ipa'));
+      expect(info.ipaDownloadUrl, equals('https://example.com/Berea_Interlineal_1.3.1.ipa'));
       expect(info.formattedIpaSize, contains('MB'));
     });
 
@@ -318,8 +318,8 @@ void main() {
         isPrerelease: false,
         apkAssets: const [],
         ipaAsset: const ReleaseIpaAsset(
-          fileName: 'Logos_K_Logos_1.3.1.ipa',
-          downloadUrl: 'https://example.com/Logos_K_Logos_1.3.1.ipa',
+          fileName: 'Berea_Interlineal_1.3.1.ipa',
+          downloadUrl: 'https://example.com/Berea_Interlineal_1.3.1.ipa',
           sizeBytes: 38500000,
         ),
       );
@@ -328,7 +328,7 @@ void main() {
       final restored = AppReleaseInfo.fromPersistedMap(map);
 
       expect(restored.hasCompatibleIpa, isTrue);
-      expect(restored.ipaFileName, equals('Logos_K_Logos_1.3.1.ipa'));
+      expect(restored.ipaFileName, equals('Berea_Interlineal_1.3.1.ipa'));
       expect(restored.ipaSizeBytes, equals(38500000));
     });
   });

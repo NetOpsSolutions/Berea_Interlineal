@@ -360,7 +360,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                 ),
                 ListTile(
                   title: const Text('Versión instalada'),
-                  subtitle: Text('Logos K Logos v${UpdateService.instance.currentVersion} • Edición Oficial'),
+                  subtitle: Text('Berea Interlineal v${UpdateService.instance.currentVersion} • Edición Oficial'),
                   leading: const Icon(Icons.info_outline),
                 ),
                 ListTile(
@@ -404,6 +404,12 @@ class SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                           const SizedBox(height: 10),
+                          _featureRow(
+                            icon: Icons.verified_rounded,
+                            title: 'Identidad Oficial Berea Interlineal',
+                            desc: 'Nueva identidad visual inspirada en Hechos 17:11 con logotipo renovado, icono adaptativo y transición fluida.',
+                            theme: theme,
+                          ),
                           _featureRow(
                             icon: Icons.explore_rounded,
                             title: 'Guía visual interactiva post-actualización',
@@ -454,7 +460,7 @@ class SettingsScreenState extends State<SettingsScreen> {
 
                 const ListTile(
                   title: Text('Repositorio Oficial'),
-                  subtitle: Text('https://github.com/NetOpsSolutions/Logos_K_Logos'),
+                  subtitle: Text('https://github.com/NetOpsSolutions/Berea_Interlineal'),
                   leading: Icon(Icons.code_rounded),
                 ),
                 const ListTile(

@@ -14,11 +14,11 @@ void main() async {
   // Iniciar la preparación de la base de datos en segundo plano
   DatabaseService.instance.initialize();
 
-  runApp(const LogosApp());
+  runApp(const BereaApp());
 }
 
-class LogosApp extends StatelessWidget {
-  const LogosApp({super.key});
+class BereaApp extends StatelessWidget {
+  const BereaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class LogosApp extends StatelessWidget {
         final currentThemeMode = StudyService.instance.themeMode;
 
         return MaterialApp(
-          title: 'Logos K Logos',
+          title: 'Berea Interlineal',
           debugShowCheckedModeBanner: false,
           theme: buildTheme(Brightness.light),
           darkTheme: buildTheme(Brightness.dark),
@@ -42,3 +42,6 @@ class LogosApp extends StatelessWidget {
     );
   }
 }
+
+/// Alias para compatibilidad hacia atrás
+typedef LogosApp = BereaApp;

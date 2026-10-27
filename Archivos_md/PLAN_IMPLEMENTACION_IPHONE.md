@@ -1,14 +1,14 @@
 # 📱 Plan de Implementación: Empaquetado y Distribución para iPhone (iOS)
-## Logos K Logos — Interlineal de Estudio Bíblico
+## Berea Interlineal — Biblia Interlineal de Estudio
 
-Este documento establece la estrategia técnica, el procedimiento paso a paso y las consideraciones operativas para compilar, empaquetar y publicar **Logos K Logos** en formato `.ipa` para **iPhone y iPad**, cubriendo tanto las **releases existentes en GitHub** como todas las versiones futuras.
+Este documento establece la estrategia técnica, el procedimiento paso a paso y las consideraciones operativas para compilar, empaquetar y publicar **Berea Interlineal** en formato `.ipa` para **iPhone y iPad**, cubriendo tanto las **releases existentes en GitHub** como todas las versiones futuras.
 
 ---
 
 ## 📌 1. Objetivo y Alcance
 
-* **Repositorio oficial**: [https://github.com/NetOpsSolutions/Logos_K_Logos.git](https://github.com/NetOpsSolutions/Logos_K_Logos.git)
-* **Objetivo principal**: Lograr que cada release de GitHub (`1.3.0`, `1.3.1`, `1.3.2`, etc.) disponga de su instalador para iPhone (`Logos_K_Logos.ipa`) adjunto junto a los archivos `.apk` de Android, sin necesidad de disponer de una computadora Mac física localmente.
+* **Repositorio oficial**: [https://github.com/NetOpsSolutions/Berea_Interlineal.git](https://github.com/NetOpsSolutions/Berea_Interlineal.git)
+* **Objetivo principal**: Lograr que cada release de GitHub (`1.3.0`, `1.3.1`, `1.3.2`, etc.) disponga de su instalador para iPhone (`Berea_Interlineal.ipa`) adjunto junto a los archivos `.apk` de Android, sin necesidad de disponer de una computadora Mac física localmente.
 * **Mecanismo técnico**: Automatización en la nube mediante **GitHub Actions** utilizando entornos oficiales de Apple (`macos-latest`).
 
 ---
@@ -29,11 +29,11 @@ flowchart TD
         Checkout["1. Checkout del Tag Histórico Exacto"]
         Setup["2. Configurar Flutter SDK + CocoaPods + Xcode"]
         Build["3. flutter build ios --release --no-codesign"]
-        Package["4. Empaquetar Payload a Logos_K_Logos.ipa"]
+        Package["4. Empaquetar Payload a Berea_Interlineal.ipa"]
     end
 
     subgraph ReleasePage["GitHub Releases"]
-        Attach["5. Adjuntar Logos_K_Logos.ipa a la Release Existente"]
+        Attach["5. Adjuntar Berea_Interlineal.ipa a la Release Existente"]
     end
 
     Trigger --> Checkout
@@ -59,7 +59,7 @@ El pipeline se ubicará en `.github/workflows/build_ios_releases.yml`. Contará 
    mkdir -p build/ios/iphoneos/Payload
    cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
    cd build/ios/iphoneos
-   zip -r -9 Logos_K_Logos_${TAG}.ipa Payload
+   zip -r -9 Berea_Interlineal_${TAG}.ipa Payload
    ```
 6. **Inyección en la Release de GitHub**: Utilizando la acción oficial `softprops/action-gh-release` con el token automático `GITHUB_TOKEN`, se sube el `.ipa` a la release existente sin alterar ni eliminar los `.apk` que ya están publicados.
 
@@ -92,7 +92,7 @@ Debido a que Apple no opera con un sistema de instalación abierta de APKs como 
 El sistema de actualización que diseñamos en la **Fase 2** interactuará en iOS bajo las siguientes condiciones técnicas:
 
 1. **Detección In-App Idéntica**:
-   * Al abrir la app en el iPhone, el servicio `UpdateService` consultará `https://api.github.com/repos/NetOpsSolutions/Logos_K_Logos/releases/latest`.
+   * Al abrir la app en el iPhone, el servicio `UpdateService` consultará `https://api.github.com/repos/NetOpsSolutions/Berea_Interlineal/releases/latest`.
    * Comparará la versión instalada contra el último tag publicado en GitHub.
 2. **Visualización de Novedades**:
    * Mostrará la misma ventana modal elegante con las **Notas de la versión** formateadas en Markdown.
@@ -130,11 +130,11 @@ Al ejecutar el pipeline sobre las releases ya publicadas en tu cuenta de GitHub,
 
 ### Release `1.3.0`
 * **Contenido histórico**: Primera versión publicada en GitHub. No contaba aún con la base de datos preconstruida SQLite ni con los resaltadores teológicos ni la lectura continua por capítulo.
-* **Resultado del empaquetado**: Se generará `Logos_K_Logos_1.3.0.ipa`. Funcionará con la interfaz y lógica original de la versión 1.3.0.
+* **Resultado del empaquetado**: Se generará `Berea_Interlineal_1.3.0.ipa`. Funcionará con la interfaz y lógica original de la versión 1.3.0.
 
 ### Release `1.3.1`
 * **Contenido histórico**: Incorporó la base de datos preconstruida de inicio rápido (arranque en segundos), la persistencia nativa en SQLite y el actualizador OTA con soporte de notificaciones.
-* **Resultado del empaquetado**: Se generará `Logos_K_Logos_1.3.1.ipa`. Excelente estabilidad y persistencia asegurada.
+* **Resultado del empaquetado**: Se generará `Berea_Interlineal_1.3.1.ipa`. Excelente estabilidad y persistencia asegurada.
 
 ### Próxima Release `v1.3.2` (Estado Actual del Código)
 * **Contenido completo**: Lectura continua de capítulos completos con scroll vertical, gestos swipe, tipografías académicas offline (*Ezra SIL*, *Cardo*, *Gentium Plus*), 5 resaltadores teológicos y corrección de contraste en notificaciones.
@@ -156,18 +156,18 @@ sequenceDiagram
     Dev->>GH: Ir a pestaña "Actions" -> "Build iOS Release" -> "Run workflow"
     Dev->>GH: Seleccionar Tag: "1.3.1"
     GH->>Action: Iniciar máquina virtual macOS
-    Action->>Action: Compilar Runner.app y empaquetar Payload -> Logos_K_Logos.ipa
-    Action->>Release: Adjuntar Logos_K_Logos.ipa a la release existente
+    Action->>Action: Compilar Runner.app y empaquetar Payload -> Berea_Interlineal.ipa
+    Action->>Release: Adjuntar Berea_Interlineal.ipa a la release existente
     Release-->>Dev: Notificación de finalización (IPA disponible para descarga)
 ```
 
 1. **Creación del workflow**: Crear el archivo `.github/workflows/build_ios_releases.yml` en el repositorio.
 2. **Subida al repositorio**: Ejecutar `git push` hacia la rama principal de GitHub.
 3. **Ejecución retroactiva**:
-   * Ingresar a GitHub en el navegador: [https://github.com/NetOpsSolutions/Logos_K_Logos/actions](https://github.com/NetOpsSolutions/Logos_K_Logos/actions).
+   * Ingresar a GitHub en el navegador: [https://github.com/NetOpsSolutions/Berea_Interlineal/actions](https://github.com/NetOpsSolutions/Berea_Interlineal/actions).
    * Seleccionar el flujo **«Build iOS Release»** en el panel izquierdo.
    * Hacer clic en el botón desplegable **«Run workflow»**.
    * Introducir el tag deseado (ej. `1.3.1`).
    * Pulsar el botón verde **«Run workflow»**.
-4. **Verificación**: En aproximadamente 6 a 8 minutos, el runner de Apple terminará la compilación y el archivo `Logos_K_Logos_1.3.1.ipa` aparecerá automáticamente en la lista de descargas de la release `1.3.1`.
+4. **Verificación**: En aproximadamente 6 a 8 minutos, el runner de Apple terminará la compilación y el archivo `Berea_Interlineal_1.3.1.ipa` aparecerá automáticamente en la lista de descargas de la release `1.3.1`.
 5. **Repetición**: El mismo procedimiento se puede repetir para el tag `1.3.0` o cualquier otro tag disponible.

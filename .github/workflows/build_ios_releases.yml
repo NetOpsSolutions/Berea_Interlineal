@@ -38,14 +38,14 @@ jobs:
           USER_INPUT="${{ github.event.inputs.release_tag || github.ref_name }}"
           RAW_TAG=$(echo "$USER_INPUT" | tr ',' ' ' | awk '{print $1}')
           CLEAN_TAG=$(echo "$RAW_TAG" | sed 's/^v//')
-          IPA_NAME="Logos_K_Logos_${CLEAN_TAG}.ipa"
+          IPA_NAME="Berea_Interlineal_${CLEAN_TAG}.ipa"
 
           echo "raw_tag=$RAW_TAG" >> $GITHUB_OUTPUT
           echo "clean_tag=$CLEAN_TAG" >> $GITHUB_OUTPUT
           echo "ipa_name=$IPA_NAME" >> $GITHUB_OUTPUT
 
           echo "=================================================="
-          echo " Compilando Logos K Logos para iOS (iPhone / iPad)"
+          echo " Compilando Berea Interlineal para iOS (iPhone / iPad)"
           echo " Entrada original : $USER_INPUT"
           echo " Tag objetivo     : $RAW_TAG"
           echo " Versión limpia   : $CLEAN_TAG"
@@ -182,7 +182,7 @@ jobs:
         with:
           tag_name: ${{ steps.vars.outputs.raw_tag }}
           files: |
-            build/ios/iphoneos/Logos_K_Logos_*.ipa
-            build/ios/iphoneos/Logos_K_Logos_*.sha256
+            build/ios/iphoneos/Berea_Interlineal_*.ipa
+            build/ios/iphoneos/Berea_Interlineal_*.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-# 📱 Guía de Arquitecturas Móviles y Compatibilidad de APKs: Logos K Logos
+# 📱 Guía de Arquitecturas Móviles y Compatibilidad de APKs: Berea Interlineal
 
 Esta guía técnica explica qué versión de APK instalar en cada teléfono, con énfasis en el **Samsung Galaxy A33** y el **Honor X6c**, junto a un catálogo de modelos y métodos de comprobación.
 
@@ -8,8 +8,8 @@ Esta guía técnica explica qué versión de APK instalar en cada teléfono, con
 
 | Dispositivo | Procesador | Arquitectura | APK Recomendado (Release v1.3.1) | Alternativa Compatible |
 |---|---|---|---|---|
-| **Samsung Galaxy A33 5G** | Exynos 1280 (64-bit) | `arm64-v8a` | **`logos_k_logos_1.3.1_arm64-v8a.apk`** (38.7 MB) | `logos_k_logos_1.3.1_armeabi-v7a.apk` |
-| **Honor X6c / X6 / X6a** | MediaTek Helio G36 / G25 | `arm64-v8a` / `armeabi-v7a`* | **`logos_k_logos_1.3.1_arm64-v8a.apk`** (38.7 MB) | **`logos_k_logos_1.3.1_armeabi-v7a.apk`** (36.3 MB) |
+| **Samsung Galaxy A33 5G** | Exynos 1280 (64-bit) | `arm64-v8a` | **`berea_interlineal_1.3.1_arm64-v8a.apk`** (38.7 MB) | `berea_interlineal_1.3.1_armeabi-v7a.apk` |
+| **Honor X6c / X6 / X6a** | MediaTek Helio G36 / G25 | `arm64-v8a` / `armeabi-v7a`* | **`berea_interlineal_1.3.1_arm64-v8a.apk`** (38.7 MB) | **`berea_interlineal_1.3.1_armeabi-v7a.apk`** (36.3 MB) |
 
 > [!TIP]
 > **Detalle sobre el Honor X6c:**  
@@ -125,4 +125,4 @@ adb install -r "build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
 2. Copia el archivo `app-arm64-v8a-release.apk` (o `app-armeabi-v7a-release.apk`) a la carpeta *Descargas* del teléfono.
 3. Abre el explorador de archivos del teléfono y toca el APK.
 4. Si el sistema te lo pide, marca la casilla *"Permitir instalar aplicaciones de esta fuente"*.
-5. Presiona **Instalar** y ¡listo! Disfruta de **Logos K Logos** 100% offline y ultraligero.
+5. Presiona **Instalar** y ¡listo! Disfruta de **Berea Interlineal** 100% offline y ultraligero.

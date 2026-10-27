@@ -44,7 +44,7 @@ class TourStepConfig {
 }
 
 /// Superposición animada tipo Spotlight / Coach-Mark que guía al usuario
-/// a través de las pantallas reales de Logos K Logos.
+/// a través de las pantallas reales de Berea Interlineal.
 class InteractiveTourOverlay extends StatefulWidget {
   final String versionLabel;
   final List<TourStepConfig> steps;

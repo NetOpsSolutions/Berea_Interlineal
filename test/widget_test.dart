@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logos_k_logos/core/theme.dart';
-import 'package:logos_k_logos/core/tour/interactive_tour_overlay.dart';
-import 'package:logos_k_logos/data/database_service.dart';
-import 'package:logos_k_logos/data/study_service.dart';
-import 'package:logos_k_logos/features/settings/settings_screen.dart';
-import 'package:logos_k_logos/features/splash/splash_screen.dart';
-import 'package:logos_k_logos/features/study/study_screen.dart';
-import 'package:logos_k_logos/main.dart';
-import 'package:logos_k_logos/shell/home_shell.dart';
+import 'package:berea_interlineal/core/theme.dart';
+import 'package:berea_interlineal/core/tour/interactive_tour_overlay.dart';
+import 'package:berea_interlineal/data/database_service.dart';
+import 'package:berea_interlineal/data/study_service.dart';
+import 'package:berea_interlineal/features/settings/settings_screen.dart';
+import 'package:berea_interlineal/features/splash/splash_screen.dart';
+import 'package:berea_interlineal/features/study/study_screen.dart';
+import 'package:berea_interlineal/main.dart';
+import 'package:berea_interlineal/shell/home_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -21,11 +21,11 @@ void main() {
   });
 
   testWidgets('SplashScreen animates and displays required branding elements', (WidgetTester tester) async {
-    await tester.pumpWidget(const LogosApp());
+    await tester.pumpWidget(const BereaApp());
 
     // 1. Verificar elementos visuales y textos clave requeridos
     expect(find.byType(SplashScreen), findsOneWidget);
-    expect(find.text('LOGOS K LOGOS'), findsOneWidget);
+    expect(find.text('BEREA INTERLINEAL'), findsOneWidget);
     expect(find.text('BIBLIA INTERLINEAL DE ESTUDIO'), findsOneWidget);
     expect(find.text('Griego • Hebreo • Reina-Valera 1960'), findsOneWidget);
     expect(find.text('Diccionarios Strong y Análisis Morfológico'), findsOneWidget);
@@ -45,7 +45,7 @@ void main() {
   });
 
   testWidgets('SplashScreen can be skipped with tap to enter immediately', (WidgetTester tester) async {
-    await tester.pumpWidget(const LogosApp());
+    await tester.pumpWidget(const BereaApp());
 
     expect(find.byType(SplashScreen), findsOneWidget);
 
@@ -53,7 +53,7 @@ void main() {
     await tester.pump();
 
     // Pulsar en el texto o pantalla para omitir
-    await tester.tap(find.text('LOGOS K LOGOS'));
+    await tester.tap(find.text('BEREA INTERLINEAL'));
     await tester.pumpAndSettle();
 
     // Confirmar que entra inmediatamente a HomeShell

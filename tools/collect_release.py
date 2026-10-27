@@ -2,7 +2,7 @@
 """
 collect_release.py — Script de empaquetado para release_builds/v1.3.2
 Copia los APKs desde build/app/outputs/flutter-apk/ a release_builds/v1.3.2/
-y renombra con el esquema logos_k_logos_{VERSION}_{ABI}.apk.
+y renombra con el esquema berea_interlineal_{VERSION}_{ABI}.apk.
 Genera checksums SHA-256 para verificación de integridad.
 
 Uso:
@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 VERSION = "1.3.2"
-BUILD_NUMBER = "6"
+BUILD_NUMBER = "7"
 
 # Carpetas
 ROOT = Path(__file__).parent.parent
@@ -26,11 +26,11 @@ DEST = ROOT / "release_builds" / f"v{VERSION}"
 
 # Mapa de nombres originales → nombres de lanzamiento
 APK_MAP = {
-    "app-arm64-v8a-release.apk":   f"logos_k_logos_{VERSION}_arm64-v8a.apk",
-    "app-armeabi-v7a-release.apk": f"logos_k_logos_{VERSION}_armeabi-v7a.apk",
-    "app-x86_64-release.apk":      f"logos_k_logos_{VERSION}_x86_64.apk",
-    "app-universal-release.apk":   f"logos_k_logos_{VERSION}_universal.apk",
-    "app-release.apk":             f"logos_k_logos_{VERSION}_universal.apk",
+    "app-arm64-v8a-release.apk":   f"berea_interlineal_{VERSION}_arm64-v8a.apk",
+    "app-armeabi-v7a-release.apk": f"berea_interlineal_{VERSION}_armeabi-v7a.apk",
+    "app-x86_64-release.apk":      f"berea_interlineal_{VERSION}_x86_64.apk",
+    "app-universal-release.apk":   f"berea_interlineal_{VERSION}_universal.apk",
+    "app-release.apk":             f"berea_interlineal_{VERSION}_universal.apk",
 }
 
 
@@ -62,7 +62,7 @@ def main():
     ipa_dir = ROOT / "build" / "ios" / "iphoneos"
     if ipa_dir.exists():
         for ipa_file in ipa_dir.glob("*.ipa"):
-            dest_ipa = DEST / f"Logos_K_Logos_{VERSION}.ipa"
+            dest_ipa = DEST / f"Berea_Interlineal_{VERSION}.ipa"
             shutil.copy2(ipa_file, dest_ipa)
             size_mb = dest_ipa.stat().st_size / (1024 * 1024)
             checksum = sha256(dest_ipa)
@@ -77,7 +77,7 @@ def main():
     # Escribir checksums.txt
     checksums_path = DEST / "checksums.txt"
     with open(checksums_path, "w", encoding="utf-8") as f:
-        f.write(f"# Logos K Logos v{VERSION}+{BUILD_NUMBER} -- SHA-256 Checksums\n")
+        f.write(f"# Berea Interlineal v{VERSION}+{BUILD_NUMBER} -- SHA-256 Checksums\n")
         f.write(f"# Generado automaticamente por tools/collect_release.py\n\n")
         for name, size_mb, checksum in collected:
             f.write(f"{checksum}  {name}  ({size_mb:.1f} MB)\n")

@@ -1,6 +1,10 @@
-# 📋 Plan Estratégico de Mejoras e Integraciones: Logos K Logos
+# 📋 Plan Estratégico de Mejoras e Integraciones: Berea Interlineal
 
-Este plan detalla la hoja de ruta técnica y funcional para consolidar **Logos K Logos** como una herramienta de referencia para el estudio bíblico interlineal (Hebreo BHS / Griego Tischendorf / RV1960).
+Este plan detalla la hoja de ruta técnica y funcional para consolidar **Berea Interlineal** como una herramienta de referencia para el estudio bíblico interlineal (Hebreo BHS / Griego Tischendorf / RV1960).
+
+> [!NOTE] Planes de Despliegue Específicos:
+> * **Despliegue v1.3.2 y Rebranding**: Consultar [PLAN_DESPLIEGUE_V1.3.2_BEREA.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_DESPLIEGUE_V1.3.2_BEREA.md) para los pasos de migración de repositorio, nuevo logo y actualización OTA.
+> * **Empaquetado y Distribución iPhone**: Consultar [PLAN_IMPLEMENTACION_IPHONE.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_IMPLEMENTACION_IPHONE.md) para el pipeline de iOS (.ipa).
 
 ---
 
@@ -64,9 +68,9 @@ flowchart LR
 ---
 
 ### 2.2. Sistema de Actualización In-App desde GitHub Releases (OTA Updater)
-- **Repositorio Oficial del Proyecto**: [https://github.com/NetOpsSolutions/Logos_K_Logos.git](https://github.com/NetOpsSolutions/Logos_K_Logos.git)
-  - **Owner**: `NetOpsSolutions` | **Repo**: `Logos_K_Logos`
-  - **API Endpoint de Releases**: `https://api.github.com/repos/NetOpsSolutions/Logos_K_Logos/releases/latest`
+- **Repositorio Oficial del Proyecto**: [https://github.com/NetOpsSolutions/Berea_Interlineal.git](https://github.com/NetOpsSolutions/Berea_Interlineal.git)
+  - **Owner**: `NetOpsSolutions` | **Repo**: `Berea_Interlineal`
+  - **API Endpoint de Releases**: `https://api.github.com/repos/NetOpsSolutions/Berea_Interlineal/releases/latest`
 - **Flujo de Funcionamiento**:
   1. **Comprobación de Versión**: Consulta el endpoint de GitHub y compara semánticamente la versión instalada contra el último tag publicado, filtrando automáticamente el `.apk` compatible con el procesador del dispositivo (`arm64-v8a`, `armeabi-v7a`, `x86_64` o `universal`).
   2. **Notificación en el Centro de Notificaciones de Android** *(Nuevo en v1.3.2)*: Cuando existe una nueva actualización disponible, Android muestra una notificación expandible (`BigTextStyle`) en la bandeja del sistema con el número de versión y avance de novedades.
@@ -221,7 +225,7 @@ flowchart TD
   - Configurar un workflow automatizado en el repositorio (`.github/workflows/build_releases.yml`) ejecutándose en runners de Apple (`macos-latest`).
   - Al crear una nueva versión (tag) en GitHub, el runner compila automáticamente:
     1. El instalador para Android (`app-release.apk`).
-    2. El paquete para iOS (`Logos_K_Logos.ipa` / archivo Xcode Archive).
+    2. El paquete para iOS (`Berea_Interlineal.ipa` / archivo Xcode Archive).
   - Ambos archivos se adjuntan automáticamente a la misma **GitHub Release**, quedando listos para descarga.
 - **Mecanismos de Distribución para iPhone**:
   - **Distribución Externa / Sideloading (Sin App Store / Costo $0)**:
