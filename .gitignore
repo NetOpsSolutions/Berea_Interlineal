@@ -79,3 +79,11 @@ app.*.map.json
 # Release output directory
 /release_builds/
 
+# Keystore and signing credentials
+android/key.properties
+android/*.jks
+android/*.keystore
+*.jks
+*.keystore
+key.properties
+
