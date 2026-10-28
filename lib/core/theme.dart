@@ -214,11 +214,11 @@ class AppSnackBar {
 
     switch (tone) {
       case AppSnackBarTone.update:
-        bgColor = isDark ? const Color(0xFF172554) : const Color(0xFF1E3A8A);
+        bgColor = const Color(0xFF1E293B);
         fgColor = Colors.white;
         iconColor = const Color(0xFFFCD34D);
         actionColor = const Color(0xFFFDE047);
-        borderColor = const Color(0xFF3B82F6);
+        borderColor = isDark ? const Color(0xFF3B82F6) : const Color(0xFF334155);
         break;
       case AppSnackBarTone.success:
         bgColor = isDark ? const Color(0xFF064E3B) : const Color(0xFF065F46);
@@ -328,7 +328,7 @@ ThemeData buildTheme(Brightness brightness) {
       indicatorColor: scheme.primaryContainer,
     ),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: isDark ? const Color(0xFF1E293B) : const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFF1E293B),
       contentTextStyle: const TextStyle(
         color: Colors.white,
         fontSize: 13.5,

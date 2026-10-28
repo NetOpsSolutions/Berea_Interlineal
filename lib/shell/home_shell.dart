@@ -135,7 +135,7 @@ class HomeShellState extends State<HomeShell> {
           context,
           icon: Icons.system_update_rounded,
           tone: AppSnackBarTone.update,
-          message: 'Nueva versión ${release.tagName} disponible (${release.apkAbi})',
+          message: 'Nueva versión ${release.tagName} disponible',
           actionLabel: 'VER NOVEDADES',
           duration: const Duration(seconds: 10),
           onAction: () {
