@@ -232,7 +232,7 @@ Acceso directo al portal oficial de Google:
 | **Email address \*** | `cirojrRcp@gmail.com` | Correo de contacto del desarrollador donde Google envía el veredicto. |
 | **Developer name** | `NetOps Solutions x Ciro Ochoa` | Nombre de la entidad desarrolladora. |
 | **Application package name \*** | `com.netopssolutions.berea_interlineal` | **CRÍTICO**: Debe ser el nuevo ID corporativo. No colocar `com.example`. |
-| **SHA256 Hash of the apk on Virus Total \*** | `3cfbfe396ab9d13282265be8f12c300923f4469f61fd0698635ede8402b1aeb4` | Cadena continua de 64 caracteres hex del archivo `berea_interlineal_1.3.2_universal.apk`. |
+| **SHA256 Hash of the apk on Virus Total \*** | `a9e30811809367f606894e9b9b5d3e90d280a2d8fa31b30e8835fadcd76af951` | Cadena continua de 64 caracteres hex del archivo `berea_interlineal_1.3.2_universal.apk`. |
 | **Additional information to support your appeal \*** | *(Ver bloque de texto abajo)* | Contiene tanto el enlace directo de descarga como la justificación legal en inglés. |
 
 ### Texto para la Casilla "Additional information to support your appeal":
@@ -258,6 +258,13 @@ We kindly request Google Play Protect to whitelist our application certificate (
 * [x] Configurar `key.properties` y `build.gradle.kts` con protección en `.gitignore`.
 * [x] Unificar globalmente el Application ID a `com.netopssolutions.berea_interlineal`.
 * [x] Aplicar Rebranding completo con logo oficial y nombre a las versiones **1.3.0**, **1.3.1** y **1.3.2**.
+* [x] Retirar permanentemente el simulador de diseño / demo offline de Ajustes en todas las versiones.
+* [x] Sanitizar el diálogo de actualización OTA (sin volcados técnicos de arquitectura ni bloques de checksums).
+* [x] Estandarizar botón de acción estrictamente como «Actualizar» (sin sufijo de CPU) en todas las versiones.
+* [x] Dotar de permisos de notificación (`POST_NOTIFICATIONS`) y banner oscuro de alto contraste (`#1E293B`).
+* [x] Recompilar, alinear con `zipalign` y refirmar con `apksigner` todos los APKs (15 binarios).
+* [x] Sustituir y publicar APKs refirmados en GitHub Releases (tags `1.3.0`, `1.3.1`, `v1.3.2`).
+* [x] Verificar instalación limpia y ciclo completo OTA en emulador Android (`emulator-5554`).
 * [x] Compilar limpiamente desde el código fuente las 3 versiones en split y universal.
 * [x] Optimizar con `zipalign` y refirmar con `apksigner` (v1, v2 y v3).
 * [x] Sustituir automáticamente los binarios en los Releases de GitHub preservando paquetes de iOS.
