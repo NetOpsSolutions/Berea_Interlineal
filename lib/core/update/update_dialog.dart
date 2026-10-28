@@ -470,7 +470,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Descargando ${widget.release.apkAbi}...',
+                  'Descargando actualización...',
                   style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
