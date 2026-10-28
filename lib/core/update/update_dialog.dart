@@ -694,7 +694,7 @@ class _UpdateModalSheetState extends State<UpdateModalSheet> {
                   child: FilledButton.icon(
                     onPressed: _startDownload,
                     icon: const Icon(Icons.download_rounded),
-                    label: Text('Sí, descargar (${widget.release.apkAbi})'),
+                    label: const Text('Actualizar'),
                   ),
                 ),
               ],
@@ -798,6 +798,18 @@ class _ReleaseNotesFormattedView extends StatelessWidget {
 
     for (final rawLine in lines) {
       final line = rawLine.trimRight();
+      final trimmed = line.trim();
+
+      // Omitir tablas tecnicas de distribucion y bloques de checksums para el usuario
+      if (trimmed.contains('¿Qué paquete descargar?') ||
+          trimmed.contains('Verificación de Integridad') ||
+          trimmed.contains('SHA-256 Checksums') ||
+          trimmed.startsWith('| Archivo') ||
+          trimmed.startsWith('|---|') ||
+          trimmed.startsWith('| `')) {
+        break;
+      }
+
       if (line.isEmpty) {
         widgets.add(const SizedBox(height: 6));
         continue;
