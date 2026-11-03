@@ -129,72 +129,18 @@ foreach ($File in $LocalFiles) {
     Write-Host "    [OK] Asset ID: $($Uploaded.id)" -ForegroundColor DarkGreen
 }
 
-# 3. Actualizar tabla de paquetes y bloque SHA-256 en el cuerpo Markdown del Release
+# 3. Actualizar tabla de paquetes y bloque SHA-256 en el cuerpo Markdown del Release (UTF-8 puro via Python)
 Write-Host "`n3. Sincronizando tabla de descargas y hashes SHA-256 en notas del Release..." -ForegroundColor Cyan
-$ChecksumLines = Get-Content -Path (Join-Path $LocalFolder "checksums.txt") -Encoding UTF8 | Where-Object { $_.Trim() -ne "" }
-
-$PhoneIcon = [char]::ConvertFromUtf32(0x1F4F1)
-$LockIcon  = [char]::ConvertFromUtf32(0x1F512)
-$RocketIcon = [char]::ConvertFromUtf32(0x1F680)
-$QueWord   = "$([char]0x00BF)Qu$([char]0x00E9)"
-$MasWord   = "Mayor$([char]0x00ED)a"
-$TelWord   = "tel$([char]0x00E9)fonos"
-$InstalacionWord = "Instalaci$([char]0x00F3)n"
-$ViaWord   = "v$([char]0x00ED)a"
-$VerifWord = "Verificaci$([char]0x00F3)n"
-$VersionWord = "Versi$([char]0x00F3)n"
-
-$IpaRow = ""
-if (-not [string]::IsNullOrWhiteSpace($PreservedIpaName)) {
-    $IpaRow = "`n| ``$PreservedIpaName`` | iOS 15.0+ (iPhone / iPad) | $InstalacionWord en iPhone $ViaWord AltStore, Sideloadly o TrollStore |"
-}
-
-$StandardDownloadSection = @"
-## $PhoneIcon $QueWord paquete descargar?
-| Archivo | Plataforma / Arquitectura | Dispositivos recomendados |
-|---|---|---|
-| ``berea_interlineal_${CleanVer}_arm64-v8a.apk`` | Android ARM 64-bit | $MasWord de $TelWord y tablets Android modernos (2017+) |
-| ``berea_interlineal_${CleanVer}_armeabi-v7a.apk`` | Android ARM 32-bit | Dispositivos Android anteriores o de 32 bits |
-| ``berea_interlineal_${CleanVer}_x86_64.apk`` | Android Intel / AMD 64-bit | Emuladores Android en PC y ChromeOS |
-| ``berea_interlineal_${CleanVer}_universal.apk`` | Android Universal (Multi-ABI) | Compatible con cualquier dispositivo Android |$IpaRow
-
----
-
-## $LockIcon $VerifWord de Integridad (SHA-256)
-``````text
-$($ChecksumLines -join "`n")
-``````
-"@
-
-$OriginalBody = [string]$Release.body
-$SplitMarker = "## $PhoneIcon"
-$SplitIdx = $OriginalBody.IndexOf($SplitMarker)
-if ($SplitIdx -gt 0) {
-    $PrefixBody = $OriginalBody.Substring(0, $SplitIdx).TrimEnd()
-    if (-not $PrefixBody.EndsWith("---")) {
-        $PrefixBody = "$PrefixBody`n`n---"
+if (Test-Path "tools/sync_release_notes_utf8.py") {
+    $env:PYTHONIOENCODING = "utf-8"
+    $env:GITHUB_TOKEN = $GitHubToken
+    python "tools/sync_release_notes_utf8.py"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Fallo la sincronizacion UTF-8 de notas del Release."
+        exit 1
     }
-    $UpdatedBody = "$PrefixBody`n`n$StandardDownloadSection"
-} else {
-    $UpdatedBody = "$($OriginalBody.TrimEnd())`n`n---`n`n$StandardDownloadSection"
 }
-
-if ($CleanVer -eq "1.3.0") {
-    $UpdatedBody = $UpdatedBody -replace "Novedades en la $VersionWord 1\.3\.0 \(Build \d+\)", "Novedades en Berea Interlineal v1.3.0 (Build 4)"
-}
-
-$PatchPayload = @{
-    body = $UpdatedBody
-} | ConvertTo-Json -Depth 5
-
-$PatchBytes = [System.Text.Encoding]::UTF8.GetBytes($PatchPayload)
-Invoke-RestMethod -Uri "https://api.github.com/repos/$Owner/$Repo/releases/$ReleaseId" -Headers @{
-    "Authorization" = "Bearer $GitHubToken"
-    "Accept"        = "application/vnd.github+json"
-    "Content-Type"  = "application/json; charset=utf-8"
-    "User-Agent"    = "Berea-Release-Deployer"
-} -Method Patch -Body $PatchBytes | Out-Null
-Write-Host "  [OK] Notas del Release sincronizadas con nombres y SHA-256 oficiales." -ForegroundColor Green
+Write-Host "  [OK] Notas del Release sincronizadas en UTF-8 puro sin mojibake." -ForegroundColor Green
 
 # 4. Verificacion HTTP 200 de la Release y de cada Asset publicado
 Write-Host "`n4. Verificando disponibilidad HTTP 200 de todos los assets publicados..." -ForegroundColor Cyan
