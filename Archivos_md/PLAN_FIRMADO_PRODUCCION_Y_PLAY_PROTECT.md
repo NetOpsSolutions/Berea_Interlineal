@@ -163,26 +163,26 @@ Posteriormente, mediante `tools/resign_all_release_builds.ps1`:
 #### 📁 `release_builds/v1.3.0/`
 | Archivo | Tamaño | SHA-256 Checksum |
 | :--- | :--- | :--- |
-| `app-arm64-v8a-release.apk` | 39.0 MB | `8680d9ad25316498c36fe9fce8f01b33346d0a7a372e12814b7e3fef9ee75746` |
-| `app-armeabi-v7a-release.apk` | 36.6 MB | `132bbf2d70e4e5ba8ae5d8527a20c35467efc50be451eb8d799984950b71f9cf` |
-| `app-x86_64-release.apk` | 40.5 MB | `c123ea27e2689ef23793755452fcf32aa31953ae2980cff3f81e779a5ca85d03` |
-| `app-universal-release.apk` / `app-release.apk` | 72.6 MB | `80629ec2e9ca852b75a1372cf02525164f06871131a9aa68bb63fb5587747e4d` |
+| `berea_interlineal_1.3.0_arm64-v8a.apk` | 40.0 MB | `a5f9e7f29c08488f3e932c2d9331b342fb90ef679b29b73ecd025605d1279685` |
+| `berea_interlineal_1.3.0_armeabi-v7a.apk` | 37.6 MB | `e3ef07c41c52c9aa7b114803f96f7389f030baf68a7dd342201412e482267e98` |
+| `berea_interlineal_1.3.0_x86_64.apk` | 41.5 MB | `08165d9366174765d3d1492e5af0b02b6bfb0f06a95cf7cb78ea4db1b52c8f1d` |
+| `berea_interlineal_1.3.0_universal.apk` | 74.0 MB | `a63ef0d4b9a278632e77f0fabc4ce236fb07ea717c576b8972c4ec89724baf9e` |
 
 #### 📁 `release_builds/v1.3.1/`
 | Archivo | Tamaño | SHA-256 Checksum |
 | :--- | :--- | :--- |
-| `logos_k_logos_1.3.1_arm64-v8a.apk` | 39.4 MB | `2d4db1c98124b17bf49581907cb3cb9671d49f69fc03f90b9b3e0cbddda3ec1d` |
-| `logos_k_logos_1.3.1_armeabi-v7a.apk` | 36.9 MB | `5d28b180d5d54fa572183b38466b0a884fe08169e0e37bc60a7e6274070a31aa` |
-| `logos_k_logos_1.3.1_x86_64.apk` | 40.8 MB | `606775791ae9c30f878f56ef982c78f149b56f8bf9087541e21b1b9cb8b9c62d` |
-| `logos_k_logos_1.3.1_universal.apk` | 73.0 MB | `c5db08404283c8cc761bc9ba840507cf2769c071d7cf9d1a3e6f6631e679ee32` |
+| `berea_interlineal_1.3.1_arm64-v8a.apk` | 40.1 MB | `22185427349ce74073833febd73d29ec667dfc84326a2b10e15006105bf160b4` |
+| `berea_interlineal_1.3.1_armeabi-v7a.apk` | 37.7 MB | `c11da8d321a1ecf2e07abf35aff56abf218d628ba9c7538334425faa70b22977` |
+| `berea_interlineal_1.3.1_x86_64.apk` | 41.5 MB | `3e53cab8cf60f7243856fbdb8d866a19da96739c3b2cd5cdb1e8fad042236d7c` |
+| `berea_interlineal_1.3.1_universal.apk` | 74.1 MB | `9aae9ab7deacaedc7811e1c55c1c814a93ff48870d52195946dd0a16a8930d45` |
 
 #### 📁 `release_builds/v1.3.2/`
 | Archivo | Tamaño | SHA-256 Checksum |
 | :--- | :--- | :--- |
-| `berea_interlineal_1.3.2_arm64-v8a.apk` | 41.6 MB | `e63b9079603666d34f9c6638dc1fee2205b1e3cab8c766a46653e95619b5b175` |
-| `berea_interlineal_1.3.2_armeabi-v7a.apk` | 39.1 MB | `9ed8985865c20b0290513b559ea7fa20a3ba73fd63cc5b552e42a638c89402da` |
-| `berea_interlineal_1.3.2_x86_64.apk` | 43.0 MB | `264b859f59d07ff8835be486e8036d8ac1b282f2ac818f86db5b3ed6834ba808` |
-| `berea_interlineal_1.3.2_universal.apk` | 75.8 MB | `3cfbfe396ab9d13282265be8f12c300923f4469f61fd0698635ede8402b1aeb4` |
+| `berea_interlineal_1.3.2_arm64-v8a.apk` | 41.6 MB | `bfbdf86ab8e38251aee5c70bae99c7335937b8871ede1c1992751ee0777446a2` |
+| `berea_interlineal_1.3.2_armeabi-v7a.apk` | 39.1 MB | `af6c7b090046511bb3bdc9a6aa94d12194d2efe75e1a69b8625f2b7cc49a05bf` |
+| `berea_interlineal_1.3.2_x86_64.apk` | 43.0 MB | `d6e320f19cf0940952607f83b10aacc57a77481ef6a618d9491ff807d5e94638` |
+| `berea_interlineal_1.3.2_universal.apk` | 75.8 MB | `ef198a3f9053b833f46118981712632c138b13cc61a323376b4d3b02ddf940fc` |
 
 ---
 
@@ -232,7 +232,7 @@ Acceso directo al portal oficial de Google:
 | **Email address \*** | `cirojrRcp@gmail.com` | Correo de contacto del desarrollador donde Google envía el veredicto. |
 | **Developer name** | `NetOps Solutions x Ciro Ochoa` | Nombre de la entidad desarrolladora. |
 | **Application package name \*** | `com.netopssolutions.berea_interlineal` | **CRÍTICO**: Debe ser el nuevo ID corporativo. No colocar `com.example`. |
-| **SHA256 Hash of the apk on Virus Total \*** | `a9e30811809367f606894e9b9b5d3e90d280a2d8fa31b30e8835fadcd76af951` | Cadena continua de 64 caracteres hex del archivo `berea_interlineal_1.3.2_universal.apk`. |
+| **SHA256 Hash of the apk on Virus Total \*** | `ef198a3f9053b833f46118981712632c138b13cc61a323376b4d3b02ddf940fc` | Cadena continua de 64 caracteres hex del archivo `berea_interlineal_1.3.2_universal.apk`. |
 | **Additional information to support your appeal \*** | *(Ver bloque de texto abajo)* | Contiene tanto el enlace directo de descarga como la justificación legal en inglés. |
 
 ### Texto para la Casilla "Additional information to support your appeal":

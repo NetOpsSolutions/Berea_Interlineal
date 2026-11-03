@@ -6,6 +6,21 @@ import 'package:flutter/services.dart';
 
 /// Tipo de micro-animación demostrativa incluida dentro de la tarjeta guía
 enum TourDemoKind {
+  // v1.3.0
+  splashWelcome,
+  interlinearWords,
+  studyBasic,
+  darkModeComfort,
+
+  // v1.3.1
+  sqlitePersistence,
+  autoMigration,
+  strongHyperlinks,
+  concordanceAccordion,
+  otaMultiArch,
+
+  // v1.3.2 y compartidos
+  bereaIdentity,
   chapterUnfold,
   topBarControls,
   typewriterSearch,
@@ -14,6 +29,9 @@ enum TourDemoKind {
   readingPreferences,
   otaNotification,
   replayGuide,
+
+  // v1.4.0+ (referencia futura)
+  futureModule,
 }
 
 /// Definición de cada paso del recorrido interactivo guiado
@@ -225,7 +243,7 @@ class _InteractiveTourOverlayState extends State<InteractiveTourOverlay>
                 ),
               ),
 
-              // 2. Indicador flotante animado ("Pulsa aquí") apuntando al elemento real
+              // 2. Indicador flotante animado apuntando al elemento real
               if (_targetRect != null && !_preparing)
                 _buildAnimatedPointerPill(size, safeTop, safeBottom, rect, placeCardBelow),
 
@@ -380,9 +398,7 @@ class _InteractiveTourOverlayState extends State<InteractiveTourOverlay>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            _step.isNewFeature
-                                ? Icons.auto_awesome_rounded
-                                : _step.icon,
+                            _step.icon,
                             size: 13,
                             color: _step.isNewFeature
                                 ? const Color(0xFFFDE047)
@@ -472,7 +488,6 @@ class _InteractiveTourOverlayState extends State<InteractiveTourOverlay>
                 // Barra inferior: Puntos de progreso + Anterior / Siguiente
                 Row(
                   children: [
-                    // Indicadores de paso
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(widget.steps.length, (i) {
@@ -619,10 +634,10 @@ class _TourAnimatedMicroDemoState extends State<_TourAnimatedMicroDemo> {
   int _tick = 0;
 
   static const List<String> _searchSamples = [
+    'Juan 3:16',
     'En el principio',
     'G3056',
     'H430',
-    'Jn 1:1',
   ];
 
   static const List<String> _dictSamples = [
@@ -677,6 +692,127 @@ class _TourAnimatedMicroDemoState extends State<_TourAnimatedMicroDemo> {
 
   Widget _buildContent() {
     switch (widget.kind) {
+      case TourDemoKind.splashWelcome:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.auto_stories_rounded, 'Manuscritos', step == 0),
+            _miniChip(Icons.translate_rounded, 'Griego & Hebreo', step == 1),
+            _miniChip(Icons.bolt_rounded, 'Carga Ágil Offline', step == 2),
+          ],
+        );
+
+      case TourDemoKind.interlinearWords:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.language_rounded, 'בְּרֵאשִׁית / λόγος', step == 0),
+            _miniChip(Icons.record_voice_over_rounded, 'Fonética + Español', step == 1),
+            _miniChip(Icons.tag_rounded, 'Código Strong', step == 2),
+          ],
+        );
+
+      case TourDemoKind.studyBasic:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.bookmark_rounded, 'Marcadores', step == 0),
+            _miniChip(Icons.edit_note_rounded, 'Notas Personales', step == 1),
+            _miniChip(Icons.history_rounded, 'Historial Reciente', step == 2),
+          ],
+        );
+
+      case TourDemoKind.darkModeComfort:
+        final step = _tick % 2;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.dark_mode_rounded, 'Modo Oscuro Cómodo', step == 0),
+            _miniChip(Icons.visibility_rounded, 'Cero Fatiga Visual', step == 1),
+          ],
+        );
+
+      case TourDemoKind.sqlitePersistence:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.storage_rounded, 'logos_user_data.db', step == 0),
+            _miniChip(Icons.verified_user_rounded, 'Transacciones ACID', step == 1),
+            _miniChip(Icons.lock_clock_rounded, '100% Permanente', step == 2),
+          ],
+        );
+
+      case TourDemoKind.autoMigration:
+        final step = _tick % 2;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            _miniChip(Icons.folder_copy_rounded, 'Favoritos Previos', step == 0),
+            const Icon(Icons.arrow_forward_rounded, size: 13, color: Color(0xFF94A3B8)),
+            _miniChip(Icons.check_circle_rounded, 'SQLite al Instante', step == 1),
+          ],
+        );
+
+      case TourDemoKind.strongHyperlinks:
+        final step = _tick % 2;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            _miniChip(Icons.touch_app_rounded, 'Pulsa (G3004 / H430)', step == 0),
+            const Icon(Icons.arrow_forward_rounded, size: 13, color: Color(0xFF94A3B8)),
+            _miniChip(Icons.link_rounded, 'Salto a Raíz Léxica', step == 1),
+          ],
+        );
+
+      case TourDemoKind.concordanceAccordion:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.format_list_bulleted_rounded, 'Acordeón por Libro', step == 0),
+            _miniChip(Icons.flash_on_rounded, 'Carga Perezosa', step == 1),
+            _miniChip(Icons.highlight_rounded, 'Resaltado Nítido', step == 2),
+          ],
+        );
+
+      case TourDemoKind.otaMultiArch:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.memory_rounded, 'arm64-v8a / v7a', step == 0),
+            _miniChip(Icons.computer_rounded, 'x86_64 Emulador', step == 1),
+            _miniChip(Icons.download_done_rounded, 'Instalación Directa', step == 2),
+          ],
+        );
+
+      case TourDemoKind.bereaIdentity:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.verified_rounded, 'Berea Interlineal', step == 0),
+            _miniChip(Icons.search_rounded, 'Lupa Exegética', step == 1),
+            _miniChip(Icons.menu_book_rounded, 'Hechos 17:11', step == 2),
+          ],
+        );
+
       case TourDemoKind.chapterUnfold:
         final highlightIdx = _tick % 3;
         return Wrap(
@@ -697,9 +833,9 @@ class _TourAnimatedMicroDemoState extends State<_TourAnimatedMicroDemo> {
           spacing: 6,
           runSpacing: 6,
           children: [
-            _miniChip(Icons.menu_book_rounded, 'Cap. / Versículo', active == 0),
-            _miniChip(Icons.auto_stories_rounded, 'Lectura Fluida', active == 1),
-            _miniChip(Icons.text_fields_rounded, 'Fuentes Ezra / Cardo', active == 2),
+            _miniChip(Icons.text_fields_rounded, 'Ezra SIL', active == 0),
+            _miniChip(Icons.font_download_rounded, 'Cardo & Gentium', active == 1),
+            _miniChip(Icons.format_size_rounded, 'Selector «TT»', active == 2),
           ],
         );
 
@@ -751,9 +887,9 @@ class _TourAnimatedMicroDemoState extends State<_TourAnimatedMicroDemo> {
           runSpacing: 6,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            _miniChip(Icons.bookmark_added_rounded, 'Marcadores', step == 0),
-            _miniChip(Icons.palette_rounded, '5 Colores Teológicos', step == 1),
-            _miniChip(Icons.edit_note_rounded, 'Notas en SQLite', step == 2),
+            _miniChip(Icons.palette_rounded, '🟡 Promesas • 🟢 Mandamientos', step == 0),
+            _miniChip(Icons.auto_awesome_rounded, '🔵 Atributos • 🌸 Advertencias', step == 1),
+            _miniChip(Icons.menu_book_rounded, '🟣 Profecía en SQLite', step == 2),
           ],
         );
 
@@ -763,8 +899,8 @@ class _TourAnimatedMicroDemoState extends State<_TourAnimatedMicroDemo> {
           spacing: 6,
           runSpacing: 6,
           children: [
-            _miniChip(Icons.brightness_6_rounded, 'Claro / Oscuro', step == 0),
-            _miniChip(Icons.chrome_reader_mode_rounded, 'Cap. Completo / Fluida', step == 1),
+            _miniChip(Icons.contrast_rounded, 'Contraste WCAG AAA', step == 0),
+            _miniChip(Icons.brightness_6_rounded, 'Claro / Oscuro', step == 1),
             _miniChip(Icons.format_size_rounded, 'Letra 85% – 145%', step == 2),
           ],
         );
@@ -806,6 +942,18 @@ class _TourAnimatedMicroDemoState extends State<_TourAnimatedMicroDemo> {
                 ),
               ),
             ),
+          ],
+        );
+
+      case TourDemoKind.futureModule:
+        final step = _tick % 3;
+        return Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _miniChip(Icons.auto_stories_rounded, '66 Libros', step == 0),
+            _miniChip(Icons.person_search_rounded, 'Biografías', step == 1),
+            _miniChip(Icons.share_rounded, 'Tarjetas Devocionales', step == 2),
           ],
         );
     }

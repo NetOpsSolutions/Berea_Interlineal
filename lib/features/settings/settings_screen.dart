@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
+import '../../core/tour/tour_steps_factory.dart';
 import '../../core/update/update_dialog.dart';
 import '../../core/update/update_model.dart';
 import '../../core/update/update_service.dart';
@@ -70,6 +71,19 @@ class SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Text(
+        title,
+        style: theme.textTheme.titleSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.primary,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -87,6 +101,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         final isChapterMode = study.chapterReadingMode;
         final scale = study.readingFontScale;
         final scalePercent = (scale * 100).round();
+        final currentVersion = UpdateService.instance.currentVersion;
 
         return Scaffold(
           appBar: AppBar(title: const Text('Ajustes')),
@@ -96,21 +111,12 @@ class SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ── Apariencia, Lectura y Tipografías Académicas (Fase 3) ──────
+                // ── 1. Bloque: Lectura y Visualización ──────────────────────────
                 Column(
                   key: tourReadingSectionKey,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                      child: Text(
-                        'Lectura y Visualización',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
+                    _buildSectionHeader(theme, 'Lectura y Visualización'),
                     SwitchListTile(
                       title: const Text('Modo oscuro'),
                       subtitle: const Text('Alterna entre tema claro y tema oscuro'),
@@ -269,17 +275,8 @@ class SettingsScreenState extends State<SettingsScreen> {
 
                 const Divider(),
 
-                // ── Estadísticas de datos personales ────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Text(
-                    'Mi Estudio Personal',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
+                // ── 2. Bloque: Mi Estudio Personal ──────────────────────────────
+                _buildSectionHeader(theme, 'Mi Estudio Personal'),
                 _buildStudyCounterTile(
                   theme: theme,
                   icon: Icons.bookmark_outline,
@@ -326,42 +323,12 @@ class SettingsScreenState extends State<SettingsScreen> {
 
                 const Divider(),
 
-                // ── Actualizaciones OTA GitHub ──────────────────────────────────
-                Column(
-                  key: tourUpdaterKey,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                      child: Text(
-                        'Actualizaciones del Sistema (OTA)',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                    const _UpdaterCard(),
-                  ],
-                ),
-
-                const Divider(),
-
-                // ── Información y novedades v1.3.2 ──────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: Text(
-                    'Acerca de la Aplicación',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
+                // ── 3. Bloque: Acerca de la Aplicación ──────────────────────────
+                _buildSectionHeader(theme, 'Acerca de la Aplicación'),
                 ListTile(
-                  title: const Text('Versión instalada'),
-                  subtitle: Text('Berea Interlineal v${UpdateService.instance.currentVersion} • Edición Oficial'),
                   leading: const Icon(Icons.info_outline),
+                  title: const Text('Versión instalada'),
+                  subtitle: Text('Berea Interlineal v$currentVersion • Edición Oficial'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.play_circle_outline),
@@ -384,96 +351,56 @@ class SettingsScreenState extends State<SettingsScreen> {
                   leading: const Icon(Icons.explore_outlined),
                   title: const Text('Ver guía de uso'),
                   subtitle: const Text(
-                    'Iniciar recorrido interactivo animado y novedades de la versión',
+                    'Iniciar recorrido interactivo animado de la versión',
                   ),
                   onTap: widget.onStartInteractiveGuide,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Novedades en Versión 1.3.2:',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          _featureRow(
-                            icon: Icons.verified_rounded,
-                            title: 'Identidad Oficial Berea Interlineal',
-                            desc: 'Nueva identidad visual inspirada en Hechos 17:11 con logotipo renovado, icono adaptativo y transición fluida.',
-                            theme: theme,
-                          ),
-                          _featureRow(
-                            icon: Icons.explore_rounded,
-                            title: 'Guía visual interactiva post-actualización',
-                            desc: 'Recorrido guiado paso a paso que aparece automáticamente una sola vez tras actualizar y puede repetirse desde «Ver guía de uso».',
-                            theme: theme,
-                          ),
-                          _featureRow(
-                            icon: Icons.menu_book_rounded,
-                            title: 'Lectura por capítulo completo',
-                            desc: 'Scroll continuo del capítulo entero, expansión interlineal al instante sobre cualquier versículo y gestos swipe laterales para cambiar de capítulo.',
-                            theme: theme,
-                          ),
-                          _featureRow(
-                            icon: Icons.font_download_outlined,
-                            title: 'Tipografías académicas SIL OFL',
-                            desc: 'Fuentes especializadas Ezra SIL y Frank Ruhl Libre para Hebreo BHS (nikud y cantilaciones) y Cardo / Gentium Plus para Griego Koiné.',
-                            theme: theme,
-                          ),
-                          _featureRow(
-                            icon: Icons.palette_rounded,
-                            title: 'Resaltadores teológicos',
-                            desc: 'Selecciona palabras o versículos y aplica marcado en 5 categorías teológicas (Promesas, Mandamientos, Atributos de Dios, Advertencias y Profecía) guardadas en SQLite.',
-                            theme: theme,
-                          ),
-                          _featureRow(
-                            icon: Icons.notifications_active_outlined,
-                            title: 'Notificaciones nativas de actualización',
-                            desc: 'Aviso directo en el Centro de Notificaciones de Android cuando hay nueva versión disponible, mostrando notas de versión y consulta de confirmación de descarga.',
-                            theme: theme,
-                          ),
-                          _featureRow(
-                            icon: Icons.contrast_rounded,
-                            title: 'Contraste visual optimizado',
-                            desc: 'Corrección integral de colores en avisos emergentes para máxima legibilidad en temas claro y oscuro.',
-                            theme: theme,
-                          ),
-                          _featureRow(
-                            icon: Icons.storage_rounded,
-                            title: 'Persistencia permanente SQLite',
-                            desc: 'Marcadores, resaltados, notas e historial respaldados de forma atómica en logos_user_data.db.',
-                            theme: theme,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+
+                // ── 4. Tarjeta de Novedades Limpia (Específica de la versión) ───
+                _buildCleanVersionFeaturesCard(theme, currentVersion),
+
+                const Divider(),
+
+                // ── 5. Bloque: Centro de Actualizaciones Oficial ────────────────
+                Column(
+                  key: tourUpdaterKey,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildSectionHeader(theme, 'Actualizaciones del Sistema'),
+                    const _UpdaterCard(),
+                  ],
                 ),
 
-                const ListTile(
-                  title: Text('Repositorio Oficial'),
-                  subtitle: Text('https://github.com/NetOpsSolutions/Berea_Interlineal'),
-                  leading: Icon(Icons.code_rounded),
+                const Divider(),
+
+                // ── 6. Bloque: Recursos y Licencias ─────────────────────────────
+                _buildSectionHeader(theme, 'Recursos y Licencias'),
+                ListTile(
+                  leading: const Icon(Icons.code_rounded),
+                  title: const Text('Repositorio Oficial'),
+                  subtitle: const Text('https://github.com/NetOpsSolutions/Berea_Interlineal'),
+                  trailing: Icon(
+                    Icons.open_in_new_rounded,
+                    size: 18,
+                    color: theme.colorScheme.outline,
+                  ),
+                  onTap: () {
+                    UpdateService.instance.openUrl(
+                      'https://github.com/NetOpsSolutions/Berea_Interlineal',
+                    );
+                  },
                 ),
                 const ListTile(
+                  leading: Icon(Icons.source_outlined),
                   title: Text('Fuentes textuales y tipográficas'),
                   subtitle: Text(
                     'BHS (Hebreo), Tischendorf (Griego), Strong, STEPBible • Tipografías Ezra SIL, Gentium Plus, Cardo y Frank Ruhl Libre (SIL OFL)',
                   ),
-                  leading: Icon(Icons.source_outlined),
                 ),
                 const ListTile(
+                  leading: Icon(Icons.gavel_outlined),
                   title: Text('Licencias y créditos'),
                   subtitle: Text('Recursos de dominio público y licencias académicas abiertas'),
-                  leading: Icon(Icons.gavel_outlined),
                 ),
               ],
             ),
@@ -481,6 +408,150 @@ class SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
+  }
+
+  /// Construye la tarjeta concisa de hitos propios de [rawVersion] (sin listas acumuladas).
+  Widget _buildCleanVersionFeaturesCard(ThemeData theme, String rawVersion) {
+    final cleanVer = TourStepsFactory.normalizeVersion(rawVersion);
+    final items = _featuresForVersion(cleanVer);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Novedades en Versión ${cleanVer.isEmpty ? rawVersion : cleanVer}',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              for (final item in items)
+                _featureRow(
+                  icon: item.icon,
+                  title: item.title,
+                  desc: item.desc,
+                  theme: theme,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<_VersionFeatureItem> _featuresForVersion(String cleanVer) {
+    switch (cleanVer) {
+      case '1.3.0':
+        return const [
+          _VersionFeatureItem(
+            icon: Icons.play_circle_outline,
+            title: 'Presentación Oficial y Arranque Ágil',
+            desc: 'Animación solemne de bienvenida con carga rápida de manuscritos offline.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.menu_book_rounded,
+            title: 'Lectura Bíblica Interlineal',
+            desc: 'Texto en Hebreo, Griego y Español palabra por palabra con fonética y morfología.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.search_rounded,
+            title: 'Búsqueda Global y Léxicos Strong',
+            desc: 'Consulta instantánea de citas bíblicas, palabras clave y raíces del AT y NT.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.bookmarks_rounded,
+            title: 'Mi Estudio y Modo Oscuro',
+            desc: 'Marcadores, notas personales e historial con tema oscuro cómodo por defecto.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.explore_rounded,
+            title: 'Guía Interactiva de Uso',
+            desc: 'Recorrido animado en el primer inicio y disponible bajo demanda en Ajustes.',
+          ),
+        ];
+
+      case '1.3.1':
+        return const [
+          _VersionFeatureItem(
+            icon: Icons.storage_rounded,
+            title: 'Persistencia Permanente SQLite ACID',
+            desc: 'Base dedicada logos_user_data.db que conserva notas y marcadores ante reinicios.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.sync_rounded,
+            title: 'Migrador Automático sin Pérdida',
+            desc: 'Importación transparente al instante de tus favoritos previos hacia SQLite.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.link_rounded,
+            title: 'Hipervínculos entre Códigos Strong',
+            desc: 'Enlaces táctiles en palabras derivadas para saltar directo a su raíz léxica.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.format_list_bulleted_rounded,
+            title: 'Concordancia «Dónde Aparece»',
+            desc: 'Ocurrencias agrupadas en acordeón por libro bíblico con resaltado nítido.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.system_update_rounded,
+            title: 'Actualizador OTA Multi-Procesador',
+            desc: 'Detección automática de CPU (arm64-v8a, armeabi-v7a, x86_64) con barra de progreso.',
+          ),
+        ];
+
+      case '1.3.2':
+      default:
+        return const [
+          _VersionFeatureItem(
+            icon: Icons.verified_rounded,
+            title: 'Identidad Oficial Berea Interlineal',
+            desc: 'Nuevo logotipo inspirado en Hechos 17:11 con Biblia iluminada y lupa exegética.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.menu_book_rounded,
+            title: 'Lectura por Capítulo Completo y Swipe',
+            desc: 'Scroll continuo con expansión interlineal al toque y gestos laterales entre capítulos.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.text_fields_rounded,
+            title: 'Tipografías Académicas SIL OFL',
+            desc: 'Fuentes Ezra SIL, Frank Ruhl Libre, Cardo y Gentium Plus con selector «TT».',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.palette_rounded,
+            title: '5 Resaltadores Teológicos',
+            desc: 'Clasifica versículos o frases en Promesas, Mandamientos, Atributos, Advertencias y Profecía.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.notifications_active_outlined,
+            title: 'Notificaciones Nativas y Contraste AAA',
+            desc: 'Avisos de actualización en la bandeja de Android con legibilidad óptima claro/oscuro.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.explore_rounded,
+            title: 'Guía de Uso Interactiva Contextual',
+            desc: 'Recorrido animado automático tras actualizar, repetible siempre en «Ver guía de uso».',
+          ),
+        ];
+    }
   }
 
   Widget _buildStudyCounterTile({
@@ -560,7 +631,19 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-/// Tarjeta limpia de producción para el sistema de actualizaciones OTA
+class _VersionFeatureItem {
+  final IconData icon;
+  final String title;
+  final String desc;
+
+  const _VersionFeatureItem({
+    required this.icon,
+    required this.title,
+    required this.desc,
+  });
+}
+
+/// Tarjeta limpia de producción para el sistema de actualizaciones OTA (sin simuladores)
 class _UpdaterCard extends StatefulWidget {
   const _UpdaterCard();
 
@@ -571,6 +654,7 @@ class _UpdaterCard extends StatefulWidget {
 class _UpdaterCardState extends State<_UpdaterCard> {
   bool _isChecking = false;
   DeviceArchitecture? _arch;
+  DateTime? _lastCheckedAt;
 
   @override
   void initState() {
@@ -578,6 +662,14 @@ class _UpdaterCardState extends State<_UpdaterCard> {
     UpdateService.instance.getDeviceArchitecture().then((arch) {
       if (mounted) setState(() => _arch = arch);
     });
+  }
+
+  String _formatCheckTime(DateTime dt) {
+    final hh = dt.hour.toString().padLeft(2, '0');
+    final mm = dt.minute.toString().padLeft(2, '0');
+    final dd = dt.day.toString().padLeft(2, '0');
+    final mo = dt.month.toString().padLeft(2, '0');
+    return '$dd/$mo/${dt.year} $hh:$mm';
   }
 
   Future<void> _checkUpdates() async {
@@ -588,6 +680,7 @@ class _UpdaterCardState extends State<_UpdaterCard> {
       final res = await UpdateService.instance.checkForUpdates(isManual: true);
 
       if (!mounted) return;
+      setState(() => _lastCheckedAt = DateTime.now());
 
       if (res.hasUpdate && res.releaseInfo != null) {
         await UpdateService.instance.showSystemUpdateNotification(
@@ -712,6 +805,16 @@ class _UpdaterCardState extends State<_UpdaterCard> {
                             ),
                           ],
                         ),
+                        if (_lastCheckedAt != null) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            'Última verificación: ${_formatCheckTime(_lastCheckedAt!)}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 11,
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

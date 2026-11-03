@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:berea_interlineal/core/theme.dart';
 import 'package:berea_interlineal/core/tour/interactive_tour_overlay.dart';
+import 'package:berea_interlineal/core/tour/tour_steps_factory.dart';
 import 'package:berea_interlineal/data/database_service.dart';
 import 'package:berea_interlineal/data/study_service.dart';
 import 'package:berea_interlineal/features/settings/settings_screen.dart';
@@ -95,6 +96,8 @@ void main() {
       scrollable: scrollable,
     );
     expect(find.text('Vista previa visual (Simulador de diseño)'), findsNothing);
+    expect(find.text('Probar diálogo de novedades (Demo OTA)'), findsNothing);
+    expect(find.text('Comprobar actualizaciones'), findsOneWidget);
 
     // Volver y pulsar en Versículos resaltados para abrir StudyScreen en la pestaña Resaltados
     await tester.scrollUntilVisible(
@@ -107,6 +110,65 @@ void main() {
 
     expect(find.byType(StudyScreen), findsOneWidget);
     expect(find.textContaining('Resaltados'), findsWidgets);
+  });
+
+  test('TourStepsFactory builds contextual steps accurately for v1.3.0, v1.3.1, v1.3.2, and v1.4.0+', () {
+    final k1 = GlobalKey();
+    final k2 = GlobalKey();
+    final k3 = GlobalKey();
+    final k4 = GlobalKey();
+    final k5 = GlobalKey();
+
+    final v130 = TourStepsFactory.getStepsForVersion(
+      version: '1.3.0+4',
+      bibleKey: k1,
+      searchBarKey: k2,
+      dictionaryControlsKey: k3,
+      studyTabsKey: k4,
+      settingsKey: k5,
+    );
+    expect(v130.length, equals(7));
+    expect(v130.first.badge, equals('INICIO OFICIAL'));
+    expect(v130[1].title, equals('Hebreo, Griego y Español en Armonía'));
+    expect(v130.last.title, equals('Vuelve a Ver esta Guía de Uso'));
+
+    final v131 = TourStepsFactory.getStepsForVersion(
+      version: 'v1.3.1',
+      bibleKey: k1,
+      searchBarKey: k2,
+      dictionaryControlsKey: k3,
+      studyTabsKey: k4,
+      settingsKey: k5,
+    );
+    expect(v131.length, equals(6));
+    expect(v131.first.badge, equals('NOVEDAD v1.3.1'));
+    expect(v131.first.title, equals('Tus Notas y Marcadores Nunca se Borran'));
+    expect(v131[4].title, equals('Descarga Automática según tu Procesador'));
+
+    final v132 = TourStepsFactory.getStepsForVersion(
+      version: '1.3.2',
+      bibleKey: k1,
+      searchBarKey: k2,
+      dictionaryControlsKey: k3,
+      studyTabsKey: k4,
+      settingsKey: k5,
+    );
+    expect(v132.length, equals(7));
+    expect(v132.first.badge, equals('NUEVA IDENTIDAD'));
+    expect(v132.first.title, equals('Inspirados en Hechos 17:11'));
+    expect(v132[1].title, equals('Lectura Continua y Expansión al Toque'));
+    expect(v132[3].title, equals('Resalta Versículos o Frases Seleccionadas'));
+
+    final v140 = TourStepsFactory.getStepsForVersion(
+      version: '1.4.0',
+      bibleKey: k1,
+      searchBarKey: k2,
+      dictionaryControlsKey: k3,
+      studyTabsKey: k4,
+      settingsKey: k5,
+    );
+    expect(v140.length, equals(5));
+    expect(v140.first.badge, equals('NUEVO MÓDULO'));
   });
 
   test('Phase 3 StudyService highlights, typography settings, and chapter verses work end-to-end', () async {
@@ -161,12 +223,18 @@ void main() {
     expect(gnChapter.first.bookId, equals('Gn'));
     expect(gnChapter.first.chapter, equals(1));
 
-    // 4. Control de aparición única de la guía interactiva post-actualización
+    // 4. Control de aparición única de la guía interactiva por versión (1.3.0 -> 1.3.1 -> 1.3.2)
+    expect(study.shouldShowVersionTour('1.3.0'), isTrue);
+    await study.markVersionTourSeen('1.3.0');
+    expect(study.shouldShowVersionTour('1.3.0'), isFalse);
+
+    expect(study.shouldShowVersionTour('1.3.1'), isTrue);
+    await study.markVersionTourSeen('1.3.1');
+    expect(study.shouldShowVersionTour('1.3.1'), isFalse);
+
     expect(study.shouldShowVersionTour('1.3.2'), isTrue);
     await study.markVersionTourSeen('1.3.2');
     expect(study.shouldShowVersionTour('1.3.2'), isFalse);
-    // Ante una futura versión (ej. 1.3.3), volverá a mostrarse una sola vez
-    expect(study.shouldShowVersionTour('1.3.3'), isTrue);
   });
 
   testWidgets('HomeShell replays InteractiveTourOverlay from Settings "Ver guía de uso"', (WidgetTester tester) async {
@@ -187,7 +255,7 @@ void main() {
     await tester.tap(find.text('Ajustes'));
     await tester.pumpAndSettle();
 
-    // Desplazar hasta la sección Información de la aplicación
+    // Desplazar hasta la sección Acerca de la Aplicación
     final settingsScrollable = find.descendant(
       of: find.byType(SettingsScreen),
       matching: find.byType(Scrollable),
@@ -204,23 +272,24 @@ void main() {
     final guidePos = tester.getCenter(find.text('Ver guía de uso'));
     expect(guidePos.dy, greaterThan(welcomePos.dy));
 
-    // Iniciar manualmente la guía visual interactiva
+    // Iniciar manualmente la guía visual interactiva v1.3.2 (7 pasos)
     await tester.tap(find.text('Ver guía de uso'));
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.byType(InteractiveTourOverlay), findsOneWidget);
-    expect(find.text('1 / 8'), findsOneWidget);
-    expect(find.text('Capítulo Completo e Interlineal al Toque'), findsOneWidget);
+    expect(find.text('1 / 7'), findsOneWidget);
+    expect(find.text('Inspirados en Hechos 17:11'), findsOneWidget);
 
-    // Avanzar al paso 2 y paso 3 (Búsqueda Global)
+    // Avanzar al paso 2 y paso 3
     await tester.tap(find.text('Siguiente'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('2 / 8'), findsOneWidget);
+    expect(find.text('2 / 7'), findsOneWidget);
+    expect(find.text('Lectura Continua y Expansión al Toque'), findsOneWidget);
 
     await tester.tap(find.text('Siguiente'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('3 / 8'), findsOneWidget);
-    expect(find.text('Busca Palabras, Citas o Códigos Strong'), findsOneWidget);
+    expect(find.text('3 / 7'), findsOneWidget);
+    expect(find.text('Fuentes Ezra SIL, Cardo y Frank Ruhl Libre'), findsOneWidget);
 
     // Cerrar guía con "Omitir" y drenar temporizadores pendientes
     await tester.tap(find.text('Omitir'));

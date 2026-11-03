@@ -802,6 +802,7 @@ class _ReleaseNotesFormattedView extends StatelessWidget {
 
       // Omitir tablas tecnicas de distribucion y bloques de checksums para el usuario
       if (trimmed.contains('¿Qué paquete descargar?') ||
+          trimmed.contains('¿Qué paquete APK descargar?') ||
           trimmed.contains('Verificación de Integridad') ||
           trimmed.contains('SHA-256 Checksums') ||
           trimmed.startsWith('| Archivo') ||

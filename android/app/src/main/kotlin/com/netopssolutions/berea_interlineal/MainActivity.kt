@@ -1,4 +1,4 @@
-﻿package com.netopssolutions.berea_interlineal
+package com.netopssolutions.berea_interlineal
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -53,7 +53,7 @@ class MainActivity : FlutterActivity() {
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "Actualizaciones de Logos K Logos",
+                "Actualizaciones de Berea Interlineal",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Notifica cuando hay nuevas versiones listas para revisar y descargar"

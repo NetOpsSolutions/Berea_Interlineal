@@ -6,6 +6,7 @@ Este plan detalla la hoja de ruta técnica y funcional para consolidar **Berea I
 > * **Despliegue v1.3.2 y Rebranding**: Consultar [PLAN_DESPLIEGUE_V1.3.2_BEREA.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_DESPLIEGUE_V1.3.2_BEREA.md) para los pasos de migración de repositorio, nuevo logo y actualización OTA.
 > * **Empaquetado y Distribución iPhone**: Consultar [PLAN_IMPLEMENTACION_IPHONE.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_IMPLEMENTACION_IPHONE.md) para el pipeline de iOS (.ipa).
 > * **Firmado Oficial y Play Protect**: Consultar [PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md) para el keystore oficial, refirmado de v1.3.0/v1.3.1/v1.3.2 y certificación contra falsos positivos en Android.
+> * **Estandarización de Guías de Uso, Limpieza de Ajustes y Releases**: Consultar [PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md) para el despliegue de guías interactivas dinámicas por versión (v1.3.0, v1.3.1, v1.3.2, v1.4.0+), purga de menús residuales en Ajustes, almacenamiento local en `release_builds/` y publicación automatizada en GitHub Releases.
 
 ---
 
@@ -139,6 +140,33 @@ flowchart TD
   6. **Ajustes de Lectura y Apariencia**: Modo Claro / Modo Oscuro, Lectura por Capítulo Completo, Modo de Lectura Fluida y control deslizante de tamaño de letra.
   7. **Actualizaciones OTA**: Comprobación de versiones y notificaciones nativas en Android.
   8. **Repetición Manual Bajo Demanda**: Opción permanente **«Ver guía de uso»** ubicada en *Ajustes → Información de la aplicación*, justo debajo de *«Ver animación de bienvenida»*, para volver a iniciar la guía animada cuando el usuario lo desee.
+
+### 5. Estandarización Universal de Guías y Depuración de Ajustes Multi-Versión
+> [!IMPORTANT]
+> **Aclaración de Alcance**: Esta tarea **no corresponde a una versión v1.4**. Se trata de actualizar y refirmar con la clave oficial permanente las **mismas 3 versiones que ya existen en el proyecto y en GitHub: v1.3.0, v1.3.1 y v1.3.2**, incorporando en cada una su guía interactiva correspondiente, la limpieza de ajustes y la sustitución de APKs en sus releases existentes.
+
+Para garantizar que estas versiones ofrezcan la misma experiencia pulida, libre de herramientas residuales de depuración y con firma oficial:
+
+* **Identidad de Marca 100% Unificada en las 3 Versiones**:
+  * **Mismo Nombre Oficial**: `Berea Interlineal` en todas las plataformas y pantallas.
+  * **Mismo Logotipo e Iconos**: El nuevo diseño oficial (Biblia abierta iluminada con la lupa sobre Hechos 17:11).
+  * **Misma Animación de Bienvenida (Splash Screen)**: Presentación elegante de entrada con barra de progreso ágil y textos solemnes.
+  * **Mismo Sistema de Notificaciones**: Soporte completo para avisos en la barra del sistema de Android.
+  * **Misma Firma Oficial Permanente**: Clave de producción `android/berea-release.jks`.
+  * **La Única Diferencia**: Las funciones de estudio e interlineal que ofrece o añade cada versión (v1.3.0 base, v1.3.1 SQLite + OTA, v1.3.2 Capítulo continuo + SIL + Resaltadores), explicadas fielmente en su propia guía interactiva.
+* **Guías Dinámicas por Versión**:
+  * Cada una de las 3 versiones incluye su recorrido interactivo adaptado fielmente a las características introducidas en esa versión específica.
+  * Al actualizar o instalar cualquiera de ellas, el sistema verifica `StudyService.shouldShowVersionTour(appVersion)` y lanza el tour correspondiente automáticamente en el primer inicio.
+  * En *Ajustes*, el botón **«Ver guía de uso»** permite reproducir el recorrido correspondiente en cualquier momento.
+* **Depuración de la Pantalla de Ajustes**:
+  * Purgar por completo herramientas de prueba o simulación (como el *"Simulador de diseño / Demo OTA"*).
+  * Sustituir las listas kilométricas acumuladas de cambios por **tarjetas limpias y concisas** que resuman únicamente los 4 a 7 hitos clave de esa versión concreta.
+  * Botón a ancho completo para *"Comprobar actualizaciones"*, eliminando cortes o desbordes de texto.
+* **Firmado Oficial de Producción y Despliegue en GitHub**:
+  * Las 3 versiones se compilan o refirman con el **Keystore Oficial** (`android/berea-release.jks`, alias `berea_key`), se alinean con `zipalign` y se validan en esquemas v1, v2 y v3 con `apksigner`.
+  * Se resguardan localmente en `release_builds/v1.3.0`, `release_builds/v1.3.1` y `release_builds/v1.3.2` con sus respectivos `checksums.txt`.
+  * El agente programador automatiza la sustitución de los binarios con firma de depuración en cada Release existente de GitHub (`1.3.0`, `1.3.1`, `1.3.2`) vía API/CLI sin requerir intervención manual en la web.
+  * *Documento completo de especificación técnica*: [PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md).
 
 ---
 
@@ -490,3 +518,4 @@ flowchart TD
 | **M8: Referencias Cruzadas & Audio** | Dataset TSK de referencias cruzadas, vista paralela y pronunciación fonética | ⭐⭐ Media |
 | **M9: Empaquetado y Pipeline iOS (iPhone)** | GitHub Actions con runner macOS para compilar y adjuntar `.ipa` en cada Release | ⭐⭐ Media |
 | **M10: Resumen Bíblico y Biografías** | Fichas técnicas de los 66 libros (autor, fecha, destinatarios, contexto, puntos clave, aplicación) y perfiles biográficos de escritores | ⭐⭐⭐ Alta |
+| **M11: Estandarización Universal de Guías y Releases** | Adaptar guías interactivas a cada versión (v1.3.0, v1.3.1, v1.3.2, v1.4.0+), purgar ajustes de depuración, firmar con release key y desplegar en GitHub Releases | ⭐⭐⭐ Alta |

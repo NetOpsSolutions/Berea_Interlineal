@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
 import '../core/tour/interactive_tour_overlay.dart';
+import '../core/tour/tour_steps_factory.dart';
 import '../core/update/update_dialog.dart';
 import '../core/update/update_model.dart';
 import '../core/update/update_service.dart';
@@ -57,7 +58,7 @@ class HomeShellState extends State<HomeShell> {
 
   /// Permite iniciar o repetir manualmente la guía visual interactiva en cualquier momento
   Future<void> startInteractiveTour() async {
-    final ver = UpdateService.instance.currentVersion;
+    final ver = await UpdateService.instance.getAppVersion();
     await StudyService.instance.markVersionTourSeen(ver);
     if (!mounted) return;
     setState(() {
@@ -96,7 +97,7 @@ class HomeShellState extends State<HomeShell> {
       await UpdateService.instance.requestNotificationPermissionIfNeeded();
       if (!mounted) return;
 
-      // 3. Mostrar la guía visual interactiva UNA SOLA VEZ tras cada actualización de versión
+      // 3. Mostrar la guía visual interactiva UNA SOLA VEZ tras cada instalación o actualización
       final appVer = await UpdateService.instance.getAppVersion();
       if (!mounted) return;
       if (StudyService.instance.shouldShowVersionTour(appVer)) {
@@ -154,136 +155,40 @@ class HomeShellState extends State<HomeShell> {
   }
 
   List<TourStepConfig> _buildTourSteps() {
-    return [
-      // Paso 1: Novedad v1.3.2 — Capítulo Completo e Interlineal al Toque
-      TourStepConfig(
-        badge: 'NOVEDAD v$_tourVersionLabel',
-        isNewFeature: true,
-        icon: Icons.menu_book_rounded,
-        title: 'Capítulo Completo e Interlineal al Toque',
-        description:
-            'Ahora lees el capítulo corrido: pulsa en cualquier versículo para desplegar al instante su Hebreo o Griego original, su código Strong y los 5 resaltadores teológicos. Desliza a los lados para cambiar de capítulo.',
-        pointerLabel: '👆 Pulsa en un versículo',
-        demoKind: TourDemoKind.chapterUnfold,
-        tabIndex: 0,
-        onPrepareStep: () async {
-          await _bibleKey.currentState?.prepareForInteractiveTourStep1();
-        },
-        targetKeyResolver: () => _bibleKey.currentState?.tourActiveVerseKey,
-      ),
-
-      // Paso 2: Novedad v1.3.2 — Controles Superiores y Fuentes Académicas
-      TourStepConfig(
-        badge: 'NOVEDAD v$_tourVersionLabel',
-        isNewFeature: true,
-        icon: Icons.text_fields_rounded,
-        title: 'Modos de Vista y Fuentes Académicas',
-        description:
-            'Usa estos íconos superiores para alternar entre Capítulo Completo o Versículo Único, activar la Lectura Fluida o pulsar «TT» para cambiar el tamaño de letra y las fuentes Ezra SIL y Cardo.',
-        pointerLabel: '👆 Vistas y fuentes (TT)',
-        demoKind: TourDemoKind.topBarControls,
-        tabIndex: 0,
-        targetKeyResolver: () => _bibleKey.currentState?.tourAppBarActionsKey,
-      ),
-
-      // Paso 3: Búsqueda Global
-      TourStepConfig(
-        badge: 'BÚSQUEDA GLOBAL',
-        icon: Icons.search_rounded,
-        title: 'Busca Palabras, Citas o Códigos Strong',
-        description:
-            'Escribe cualquier palabra en español, referencia bíblica o código Strong (ej. G3056 o H430) para encontrar en milisegundos todos los pasajes relacionados.',
-        pointerLabel: '⌨️ Escribe tu búsqueda aquí',
-        demoKind: TourDemoKind.typewriterSearch,
-        tabIndex: 1,
-        targetKeyResolver: () => _searchBarKey,
-      ),
-
-      // Paso 4: Diccionario Strong
-      TourStepConfig(
-        badge: 'DICCIONARIO LÉXICO',
-        icon: Icons.translate_rounded,
-        title: 'Diccionario Strong Griego y Hebreo',
-        description:
-            'Selecciona Griego o Hebreo y escribe una palabra, raíz transliterada o número Strong para consultar su significado etimológico y sus apariciones.',
-        pointerLabel: '📖 Elige idioma y escribe',
-        demoKind: TourDemoKind.typewriterDictionary,
-        tabIndex: 2,
-        targetKeyResolver: () => _dictionaryControlsKey,
-      ),
-
-      // Paso 5: Mi Estudio (Marcadores, Resaltados, Notas)
-      TourStepConfig(
-        badge: 'ESTUDIO PERSONAL',
-        isNewFeature: true,
-        icon: Icons.bookmarks_rounded,
-        title: 'Marcadores, Resaltados y Notas',
-        description:
-            '¿Cómo crear un marcador o resaltar? Al tocar un versículo en la Biblia verás «Marcador», «Añadir nota» y 5 colores teológicos. Todo queda guardado aquí de forma permanente.',
-        pointerLabel: '🔖 Tus colecciones guardadas',
-        demoKind: TourDemoKind.studyCollections,
-        tabIndex: 3,
-        targetKeyResolver: () => _studyTabsKey,
-      ),
-
-      // Paso 6: Ajustes de Lectura y Tema
-      TourStepConfig(
-        badge: 'PERSONALIZACIÓN',
-        icon: Icons.tune_rounded,
-        title: 'Modo Claro/Oscuro, Lectura y Letra',
-        description:
-            'Personaliza tu lectura activando Modo Claro u Oscuro, Lectura por Capítulo Completo, Modo Lectura Fluida y el tamaño exacto de letra bíblica.',
-        pointerLabel: '🎨 Tema, modos y letra',
-        demoKind: TourDemoKind.readingPreferences,
-        tabIndex: 4,
-        onPrepareStep: () async {
-          final st = _settingsKey.currentState;
-          if (st != null) {
-            await st.scrollToTourTarget(st.tourReadingSectionKey, alignment: 0.0);
-          }
-        },
-        targetKeyResolver: () => _settingsKey.currentState?.tourReadingSectionKey,
-      ),
-
-      // Paso 7: Centro de Actualizaciones OTA
-      TourStepConfig(
-        badge: 'ACTUALIZACIONES OTA',
-        isNewFeature: true,
-        icon: Icons.system_update_rounded,
-        title: 'Actualizaciones y Avisos en Android',
-        description:
-            'Comprueba nuevas versiones aquí o recibe el aviso directo en el Centro de Notificaciones de Android con las notas de versión y confirmación de descarga.',
-        pointerLabel: '🔄 Centro de actualizaciones',
-        demoKind: TourDemoKind.otaNotification,
-        tabIndex: 4,
-        onPrepareStep: () async {
-          final st = _settingsKey.currentState;
-          if (st != null) {
-            await st.scrollToTourTarget(st.tourUpdaterKey, alignment: 0.12);
-          }
-        },
-        targetKeyResolver: () => _settingsKey.currentState?.tourUpdaterKey,
-      ),
-
-      // Paso 8: Repetir Guía Visual cuando quieras
-      TourStepConfig(
-        badge: 'AYUDA SIEMPRE ACTIVA',
-        icon: Icons.explore_rounded,
-        title: 'Vuelve a Ver esta Guía Cuando Quieras',
-        description:
-            'Este recorrido solo aparece automáticamente una vez tras cada actualización. Si deseas repetirlo más adelante, pulsa aquí en «Ver guía de uso».',
-        pointerLabel: '👆 Repetir guía de uso',
-        demoKind: TourDemoKind.replayGuide,
-        tabIndex: 4,
-        onPrepareStep: () async {
-          final st = _settingsKey.currentState;
-          if (st != null) {
-            await st.scrollToTourTarget(st.tourReplayGuideKey, alignment: 0.22);
-          }
-        },
-        targetKeyResolver: () => _settingsKey.currentState?.tourReplayGuideKey,
-      ),
-    ];
+    return TourStepsFactory.getStepsForVersion(
+      version: _tourVersionLabel,
+      bibleKey: _bibleKey,
+      searchBarKey: _searchBarKey,
+      dictionaryControlsKey: _dictionaryControlsKey,
+      studyTabsKey: _studyTabsKey,
+      settingsKey: _settingsKey,
+      bibleVerseKeyResolver: () => _bibleKey.currentState?.tourActiveVerseKey,
+      bibleAppBarKeyResolver: () => _bibleKey.currentState?.tourAppBarActionsKey,
+      settingsReadingKeyResolver: () => _settingsKey.currentState?.tourReadingSectionKey,
+      settingsUpdaterKeyResolver: () => _settingsKey.currentState?.tourUpdaterKey,
+      settingsReplayGuideKeyResolver: () => _settingsKey.currentState?.tourReplayGuideKey,
+      onPrepareBibleStep: () async {
+        await _bibleKey.currentState?.prepareForInteractiveTourStep1();
+      },
+      onPrepareSettingsReadingStep: () async {
+        final st = _settingsKey.currentState;
+        if (st != null) {
+          await st.scrollToTourTarget(st.tourReadingSectionKey, alignment: 0.0);
+        }
+      },
+      onPrepareSettingsUpdaterStep: () async {
+        final st = _settingsKey.currentState;
+        if (st != null) {
+          await st.scrollToTourTarget(st.tourUpdaterKey, alignment: 0.12);
+        }
+      },
+      onPrepareSettingsReplayStep: () async {
+        final st = _settingsKey.currentState;
+        if (st != null) {
+          await st.scrollToTourTarget(st.tourReplayGuideKey, alignment: 0.22);
+        }
+      },
+    );
   }
 
   @override

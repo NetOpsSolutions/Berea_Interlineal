@@ -1,13 +1,34 @@
 param (
     [string]$KeystorePath = "android\berea-release.jks",
+    [string]$KeyPropertiesPath = "android\key.properties",
     [string]$KeyAlias = "berea_key",
-    [string]$KeystorePassword = "BereaInterlineal#2026@ProductionSecure"
+    [string]$KeystorePassword = "",
+    [string[]]$Versions = @("v1.3.0", "v1.3.1", "v1.3.2")
 )
 
 $ErrorActionPreference = "Stop"
 
-$ZipAlign = "C:\Users\User\AppData\Local\Android\Sdk\build-tools\36.0.0\zipalign.exe"
-$ApkSigner = "C:\Users\User\AppData\Local\Android\Sdk\build-tools\36.0.0\apksigner.bat"
+# Resolver credenciales desde android/key.properties si no se pasaron explícitamente
+if ([string]::IsNullOrWhiteSpace($KeystorePassword) -and (Test-Path $KeyPropertiesPath)) {
+    foreach ($line in Get-Content $KeyPropertiesPath) {
+        if ($line -match '^\s*storePassword\s*=\s*(.+)$') {
+            $KeystorePassword = $Matches[1].Trim()
+        }
+        elseif ($line -match '^\s*keyAlias\s*=\s*(.+)$' -and [string]::IsNullOrWhiteSpace($KeyAlias)) {
+            $KeyAlias = $Matches[1].Trim()
+        }
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($KeystorePassword)) {
+    Write-Error "No se pudo resolver storePassword desde $KeyPropertiesPath ni por parametro."
+    exit 1
+}
+
+$SdkRoot = "$env:LOCALAPPDATA\Android\Sdk\build-tools"
+$LatestBuildTools = Get-ChildItem -Path $SdkRoot -Directory | Sort-Object Name -Descending | Select-Object -First 1
+$ZipAlign = Join-Path $LatestBuildTools.FullName "zipalign.exe"
+$ApkSigner = Join-Path $LatestBuildTools.FullName "apksigner.bat"
 $BaseDir = "release_builds"
 
 if (-not (Test-Path $KeystorePath)) {
@@ -15,33 +36,36 @@ if (-not (Test-Path $KeystorePath)) {
     exit 1
 }
 
-$Versions = @("v1.3.0", "v1.3.1", "v1.3.2")
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 foreach ($Ver in $Versions) {
     $TargetFolder = Join-Path $BaseDir $Ver
-    if (-not (Test-Path $TargetFolder)) { 
+    if (-not (Test-Path $TargetFolder)) {
         Write-Host "Omitiendo $TargetFolder (no existe)" -ForegroundColor Gray
-        continue 
+        continue
     }
-    
+
     Write-Host "`n=======================================================" -ForegroundColor Yellow
-    Write-Host " Procesando version: $Ver en $TargetFolder" -ForegroundColor Yellow
+    Write-Host " Firmando oficialmente Berea Interlineal $Ver en $TargetFolder" -ForegroundColor Yellow
     Write-Host "=======================================================" -ForegroundColor Yellow
 
-    $ApkFiles = Get-ChildItem -Path $TargetFolder -Filter "*.apk"
+    # Limpiar posibles residuos .sha1 o .tmp
+    Get-ChildItem -Path $TargetFolder -Include "*.sha1", "*.tmp", "*.idsig" -File -ErrorAction SilentlyContinue | Remove-Item -Force
+
+    $ApkFiles = Get-ChildItem -Path $TargetFolder -Filter "*.apk" | Sort-Object Name
     foreach ($Apk in $ApkFiles) {
         $SourceFile = $Apk.FullName
         $TempAligned = "$SourceFile.aligned.tmp"
-        
+
         Write-Host "`n[APK] $($Apk.Name)" -ForegroundColor Cyan
-        Write-Host "  1. Alineando con zipalign (4 bytes / 4KB page align)..." -ForegroundColor DarkCyan
-        & $ZipAlign -f -p 4 $SourceFile $TempAligned
+        Write-Host "  1. Alineando a 4 bytes con zipalign (-v -f -p 4)..." -ForegroundColor DarkCyan
+        & $ZipAlign -f -p 4 $SourceFile $TempAligned | Out-Null
         if ($LASTEXITCODE -ne 0) {
             Write-Error "Fallo zipalign en $($Apk.Name)"
             exit 1
         }
-        
-        Write-Host "  2. Refirmando con apksigner (v1, v2 y v3)..." -ForegroundColor DarkCyan
+
+        Write-Host "  2. Firmando con apksigner (esquemas v1, v2 y v3; v4=false)..." -ForegroundColor DarkCyan
         & $ApkSigner sign --ks $KeystorePath `
             --ks-key-alias $KeyAlias `
             --ks-pass "pass:$KeystorePassword" `
@@ -53,65 +77,48 @@ foreach ($Ver in $Versions) {
             --out $SourceFile $TempAligned
 
         if ($LASTEXITCODE -ne 0) {
-            Write-Error "Fallo apksigner en $($Apk.Name)"
+            Write-Error "Fallo apksigner sign en $($Apk.Name)"
             exit 1
         }
-            
+
         Remove-Item $TempAligned -Force -ErrorAction SilentlyContinue
+        Remove-Item "$SourceFile.idsig" -Force -ErrorAction SilentlyContinue
 
-        Write-Host "  3. Verificando firma digital con apksigner verify..." -ForegroundColor DarkGreen
-        $verifyOutput = & $ApkSigner verify --verbose --print-certs $SourceFile 2>&1
-        $sha256Match = $verifyOutput | Select-String "certificate SHA-256 digest: ([0-9a-fA-F]+)"
-        if ($sha256Match) {
-            Write-Host "  [OK] Certificado verificado: SHA-256 = $($sha256Match.Matches[0].Groups[1].Value)" -ForegroundColor Green
-        } else {
-            Write-Host "  [VERIFICACION]:" -ForegroundColor Gray
-            $verifyOutput | ForEach-Object { Write-Host "    $_" -ForegroundColor Gray }
+        Write-Host "  3. Verificando esquemas v1, v2, v3 y certificado con apksigner verify..." -ForegroundColor DarkGreen
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
+        $verifyOutput = (& $ApkSigner verify --min-sdk-version 21 --verbose --print-certs $SourceFile 2>&1 | Out-String)
+        $verifyCode = $LASTEXITCODE
+        $ErrorActionPreference = $prevEap
+        if ($verifyCode -ne 0) {
+            Write-Error "Fallo apksigner verify en $($Apk.Name):`n$verifyOutput"
+            exit 1
         }
 
-        # Actualizar .sha1 individuales si existen (como en v1.3.0)
-        $Sha1File = "$SourceFile.sha1"
-        if (Test-Path $Sha1File) {
-            $sha1Hash = (Get-FileHash -Path $SourceFile -Algorithm SHA1).Hash.ToLower()
-            [System.IO.File]::WriteAllText($Sha1File, $sha1Hash)
-            Write-Host "  [OK] Actualizado $Sha1File" -ForegroundColor DarkGray
+        $v1Ok = $verifyOutput -match "Verified using v1 scheme \(JAR signing\): true"
+        $v2Ok = $verifyOutput -match "Verified using v2 scheme \(APK Signature Scheme v2\): true"
+        $v3Ok = $verifyOutput -match "Verified using v3 scheme \(APK Signature Scheme v3\): true"
+        if (-not ($v1Ok -and $v2Ok -and $v3Ok)) {
+            Write-Error "Esquemas de firma incompletos en $($Apk.Name) (v1=$v1Ok, v2=$v2Ok, v3=$v3Ok)"
+            exit 1
+        }
+
+        if ($verifyOutput -match "certificate SHA-256 digest:\s*([0-9a-fA-F]+)") {
+            Write-Host "  [OK] v1+v2+v3 verificados | Cert SHA-256 = $($Matches[1])" -ForegroundColor Green
         }
     }
 
-    # 4. Regenerar checksums.txt para el Release
-    Write-Host "`n  4. Regenerando checksums.txt para $Ver..." -ForegroundColor Magenta
+    # 4. Generar checksums.txt estandarizado (formato sha256sum según Sección 6)
+    Write-Host "`n  4. Generando checksums.txt (SHA-256) para $Ver..." -ForegroundColor Magenta
     $ChecksumFile = Join-Path $TargetFolder "checksums.txt"
-    $lines = @()
-    
-    if ($Ver -eq "v1.3.0") {
-        $lines = Get-ChildItem -Path $TargetFolder -Filter "*.apk" | ForEach-Object {
-            $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash.ToUpper()
-            "$hash  $($_.Name)"
-        }
-    } elseif ($Ver -eq "v1.3.1") {
-        $lines += "# Logos K Logos v1.3.1+5 -- SHA-256 Checksums"
-        $lines += "# Generado automaticamente por tools/resign_all_release_builds.ps1"
-        $lines += ""
-        $lines += Get-ChildItem -Path $TargetFolder -Filter "*.apk" | ForEach-Object {
-            $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash.ToLower()
-            $sizeMb = [math]::Round($_.Length / 1MB, 1)
-            "$hash  $($_.Name)  ($sizeMb MB)"
-        }
-    } elseif ($Ver -eq "v1.3.2") {
-        $lines += "# Berea Interlineal v1.3.2+7 -- SHA-256 Checksums"
-        $lines += "# Generado automaticamente por tools/resign_all_release_builds.ps1"
-        $lines += ""
-        $lines += Get-ChildItem -Path $TargetFolder -Filter "*.apk" | ForEach-Object {
-            $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash.ToLower()
-            $sizeMb = [math]::Round($_.Length / 1MB, 1)
-            "$hash  $($_.Name)  ($sizeMb MB)"
-        }
+    $lines = Get-ChildItem -Path $TargetFolder -Filter "*.apk" | Sort-Object Name | ForEach-Object {
+        $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash
+        "$hash  $($_.Name)"
     }
-    
-    [System.IO.File]::WriteAllLines($ChecksumFile, $lines, [System.Text.Encoding]::UTF8)
-    Write-Host "  [OK] $ChecksumFile actualizado con exito." -ForegroundColor Green
+    [System.IO.File]::WriteAllLines($ChecksumFile, $lines, $Utf8NoBom)
+    Write-Host "  [OK] $ChecksumFile generado ($($lines.Count) entradas)." -ForegroundColor Green
 }
 
 Write-Host "`n=======================================================" -ForegroundColor Green
-Write-Host " Refirmado completado con exito para todas las versiones locales!" -ForegroundColor Green
+Write-Host " Alineacion, firmado v1+v2+v3 y checksums completados!" -ForegroundColor Green
 Write-Host "=======================================================" -ForegroundColor Green
