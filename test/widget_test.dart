@@ -36,9 +36,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(SplashScreen), findsOneWidget);
 
-    // 3. Completar la animación de inicio
-    await tester.pump(const Duration(milliseconds: 1200));
-    await tester.pump(const Duration(milliseconds: 350));
+    // 3. Completar la animación de inicio (por lo menos 3 segundos)
+    await tester.pump(const Duration(milliseconds: 2600));
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.pumpAndSettle();
 
     // Confirmar que HomeShell está activo
@@ -50,10 +50,10 @@ void main() {
 
     expect(find.byType(SplashScreen), findsOneWidget);
 
-    // Esperar microtareas para que la BD reporte lista
-    await tester.pump();
+    // Esperar a que transcurran los 3 segundos mínimos requeridos
+    await tester.pump(const Duration(milliseconds: 3100));
 
-    // Pulsar en el texto o pantalla para omitir
+    // Pulsar en el texto o pantalla para avanzar
     await tester.tap(find.text('BEREA INTERLINEAL'));
     await tester.pumpAndSettle();
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
+import '../../core/theme.dart';
 import '../../data/database_service.dart';
 import '../../shell/home_shell.dart';
 
@@ -33,13 +34,15 @@ class _SplashScreenState extends State<SplashScreen>
   bool _animDone = false;
   bool _dbReady = false;
 
+  static const int _minDurationMs = 3000; // Mínimo 3 segundos garantizados
+
   @override
   void initState() {
     super.initState();
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: const Duration(milliseconds: _minDurationMs),
     );
 
     // Animación del logo: escala suave + fade
@@ -128,7 +131,14 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _tryNavigate() {
     if (_animDone && _dbReady) {
-      Future.delayed(const Duration(milliseconds: 300), _navigateToHome);
+      _navigateToHome();
+    }
+  }
+
+  void _onScreenTap() {
+    // Solo permitir avanzar al tocar si ya transcurrieron los 3 segundos de animación
+    if (_animDone && _dbReady) {
+      _navigateToHome();
     }
   }
 
@@ -159,27 +169,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = widget.themeMode == ThemeMode.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0B09),
-      body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        // Permitir omitir tocando la pantalla para máxima rapidez si la BD ya cargó
-        onTap: _dbReady ? _navigateToHome : null,
-        child: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment(0.0, -0.25), // Centrado detrás del logo
-              radius: 1.15,
-              colors: [
-                Color(0xFF241C16), // Núcleo cálido de penumbra
-                Color(0xFF14110E), // Cuero espresso oscuro en los bordes
-                Color(0xFF0D0B09), // Viñeta profunda
-              ],
-              stops: [0.0, 0.65, 1.0],
-            ),
-          ),
+      backgroundColor: Colors.transparent,
+      body: ParchmentBackground(
+        isDark: isDark,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          // Solo permitir avanzar al tocar si ya transcurrieron al menos 3 segundos
+          onTap: _onScreenTap,
           child: SafeArea(
             child: Stack(
               children: [
@@ -204,7 +203,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                               );
                             },
-                            child: _buildLogoWithCelestialGlow(),
+                            child: _buildLogoWithCelestialGlow(isDark),
                           ),
                           const SizedBox(height: 26),
 
@@ -232,11 +231,16 @@ class _SplashScreenState extends State<SplashScreen>
                                     fontSize: 28,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 3.5,
-                                    color: const Color(0xFFFDFBF7),
+                                    color: isDark
+                                        ? const Color(0xFFFDFBF7)
+                                        : const Color(0xFF2E1708),
                                     shadows: [
                                       Shadow(
-                                        color: const Color(0xFFD97706)
-                                            .withValues(alpha: 0.6),
+                                        color: isDark
+                                            ? const Color(0xFFD97706)
+                                                .withValues(alpha: 0.6)
+                                            : const Color(0xFF9E4B06)
+                                                .withValues(alpha: 0.35),
                                         blurRadius: 14,
                                       ),
                                     ],
@@ -251,29 +255,36 @@ class _SplashScreenState extends State<SplashScreen>
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF59E0B)
-                                        .withValues(alpha: 0.18),
+                                    color: isDark
+                                        ? const Color(0xFFF59E0B)
+                                            .withValues(alpha: 0.18)
+                                        : const Color(0xFF9E4B06)
+                                            .withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: const Color(0xFFFBBF24)
-                                          .withValues(alpha: 0.7),
+                                      color: isDark
+                                          ? const Color(0xFFFBBF24)
+                                              .withValues(alpha: 0.7)
+                                          : const Color(0xFF9E4B06),
                                       width: 1.2,
                                     ),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'BIBLIA INTERLINEAL DE ESTUDIO',
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 1.6,
-                                      color: Color(0xFFFCD34D),
+                                      color: isDark
+                                          ? const Color(0xFFFCD34D)
+                                          : const Color(0xFF7E3603),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(height: 14),
 
                                 // Lema Bíblico Oficial
-                                const Text(
+                                Text(
                                   '«...escudriñando cada día las Escrituras» (Hechos 17:11)',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
@@ -281,19 +292,23 @@ class _SplashScreenState extends State<SplashScreen>
                                     fontStyle: FontStyle.italic,
                                     fontWeight: FontWeight.w500,
                                     letterSpacing: 0.4,
-                                    color: Color(0xFFE2C48E),
+                                    color: isDark
+                                        ? const Color(0xFFE2C48E)
+                                        : const Color(0xFF5A3515),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
 
                                 // Fuentes Originales
-                                const Text(
+                                Text(
                                   'Hebreo BHS • Griego Tischendorf • Reina-Valera 1960\nDiccionarios Strong y Análisis Morfológico',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 12,
                                     height: 1.45,
-                                    color: Color(0xFFA89884),
+                                    color: isDark
+                                        ? const Color(0xFFA89884)
+                                        : const Color(0xFF75512F),
                                   ),
                                 ),
                               ],
@@ -323,11 +338,14 @@ class _SplashScreenState extends State<SplashScreen>
                                           ? null // indeterminado mientras termina BD
                                           : _loadingProgress,
                                       minHeight: 4.5,
-                                      backgroundColor:
-                                          Colors.white.withValues(alpha: 0.12),
+                                      backgroundColor: isDark
+                                          ? Colors.white.withValues(alpha: 0.12)
+                                          : const Color(0xFFDCC6A8),
                                       valueColor:
-                                          const AlwaysStoppedAnimation<Color>(
-                                        Color(0xFFF59E0B), // Ámbar líquido
+                                          AlwaysStoppedAnimation<Color>(
+                                        isDark
+                                            ? const Color(0xFFF59E0B) // Ámbar líquido
+                                            : const Color(0xFF9E4B06), // Bronce cálido
                                       ),
                                     ),
                                   ),
@@ -336,11 +354,13 @@ class _SplashScreenState extends State<SplashScreen>
                                 Text(
                                   _statusText,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w500,
                                     letterSpacing: 0.2,
-                                    color: Color(0xFFE2C48E),
+                                    color: isDark
+                                        ? const Color(0xFFE2C48E)
+                                        : const Color(0xFF8A4908),
                                   ),
                                 ),
                               ],
@@ -365,7 +385,9 @@ class _SplashScreenState extends State<SplashScreen>
                       style: TextStyle(
                         fontSize: 11,
                         letterSpacing: 0.3,
-                        color: const Color(0xFFE2C48E).withValues(alpha: 0.55),
+                        color: isDark
+                            ? const Color(0xFFE2C48E).withValues(alpha: 0.55)
+                            : const Color(0xFF8A623A).withValues(alpha: 0.70),
                       ),
                     ),
                   ),
@@ -378,7 +400,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildLogoWithCelestialGlow() {
+  Widget _buildLogoWithCelestialGlow(bool isDark) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -390,7 +412,9 @@ class _SplashScreenState extends State<SplashScreen>
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                const Color(0xFFFBBF24).withValues(alpha: 0.22), // Resplandor dorado suave
+                isDark
+                    ? const Color(0xFFFBBF24).withValues(alpha: 0.22) // Resplandor dorado suave
+                    : const Color(0xFFD4924A).withValues(alpha: 0.20),
                 Colors.transparent,
               ],
             ),
@@ -403,12 +427,16 @@ class _SplashScreenState extends State<SplashScreen>
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: const Color(0xFFFBBF24).withValues(alpha: 0.55),
+              color: isDark
+                  ? const Color(0xFFFBBF24).withValues(alpha: 0.55)
+                  : const Color(0xFF9E4B06).withValues(alpha: 0.65),
               width: 1.8,
             ),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                color: isDark
+                    ? const Color(0xFFF59E0B).withValues(alpha: 0.35)
+                    : const Color(0xFF7A4518).withValues(alpha: 0.25),
                 blurRadius: 26,
                 spreadRadius: 2,
               ),
@@ -421,12 +449,12 @@ class _SplashScreenState extends State<SplashScreen>
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: const Color(0xFF14110E),
+                  color: isDark ? const Color(0xFF14110E) : const Color(0xFFF2E5CC),
                   alignment: Alignment.center,
-                  child: const Icon(
+                  child: Icon(
                     Icons.auto_stories_rounded,
                     size: 58,
-                    color: Color(0xFFFCD34D),
+                    color: isDark ? const Color(0xFFFCD34D) : const Color(0xFF9E4B06),
                   ),
                 );
               },

@@ -348,7 +348,7 @@ class StudyService extends ChangeNotifier {
   String _hebrewFontFamily = AcademicFonts.defaultHebrew;
   String _greekFontFamily = AcademicFonts.defaultGreek;
   double _readingFontScale = 1.0;
-  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode _themeMode = ThemeMode.light;
   String _lastSeenTourVersion = '';
 
   // ── Getters públicos ───────────────────────────────────────────────────────
@@ -430,7 +430,9 @@ class StudyService extends ChangeNotifier {
         _lastSeenTourVersion = _prefs?.getString(_keyLastSeenTourVersion) ?? _lastSeenTourVersion;
         final tRaw = _prefs?.getString(_keyThemeMode);
         if (tRaw != null) {
-          _themeMode = tRaw == 'light' ? ThemeMode.light : ThemeMode.dark;
+          _themeMode = tRaw == 'dark' ? ThemeMode.dark : ThemeMode.light;
+        } else {
+          _themeMode = ThemeMode.light;
         }
       } catch (e) {
         if (kDebugMode) debugPrint('[StudyService] SharedPreferences no disponible: $e');
@@ -781,7 +783,7 @@ class StudyService extends ChangeNotifier {
           final parsed = double.tryParse(v);
           if (parsed != null) _readingFontScale = parsed.clamp(0.85, 1.45);
         } else if (k == _keyThemeMode && _prefs?.getString(_keyThemeMode) == null && v != null) {
-          _themeMode = v == 'light' ? ThemeMode.light : ThemeMode.dark;
+          _themeMode = v == 'dark' ? ThemeMode.dark : ThemeMode.light;
         } else if (k == _keyLastSeenTourVersion && v != null && v.isNotEmpty) {
           if (_lastSeenTourVersion.isEmpty) {
             _lastSeenTourVersion = v;

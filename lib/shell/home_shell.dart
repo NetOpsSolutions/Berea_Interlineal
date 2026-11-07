@@ -216,41 +216,65 @@ class HomeShellState extends State<HomeShell> {
       ),
     ];
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Stack(
       fit: StackFit.expand,
       children: [
-        Scaffold(
-          body: IndexedStack(index: _index, children: screens),
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: _index,
-            onDestinationSelected: (v) => setState(() => _index = v),
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.menu_book_outlined),
-                selectedIcon: Icon(Icons.menu_book),
-                label: 'Biblia',
+        ParchmentBackground(
+          isDark: isDark,
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: IndexedStack(index: _index, children: screens),
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF6B4E2B).withValues(alpha: 0.8)
+                        : const Color(0xFFD4C0A0),
+                    width: 1.0,
+                  ),
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.search_outlined),
-                selectedIcon: Icon(Icons.search),
-                label: 'Búsqueda',
+              child: NavigationBar(
+                backgroundColor: isDark
+                    ? const Color(0xFF16100D)
+                    : const Color(0xFFEADCC4),
+                indicatorColor: isDark
+                    ? const Color(0xFF3B2C1E)
+                    : const Color(0xFFDEC59E),
+                selectedIndex: _index,
+                onDestinationSelected: (v) => setState(() => _index = v),
+                destinations: const [
+                  NavigationDestination(
+                    icon: Icon(Icons.menu_book_outlined),
+                    selectedIcon: Icon(Icons.menu_book),
+                    label: 'Biblia',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.search_outlined),
+                    selectedIcon: Icon(Icons.search),
+                    label: 'Búsqueda',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.translate_outlined),
+                    selectedIcon: Icon(Icons.translate),
+                    label: 'Diccionario',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.bookmarks_outlined),
+                    selectedIcon: Icon(Icons.bookmarks),
+                    label: 'Mi Estudio',
+                  ),
+                  NavigationDestination(
+                    icon: Icon(Icons.settings_outlined),
+                    selectedIcon: Icon(Icons.settings),
+                    label: 'Ajustes',
+                  ),
+                ],
               ),
-              NavigationDestination(
-                icon: Icon(Icons.translate_outlined),
-                selectedIcon: Icon(Icons.translate),
-                label: 'Diccionario',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.bookmarks_outlined),
-                selectedIcon: Icon(Icons.bookmarks),
-                label: 'Mi Estudio',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings),
-                label: 'Ajustes',
-              ),
-            ],
+            ),
           ),
         ),
         if (_showInteractiveTour)

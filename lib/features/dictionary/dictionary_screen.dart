@@ -72,6 +72,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       listenable: StudyService.instance,
       builder: (context, _) {
         return Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(title: Text('Diccionario Strong ${_lbl(_language)}')),
           body: SafeArea(
             child: Padding(

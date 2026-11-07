@@ -504,6 +504,7 @@ class BibleScreenState extends State<BibleScreen> {
             : null;
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             title: Text(
               chapterMode ? '${_book.name} $_chapter' : 'Biblia Interlineal',
@@ -1912,22 +1913,44 @@ class _InterlinearWordTile extends StatelessWidget {
     final prefix = isHebrew ? 'H' : 'G';
 
     final isDark = t.brightness == Brightness.dark;
-    final tileBg = isDark ? const Color(0xFF2A221C) : const Color(0xFFF3EAD5);
+    final tileGradient = isDark
+        ? const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF2C221A), Color(0xFF1E1712)],
+          )
+        : const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFCF8EE), Color(0xFFF0E1C6)],
+          );
     final tileBorder = isDark
-        ? Border.all(color: const Color(0xFF785B3F).withValues(alpha: 0.55), width: 1.0)
-        : Border.all(color: const Color(0xFFDFCFAF), width: 1.0);
+        ? Border.all(color: const Color(0xFFD4A359).withValues(alpha: 0.7), width: 1.2)
+        : Border.all(color: const Color(0xFFC8B392), width: 1.2);
     final tileShadow = [
-      if (isDark)
+      if (isDark) ...[
         BoxShadow(
-          color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
-          blurRadius: 6,
-        )
-      else
+          color: const Color(0xFFF59E0B).withValues(alpha: 0.18),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
         const BoxShadow(
-          color: Color(0x18000000),
+          color: Color(0x55000000),
           blurRadius: 4,
           offset: Offset(0, 2),
         ),
+      ] else ...[
+        const BoxShadow(
+          color: Color(0x286E4F28),
+          blurRadius: 5,
+          offset: Offset(0, 2),
+        ),
+        const BoxShadow(
+          color: Color(0x15FFFFFF),
+          blurRadius: 0,
+          offset: Offset(0, -1),
+        ),
+      ],
     ];
 
     return InkWell(
@@ -1938,8 +1961,8 @@ class _InterlinearWordTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
+          gradient: tileGradient,
           border: tileBorder,
-          color: tileBg,
           boxShadow: tileShadow,
         ),
         child: Column(

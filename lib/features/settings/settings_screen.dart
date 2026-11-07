@@ -104,6 +104,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         final currentVersion = UpdateService.instance.currentVersion;
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(title: const Text('Ajustes')),
           body: SingleChildScrollView(
             controller: _scrollController,

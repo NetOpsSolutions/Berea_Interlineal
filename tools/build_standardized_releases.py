@@ -129,7 +129,7 @@ def patch_study_service_130(wt: Path) -> None:
     )
     text = text.replace(
         "  ThemeMode _themeMode = ThemeMode.dark;",
-        "  ThemeMode _themeMode = ThemeMode.dark;\n"
+        "  ThemeMode _themeMode = ThemeMode.light;\n"
         "  String _lastSeenTourVersion = '';",
     )
     text = text.replace(
@@ -180,7 +180,7 @@ def patch_study_service_131(wt: Path) -> None:
     )
     text = text.replace(
         "  ThemeMode _themeMode = ThemeMode.dark;",
-        "  ThemeMode _themeMode = ThemeMode.dark;\n"
+        "  ThemeMode _themeMode = ThemeMode.light;\n"
         "  String _lastSeenTourVersion = '';",
     )
     text = text.replace(
@@ -316,6 +316,59 @@ def patch_feature_screens_for_tour(wt: Path) -> None:
         "                  Expanded(\n"
         "                    key: tourActiveVerseKey,",
     )
+    tile_target = (
+        "          decoration: BoxDecoration(\n"
+        "            borderRadius: BorderRadius.circular(12),\n"
+        "            border: Border.all(color: t.colorScheme.outlineVariant),\n"
+        "            color: t.colorScheme.surfaceContainerHighest,\n"
+        "          ),"
+    )
+    tile_replacement = (
+        "          decoration: BoxDecoration(\n"
+        "            borderRadius: BorderRadius.circular(12),\n"
+        "            gradient: t.brightness == Brightness.dark\n"
+        "                ? const LinearGradient(\n"
+        "                    begin: Alignment.topCenter,\n"
+        "                    end: Alignment.bottomCenter,\n"
+        "                    colors: [Color(0xFF2C221A), Color(0xFF1E1712)],\n"
+        "                  )\n"
+        "                : const LinearGradient(\n"
+        "                    begin: Alignment.topCenter,\n"
+        "                    end: Alignment.bottomCenter,\n"
+        "                    colors: [Color(0xFFFCF8EE), Color(0xFFF0E1C6)],\n"
+        "                  ),\n"
+        "            border: t.brightness == Brightness.dark\n"
+        "                ? Border.all(color: const Color(0xFFD4A359).withValues(alpha: 0.7), width: 1.2)\n"
+        "                : Border.all(color: const Color(0xFFC8B392), width: 1.2),\n"
+        "            boxShadow: t.brightness == Brightness.dark\n"
+        "                ? [\n"
+        "                    BoxShadow(\n"
+        "                      color: const Color(0xFFF59E0B).withValues(alpha: 0.18),\n"
+        "                      blurRadius: 8,\n"
+        "                      offset: const Offset(0, 2),\n"
+        "                    ),\n"
+        "                    const BoxShadow(\n"
+        "                      color: Color(0x55000000),\n"
+        "                      blurRadius: 4,\n"
+        "                      offset: Offset(0, 2),\n"
+        "                    ),\n"
+        "                  ]\n"
+        "                : [\n"
+        "                    const BoxShadow(\n"
+        "                      color: Color(0x286E4F28),\n"
+        "                      blurRadius: 5,\n"
+        "                      offset: Offset(0, 2),\n"
+        "                    ),\n"
+        "                    const BoxShadow(\n"
+        "                      color: Color(0x15FFFFFF),\n"
+        "                      blurRadius: 0,\n"
+        "                      offset: Offset(0, -1),\n"
+        "                    ),\n"
+        "                  ],\n"
+        "          ),"
+    )
+    if tile_target in bible:
+        bible = bible.replace(tile_target, tile_replacement)
     assert "tourActiveVerseKey" in bible and "prepareForInteractiveTourStep1" in bible
     bible_path.write_text(bible, encoding="utf-8")
 
@@ -502,6 +555,7 @@ class SettingsScreenState extends State<SettingsScreen> {
         final currentVersion = UpdateService.instance.currentVersion;
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(title: const Text('Ajustes')),
           body: SingleChildScrollView(
             controller: _scrollController,

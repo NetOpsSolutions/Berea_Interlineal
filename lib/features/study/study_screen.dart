@@ -83,6 +83,7 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
         final history = StudyService.instance.history;
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             title: const Text('Mi Estudio'),
             bottom: TabBar(
