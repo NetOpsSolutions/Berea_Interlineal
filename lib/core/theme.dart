@@ -289,22 +289,66 @@ class AppSnackBar {
 
 ThemeData buildTheme(Brightness brightness) {
   final isDark = brightness == Brightness.dark;
-  final scheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF1F3A93),
-    brightness: brightness,
-  );
+
+  // Paleta Pergamino Alejandrino (Día) / Códice a la Luz de la Vela (Noche)
+  final scheme = isDark
+      ? const ColorScheme.dark(
+          primary: Color(0xFFF59E0B), // Ámbar cálido
+          onPrimary: Color(0xFF181412),
+          primaryContainer: Color(0xFF382918),
+          onPrimaryContainer: Color(0xFFFDE68A),
+          secondary: Color(0xFFFBBF24), // Ámbar dorado
+          onSecondary: Color(0xFF181412),
+          secondaryContainer: Color(0xFF3D2E1A),
+          onSecondaryContainer: Color(0xFFFEF3C7),
+          surface: Color(0xFF221C18), // Cuero tostado oscuro
+          onSurface: Color(0xFFEAD8BA), // Oro champaña y marfil luminoso
+          onSurfaceVariant: Color(0xFFC7B69C),
+          surfaceContainerLowest: Color(0xFF14100E),
+          surfaceContainerLow: Color(0xFF1D1714),
+          surfaceContainer: Color(0xFF221C18),
+          surfaceContainerHigh: Color(0xFF2D241F),
+          surfaceContainerHighest: Color(0xFF382D26),
+          outline: Color(0xFF785B3F),
+          outlineVariant: Color(0xFF4A3E34),
+        )
+      : const ColorScheme.light(
+          primary: Color(0xFFB45309), // Bronce antiguo cálido
+          onPrimary: Colors.white,
+          primaryContainer: Color(0xFFF3EAD5),
+          onPrimaryContainer: Color(0xFF78350F),
+          secondary: Color(0xFFD97706), // Ámbar dorado
+          onSecondary: Colors.white,
+          secondaryContainer: Color(0xFFEDE4CE),
+          onSecondaryContainer: Color(0xFF92400E),
+          surface: Color(0xFFFAF5EA), // Papiro limpio para tarjetas
+          onSurface: Color(0xFF261D17), // Tinta sepia / carbón vegetal (>12:1)
+          onSurfaceVariant: Color(0xFF6B584B),
+          surfaceContainerLowest: Color(0xFFFAF5EA),
+          surfaceContainerLow: Color(0xFFFAF5EA),
+          surfaceContainer: Color(0xFFF5EEDB),
+          surfaceContainerHigh: Color(0xFFEFE6D2),
+          surfaceContainerHighest: Color(0xFFEDE4CE),
+          outline: Color(0xFFB09E88),
+          outlineVariant: Color(0xFFE2D6C0), // Bordes de tarjetas papiro
+        );
 
   final base = ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
     brightness: brightness,
+    scaffoldBackgroundColor:
+        isDark ? const Color(0xFF181412) : const Color(0xFFF5EEDB), // Arena marfil cálido
+    cardColor: isDark ? const Color(0xFF221C18) : const Color(0xFFFAF5EA),
   );
 
   return base.copyWith(
     appBarTheme: AppBarTheme(
       centerTitle: false,
-      backgroundColor: scheme.surface,
-      foregroundColor: scheme.onSurface,
+      backgroundColor:
+          isDark ? const Color(0xFF1F1915) : const Color(0xFFEFE6D2),
+      foregroundColor:
+          isDark ? const Color(0xFFEAD8BA) : const Color(0xFF261D17),
       elevation: 0,
       scrolledUnderElevation: 1,
     ),
@@ -312,20 +356,64 @@ ThemeData buildTheme(Brightness brightness) {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: scheme.outlineVariant),
+        side: BorderSide(
+          color: isDark ? const Color(0xFF4A3E34) : const Color(0xFFE2D6C0),
+          width: 1.0,
+        ),
       ),
-      color: scheme.surfaceContainerLow,
+      color: isDark ? const Color(0xFF221C18) : const Color(0xFFFAF5EA),
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(
+          color: isDark ? const Color(0xFF4A3E34) : const Color(0xFFE2D6C0),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(
+          color: isDark ? const Color(0xFF4A3E34) : const Color(0xFFE2D6C0),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(
+          color: isDark ? const Color(0xFFF59E0B) : const Color(0xFFB45309),
+          width: 1.5,
+        ),
       ),
       filled: true,
-      fillColor: scheme.surfaceContainerHighest,
+      fillColor: isDark ? const Color(0xFF2A221C) : const Color(0xFFFAF5EA),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: scheme.surface,
-      indicatorColor: scheme.primaryContainer,
+      backgroundColor:
+          isDark ? const Color(0xFF1B1613) : const Color(0xFFEDE4CE),
+      indicatorColor:
+          isDark ? const Color(0xFF382918) : const Color(0xFFE2D6C0),
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor:
+          isDark ? const Color(0xFF1B1613) : const Color(0xFFEDE4CE),
+      selectedItemColor:
+          isDark ? const Color(0xFFF59E0B) : const Color(0xFFB45309),
+      unselectedItemColor:
+          isDark ? const Color(0xFF8A7768) : const Color(0xFF8A7A6D),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor:
+          isDark ? const Color(0xFF221C18) : const Color(0xFFFAF5EA),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: isDark ? const Color(0xFF4A3E34) : const Color(0xFFE2D6C0),
+          width: 1.0,
+        ),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: isDark ? const Color(0xFF4A3E34) : const Color(0xFFE2D6C0),
+      thickness: 1,
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: const Color(0xFF1E293B),

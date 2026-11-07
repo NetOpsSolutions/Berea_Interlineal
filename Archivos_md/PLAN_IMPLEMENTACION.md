@@ -7,6 +7,7 @@ Este plan detalla la hoja de ruta técnica y funcional para consolidar **Berea I
 > * **Empaquetado y Distribución iPhone**: Consultar [PLAN_IMPLEMENTACION_IPHONE.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_IMPLEMENTACION_IPHONE.md) para el pipeline de iOS (.ipa).
 > * **Firmado Oficial y Play Protect**: Consultar [PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md) para el keystore oficial, refirmado de v1.3.0/v1.3.1/v1.3.2 y certificación contra falsos positivos en Android.
 > * **Estandarización de Guías de Uso, Limpieza de Ajustes y Releases**: Consultar [PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md) para el despliegue de guías interactivas dinámicas por versión (v1.3.0, v1.3.1, v1.3.2, v1.4.0+), purga de menús residuales en Ajustes, almacenamiento local en `release_builds/` y publicación automatizada en GitHub Releases.
+> * **Entorno Visual Pergamino e Introducción Solemne**: Consultar [PLAN_DESPLIEGUE_PERGAMINO_E_INTRODUCCION.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_DESPLIEGUE_PERGAMINO_E_INTRODUCCION.md) para la especificación del fondo cálido de Pergamino Alejandrino (Claro/Oscuro), la nueva pantalla de bienvenida con el lema de Hechos 17:11 y su documentación como novedad en la v1.3.1.
 
 ---
 
@@ -40,6 +41,7 @@ flowchart TD
 > 1. **Persistencia SQLite de Usuario**: Implementada en `logos_user_data.db` v2 (separada de la base bíblica de solo lectura), con tablas dedicadas (`user_bookmarks`, `user_highlights`, `user_verse_notes`, `user_strong_notes`, `user_history`, `user_settings`), soporte de transacciones ACID y migrador automático.
 > 2. **Centro de Actualizaciones GitHub OTA + Centro de Notificaciones Android**: Integrado con detección nativa de arquitecturas (`arm64-v8a`, `armeabi-v7a`, `x86_64`, `universal`), notificación nativa en la barra de estado de Android (`POST_NOTIFICATIONS` + `NotificationCompat`), visualización de notas de versión, confirmación explícita de descarga, barra de progreso e instalación mediante `FileProvider`.
 > 3. **Corrección de Contraste Visual WCAG AAA**: Solucionado el problema de contraste ilegible en avisos de actualización (`SnackBar` / botones) tanto en tema claro como en tema oscuro, y eliminada la opción de depuración *"Vista previa visual (Simulador de diseño)"*.
+> 4. **Entorno Visual Pergamino Alejandrino e Introducción Solemne**: Incorporación del fondo cálido de papiro/vitela (#F5EEDB en Claro, #181412 en Oscuro) y la pantalla de bienvenida cinematográfica con atmósfera de cuero, halo dorado y el lema de Hechos 17:11 (documentado como novedad oficial en v1.3.1).
 
 ```mermaid
 flowchart LR
@@ -88,6 +90,22 @@ flowchart LR
   - **Solución desplegada**: Se diseñó `AppSnackBar` y `SnackBarThemeData` adaptativos en `lib/core/theme.dart` con superficies oscuras/claras dedicadas, bordes definidos y acentos de contraste **WCAG AAA (> 9:1)** garantizados en ambos temas. Se reestructuró la tarjeta `_UpdaterCard` a ancho completo para evitar cortes de texto.
 - **Eliminación del Simulador de Diseño**:
   - Se retiró por completo el bloque de depuración *«Vista previa visual (Simulador de diseño)»* en `SettingsScreen` para mantener una interfaz de producción limpia y profesional.
+
+---
+
+### 2.4. Entorno Visual Pergamino Alejandrino y Nueva Introducción Solemne (Novedad Oficial en v1.3.1)
+- **Motivación y Feedback de Usuarios**:
+  - Sustituir el fondo blanco/gris plano de la versión 1.3.0 por un entorno inmersivo y didáctico que reduzca el cansancio visual y transporte al usuario a los manuscritos bíblicos antiguos.
+- **Implementación Visual en v1.3.1**:
+  - **Modo Claro (Pergamino Alejandrino)**: Arena marfil cálido (`#F5EEDB`) con tinta sepia oscura (`#261D17`, ratio >12:1) y tarjetas flotantes en papiro suave con sombras sutiles.
+  - **Modo Oscuro (Códice a la Luz de la Vela)**: Cuero espresso profundo y papiro en penumbra (`#181412`), con tipografía en oro champaña y marfil luminoso (`#EAD8BA`).
+  - **Pantalla de Bienvenida Cinematográfica (`SplashScreen`)**:
+    - Atmósfera de cuero oscuro (`#14110E`), halo celestial dorado irradiando detrás del logotipo Berea, barra de progreso en oro ámbar y la integración del lema bíblico oficial: *«...escudriñando cada día las Escrituras» (Hechos 17:11)*.
+    - Se elimina la pantalla de arranque vacía donde el logo flotaba solo en un fondo negro.
+- **Visibilidad en Notas de Versión**:
+  - Este cambio se documenta formalmente como novedad principal de la **v1.3.1** (visible para usuarios que actualizan desde la v1.3.0 en la tarjeta de novedades de Ajustes, la notificación OTA y el changelog de GitHub).
+  - En la **v1.3.2** y posteriores, este entorno visual permanece activo como la identidad estándar de la aplicación.
+  - *Especificación técnica completa*: [PLAN_DESPLIEGUE_PERGAMINO_E_INTRODUCCION.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_DESPLIEGUE_PERGAMINO_E_INTRODUCCION.md).
 
 ---
 
@@ -519,3 +537,4 @@ flowchart TD
 | **M9: Empaquetado y Pipeline iOS (iPhone)** | GitHub Actions con runner macOS para compilar y adjuntar `.ipa` en cada Release | ⭐⭐ Media |
 | **M10: Resumen Bíblico y Biografías** | Fichas técnicas de los 66 libros (autor, fecha, destinatarios, contexto, puntos clave, aplicación) y perfiles biográficos de escritores | ⭐⭐⭐ Alta |
 | **M11: Estandarización Universal de Guías y Releases** | Adaptar guías interactivas a cada versión (v1.3.0, v1.3.1, v1.3.2, v1.4.0+), purgar ajustes de depuración, firmar con release key y desplegar en GitHub Releases | ⭐⭐⭐ Alta |
+| **M12: Entorno Pergamino Alejandrino & Intro Solemne** | Fondo papiro/vitela (#F5EEDB / #181412), splash con halo dorado y Hechos 17:11 (documentado como novedad oficial en v1.3.1) | ⭐⭐⭐ Alta |

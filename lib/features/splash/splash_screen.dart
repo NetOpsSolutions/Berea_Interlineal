@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _progressFade;
 
   double _loadingProgress = 0.0;
-  String _statusText = 'Iniciando textos sagrados...';
+  String _statusText = '«Abriendo manuscritos hebreos y griegos...»';
   bool _navigated = false;
   bool _animDone = false;
   bool _dbReady = false;
@@ -86,14 +86,14 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.addListener(() {
       final p = _controller.value;
       String status;
-      if (p < 0.3) {
-        status = 'Cargando manuscritos interlineales...';
-      } else if (p < 0.65) {
-        status = 'Inicializando Strong griego y hebreo...';
-      } else if (p < 0.95) {
-        status = 'Preparando concordancia y notas...';
+      if (p < 0.35) {
+        status = '«Abriendo manuscritos hebreos y griegos...»';
+      } else if (p < 0.70) {
+        status = '«Sincronizando léxicos Strong y morfología...»';
       } else {
-        status = _dbReady ? '¡Todo listo!' : 'Preparando base de datos...';
+        status = _dbReady
+            ? '«Listo para escudriñar la Palabra.»'
+            : '«Preparando base de datos sagrada...»';
       }
       if (status != _statusText || (p - _loadingProgress).abs() > 0.02) {
         setState(() {
@@ -121,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
     setState(() {
       _dbReady = true;
-      _statusText = '¡Todo listo!';
+      _statusText = '«Listo para escudriñar la Palabra.»';
     });
     _tryNavigate();
   }
@@ -159,39 +159,27 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    // Fondo degradado elegante: tonos azul profundo / medianoche
-    final bgGradient = isDark
-        ? const RadialGradient(
-            center: Alignment(0, -0.2),
-            radius: 1.2,
-            colors: [
-              Color(0xFF1A2639),
-              Color(0xFF0F172A),
-              Color(0xFF090D16),
-            ],
-          )
-        : const RadialGradient(
-            center: Alignment(0, -0.2),
-            radius: 1.2,
-            colors: [
-              Color(0xFFFFFFFF),
-              Color(0xFFEEF2F6),
-              Color(0xFFE2E8F0),
-            ],
-          );
-
     return Scaffold(
+      backgroundColor: const Color(0xFF0D0B09),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        // Permitir omitir tocando la pantalla para máxima rapidez
+        // Permitir omitir tocando la pantalla para máxima rapidez si la BD ya cargó
         onTap: _dbReady ? _navigateToHome : null,
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(gradient: bgGradient),
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0.0, -0.25), // Centrado detrás del logo
+              radius: 1.15,
+              colors: [
+                Color(0xFF241C16), // Núcleo cálido de penumbra
+                Color(0xFF14110E), // Cuero espresso oscuro en los bordes
+                Color(0xFF0D0B09), // Viñeta profunda
+              ],
+              stops: [0.0, 0.65, 1.0],
+            ),
+          ),
           child: SafeArea(
             child: Stack(
               children: [
@@ -203,7 +191,7 @@ class _SplashScreenState extends State<SplashScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // -------------------------------------------------
-                          // LOGO EMBLEMA CON ANIMACIÓN DE ESCALA Y BRILLO
+                          // LOGO EMBLEMA CON RESPLANDOR CELESTIAL
                           // -------------------------------------------------
                           AnimatedBuilder(
                             animation: _controller,
@@ -216,12 +204,12 @@ class _SplashScreenState extends State<SplashScreen>
                                 ),
                               );
                             },
-                            child: _buildLogoEmblem(isDark),
+                            child: _buildLogoWithCelestialGlow(),
                           ),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 26),
 
                           // -------------------------------------------------
-                          // TÍTULO Y SUBTÍTULOS ANIMADOS
+                          // TÍTULO, PASTILLA DORADA, LEMA Y FUENTES
                           // -------------------------------------------------
                           AnimatedBuilder(
                             animation: _controller,
@@ -236,93 +224,85 @@ class _SplashScreenState extends State<SplashScreen>
                             },
                             child: Column(
                               children: [
+                                // Título Principal
                                 Text(
                                   'BEREA INTERLINEAL',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 30,
+                                    fontSize: 28,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: 3.5,
-                                    color: isDark
-                                        ? Colors.white
-                                        : const Color(0xFF0F172A),
-                                    shadows: isDark
-                                        ? [
-                                            Shadow(
-                                              color: const Color(0xFF60A5FA)
-                                                  .withAlpha(100),
-                                              blurRadius: 18,
-                                            ),
-                                          ]
-                                        : null,
+                                    color: const Color(0xFFFDFBF7),
+                                    shadows: [
+                                      Shadow(
+                                        color: const Color(0xFFD97706)
+                                            .withValues(alpha: 0.6),
+                                        blurRadius: 14,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 10),
 
-                                // Tagline: Biblia Interlineal de Estudio
+                                // Tagline en Pastilla Dorada
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 14,
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: isDark
-                                        ? const Color(0xFFF59E0B).withAlpha(35)
-                                        : const Color(0xFFD97706).withAlpha(25),
+                                    color: const Color(0xFFF59E0B)
+                                        .withValues(alpha: 0.18),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: isDark
-                                        ? const Color(0xFFFBBF24).withAlpha(130)
-                                        : const Color(0xFFD97706).withAlpha(90),
+                                      color: const Color(0xFFFBBF24)
+                                          .withValues(alpha: 0.7),
                                       width: 1.2,
                                     ),
                                   ),
-                                  child: Text(
+                                  child: const Text(
                                     'BIBLIA INTERLINEAL DE ESTUDIO',
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11.5,
                                       fontWeight: FontWeight.w800,
-                                      letterSpacing: 1.5,
-                                      color: isDark
-                                          ? const Color(0xFFFCD34D)
-                                          : const Color(0xFFB45309),
+                                      letterSpacing: 1.6,
+                                      color: Color(0xFFFCD34D),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 14),
 
-                                // Fuentes e idiomas
-                                Text(
-                                  'Griego • Hebreo • Reina-Valera 1960',
+                                // Lema Bíblico Oficial
+                                const Text(
+                                  '«...escudriñando cada día las Escrituras» (Hechos 17:11)',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 13.5,
+                                    fontStyle: FontStyle.italic,
                                     fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.5,
-                                    color: isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF475569),
+                                    letterSpacing: 0.4,
+                                    color: Color(0xFFE2C48E),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Diccionarios Strong y Análisis Morfológico',
+                                const SizedBox(height: 10),
+
+                                // Fuentes Originales
+                                const Text(
+                                  'Hebreo BHS • Griego Tischendorf • Reina-Valera 1960\nDiccionarios Strong y Análisis Morfológico',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    color: isDark
-                                        ? const Color(0xFF64748B)
-                                        : const Color(0xFF64748B),
+                                    height: 1.45,
+                                    color: Color(0xFFA89884),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 38),
+                          const SizedBox(height: 36),
 
                           // -------------------------------------------------
-                          // BARRA DE CARGA Y ESTADO
+                          // BARRA DE CARGA ÁMBAR Y MENSAJE DIDÁCTICO
                           // -------------------------------------------------
                           AnimatedBuilder(
                             animation: _controller,
@@ -340,30 +320,27 @@ class _SplashScreenState extends State<SplashScreen>
                                     borderRadius: BorderRadius.circular(10),
                                     child: LinearProgressIndicator(
                                       value: _animDone && !_dbReady
-                                          ? null // indeterminado mientras carga BD
+                                          ? null // indeterminado mientras termina BD
                                           : _loadingProgress,
-                                      minHeight: 5,
-                                      backgroundColor: isDark
-                                          ? Colors.white.withAlpha(25)
-                                          : Colors.black.withAlpha(20),
+                                      minHeight: 4.5,
+                                      backgroundColor:
+                                          Colors.white.withValues(alpha: 0.12),
                                       valueColor:
-                                          AlwaysStoppedAnimation<Color>(
-                                        isDark
-                                            ? const Color(0xFF60A5FA)
-                                            : const Color(0xFF2563EB),
+                                          const AlwaysStoppedAnimation<Color>(
+                                        Color(0xFFF59E0B), // Ámbar líquido
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
+                                const SizedBox(height: 14),
                                 Text(
                                   _statusText,
-                                  style: TextStyle(
-                                    fontSize: 12,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 12.5,
                                     fontWeight: FontWeight.w500,
-                                    color: isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF64748B),
+                                    letterSpacing: 0.2,
+                                    color: Color(0xFFE2C48E),
                                   ),
                                 ),
                               ],
@@ -375,19 +352,20 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
 
-                // Botón discreto inferior para saltar si lo desea
+                // Aviso discreto inferior
                 Positioned(
                   bottom: 16,
                   left: 0,
                   right: 0,
                   child: Center(
                     child: Text(
-                      _dbReady ? 'Toca para continuar' : 'Preparando base de datos...',
+                      _dbReady
+                          ? 'Toca para continuar'
+                          : 'Abriendo manuscritos...',
                       style: TextStyle(
                         fontSize: 11,
-                        color: isDark
-                            ? Colors.white.withAlpha(80)
-                            : Colors.black.withAlpha(80),
+                        letterSpacing: 0.3,
+                        color: const Color(0xFFE2C48E).withValues(alpha: 0.55),
                       ),
                     ),
                   ),
@@ -400,51 +378,62 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildLogoEmblem(bool isDark) {
-    return Container(
-      width: 124,
-      height: 124,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? const Color(0xFF3B82F6).withAlpha(100)
-                : const Color(0xFF2563EB).withAlpha(80),
-            blurRadius: 28,
-            spreadRadius: 2,
-            offset: const Offset(0, 6),
+  Widget _buildLogoWithCelestialGlow() {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Halo Dorado Central (Celestial Glow)
+        Container(
+          width: 220,
+          height: 220,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                const Color(0xFFFBBF24).withValues(alpha: 0.22), // Resplandor dorado suave
+                Colors.transparent,
+              ],
+            ),
           ),
-          BoxShadow(
-            color: const Color(0xFFF59E0B).withAlpha(60),
-            blurRadius: 16,
-            spreadRadius: -2,
-            offset: const Offset(0, 0),
-          ),
-        ],
-        border: Border.all(
-          color: const Color(0xFFF59E0B).withAlpha(160),
-          width: 2.0,
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(26),
-        child: Image.asset(
-          'assets/images/berea_interlineal_icon.jpg',
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: const Color(0xFF0B132B),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.auto_stories_rounded,
-                size: 58,
-                color: Color(0xFFFCD34D),
+        // Logotipo Central Berea Interlineal en Contenedor Squircle
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: const Color(0xFFFBBF24).withValues(alpha: 0.55),
+              width: 1.8,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                blurRadius: 26,
+                spreadRadius: 2,
               ),
-            );
-          },
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(26),
+            child: Image.asset(
+              'assets/images/berea_interlineal_icon.jpg',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: const Color(0xFF14110E),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.auto_stories_rounded,
+                    size: 58,
+                    color: Color(0xFFFCD34D),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 }

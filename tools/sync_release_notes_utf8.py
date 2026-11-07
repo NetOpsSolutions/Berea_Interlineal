@@ -84,17 +84,16 @@ def build_releases_payload() -> list[dict]:
         {
             "tag": "1.3.1",
             "id": 422149278,
-            "name": "Berea Interlineal v1.3.1 - Persistencia SQLite ACID & Centro OTA",
+            "name": "Berea Interlineal v1.3.1: Edición Manuscrito Alejandrino",
             "body": (
-                "## 🚀 Novedades en Berea Interlineal v1.3.1 (Build 5)\n\n"
-                "### 🗄️ Persistencia Real en SQLite (`logos_user_data.db`)\n"
-                "- **Almacenamiento permanente ACID (WAL)**: Marcadores, notas de versículos, notas léxicas Strong, historial de lectura y respaldo de preferencias de interfaz ahora se almacenan en una base de datos SQLite dedicada e independiente de la base bíblica de solo lectura.\n"
-                "- **Compatibilidad total con Release / R8**: Reglas ProGuard/R8 reforzadas para `androidx.datastore` y aislamiento completo de inicialización para garantizar persistencia inmediata tras cierres forzados o reinicios del dispositivo.\n"
-                "- **Migrador automático sin pérdida**: Importación transparente al instante de datos previos desde `SharedPreferences` hacia SQLite.\n\n"
-                "### 🔗 Enlaces Léxicos Strong, Concordancia y Guía Contextual v1.3.1\n"
-                "- **Hipervínculos táctiles entre códigos Strong**: Toca referencias como `G3056` o `H430` dentro de una definición para saltar directamente a su raíz léxica.\n"
-                "- **Concordancia «Dónde Aparece»**: Todas las ocurrencias bíblicas agrupadas en acordeón por libro con resaltado automático.\n"
-                "- **Guía interactiva específica de v1.3.1**: Se despliega automáticamente tras actualizar para presentar las mejoras de esta edición y puede repetirse desde *Ajustes → Ver guía de uso*.\n\n"
+                "# 📜 Berea Interlineal v1.3.1: Edición Manuscrito Alejandrino\n\n"
+                "### 🎨 Nueva Experiencia Visual y Didáctica\n"
+                "* **Fondo de Pergamino Alejandrino**: Reemplazo del blanco digital por un tono cálido de papiro y arena marfil (`#F5EEDB`) en Modo Claro, y códice en penumbra (`#181412`) en Modo Oscuro.\n"
+                "* **Pantalla de Bienvenida Solemne**: Presentación majestuosa con atmósfera de cuero antiguo, resplandor dorado, barra de carga en oro ámbar y el lema oficial de **Hechos 17:11** (*«...escudriñando cada día las Escrituras»*).\n\n"
+                "### 💾 Persistencia y Rendimiento\n"
+                "* **Persistencia Real en SQLite**: Base de datos dedicada permanente (`logos_user_data.db`) para marcadores, notas e historial.\n"
+                "* **Actualizador In-App OTA**: Descarga optimizada según la arquitectura de procesador del teléfono.\n"
+                "* **Navegación Léxica Mejorada**: Hipervínculos entre códigos Strong derivados y acordeón de ocurrencias por libro.\n\n"
                 "---\n\n"
                 f"{build_download_section('1.3.1', 'Logos_K_Logos_1.3.1.ipa')}"
             ),

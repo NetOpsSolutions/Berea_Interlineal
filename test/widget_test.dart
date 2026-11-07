@@ -28,8 +28,8 @@ void main() {
     expect(find.byType(SplashScreen), findsOneWidget);
     expect(find.text('BEREA INTERLINEAL'), findsOneWidget);
     expect(find.text('BIBLIA INTERLINEAL DE ESTUDIO'), findsOneWidget);
-    expect(find.text('Griego • Hebreo • Reina-Valera 1960'), findsOneWidget);
-    expect(find.text('Diccionarios Strong y Análisis Morfológico'), findsOneWidget);
+    expect(find.text('«...escudriñando cada día las Escrituras» (Hechos 17:11)'), findsOneWidget);
+    expect(find.text('Hebreo BHS \u2022 Griego Tischendorf \u2022 Reina-Valera 1960\nDiccionarios Strong y An\u00e1lisis Morfol\u00f3gico'), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
 
     // 2. Simular el avance del tiempo de animación

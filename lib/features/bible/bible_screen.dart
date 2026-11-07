@@ -1911,6 +1911,25 @@ class _InterlinearWordTile extends StatelessWidget {
     final t = Theme.of(context);
     final prefix = isHebrew ? 'H' : 'G';
 
+    final isDark = t.brightness == Brightness.dark;
+    final tileBg = isDark ? const Color(0xFF2A221C) : const Color(0xFFF3EAD5);
+    final tileBorder = isDark
+        ? Border.all(color: const Color(0xFF785B3F).withValues(alpha: 0.55), width: 1.0)
+        : Border.all(color: const Color(0xFFDFCFAF), width: 1.0);
+    final tileShadow = [
+      if (isDark)
+        BoxShadow(
+          color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
+          blurRadius: 6,
+        )
+      else
+        const BoxShadow(
+          color: Color(0x18000000),
+          blurRadius: 4,
+          offset: Offset(0, 2),
+        ),
+    ];
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -1919,8 +1938,9 @@ class _InterlinearWordTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: t.colorScheme.outlineVariant),
-          color: t.colorScheme.surfaceContainerHighest,
+          border: tileBorder,
+          color: tileBg,
+          boxShadow: tileShadow,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

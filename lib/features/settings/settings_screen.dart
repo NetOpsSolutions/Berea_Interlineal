@@ -491,29 +491,40 @@ class SettingsScreenState extends State<SettingsScreen> {
       case '1.3.1':
         return const [
           _VersionFeatureItem(
+            icon: Icons.auto_stories_rounded,
+            title: 'Entorno Visual Pergamino Alejandrino',
+            desc:
+                'Nuevo diseño cálido inspirado en los manuscritos antiguos de papiro y vitela. Reduce el cansancio visual y brinda una experiencia de lectura bíblica inmersiva tanto en Modo Claro como en Modo Oscuro.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.movie_filter_rounded,
+            title: 'Nueva Introducción y Lema de Berea',
+            desc:
+                'Pantalla de bienvenida solemne con fondo de cuero antiguo, iluminación celestial, barra de progreso en oro ámbar y el lema bíblico oficial: «...escudriñando cada día las Escrituras» (Hechos 17:11).',
+          ),
+          _VersionFeatureItem(
             icon: Icons.storage_rounded,
-            title: 'Persistencia Permanente SQLite ACID',
-            desc: 'Base dedicada logos_user_data.db que conserva notas y marcadores ante reinicios.',
-          ),
-          _VersionFeatureItem(
-            icon: Icons.sync_rounded,
-            title: 'Migrador Automático sin Pérdida',
-            desc: 'Importación transparente al instante de tus favoritos previos hacia SQLite.',
-          ),
-          _VersionFeatureItem(
-            icon: Icons.link_rounded,
-            title: 'Hipervínculos entre Códigos Strong',
-            desc: 'Enlaces táctiles en palabras derivadas para saltar directo a su raíz léxica.',
-          ),
-          _VersionFeatureItem(
-            icon: Icons.format_list_bulleted_rounded,
-            title: 'Concordancia «Dónde Aparece»',
-            desc: 'Ocurrencias agrupadas en acordeón por libro bíblico con resaltado nítido.',
+            title: 'Persistencia permanente en SQLite',
+            desc:
+                'Marcadores, notas e historial ahora se resguardan de forma atómica en logos_user_data.db, garantizando que nunca se borren al cerrar o reiniciar la app.',
           ),
           _VersionFeatureItem(
             icon: Icons.system_update_rounded,
-            title: 'Actualizador OTA Multi-Procesador',
-            desc: 'Detección automática de CPU (arm64-v8a, armeabi-v7a, x86_64) con barra de progreso.',
+            title: 'Actualizador In-App OTA Multi-Procesador',
+            desc:
+                'Detección automática de procesador (arm64, armv7, x86_64, universal) y descarga directa con barra de progreso desde GitHub Releases.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.link_rounded,
+            title: 'Hipervínculos en códigos Strong derivados',
+            desc:
+                'Toca las referencias derivadas entre paréntesis dentro de las definiciones para abrir ese Strong directamente sin perder el contexto.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.format_list_bulleted_rounded,
+            title: 'Dónde aparece desplegable',
+            desc:
+                'Acordeón por libro con todas las apariciones de cada palabra y resaltado de marcador que conserva el color de fuente original.',
           ),
         ];
 
