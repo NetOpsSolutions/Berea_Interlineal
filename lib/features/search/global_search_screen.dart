@@ -81,7 +81,6 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-          backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Búsqueda Global'),
       ),

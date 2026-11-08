@@ -221,59 +221,55 @@ class HomeShellState extends State<HomeShell> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        ParchmentBackground(
-          isDark: isDark,
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: IndexedStack(index: _index, children: screens),
-            bottomNavigationBar: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF6B4E2B).withValues(alpha: 0.8)
-                        : const Color(0xFFD4C0A0),
-                    width: 1.0,
-                  ),
+        Scaffold(
+          body: IndexedStack(index: _index, children: screens),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isDark
+                      ? const Color(0xFF4A3E34)
+                      : const Color(0xFFDFCFAF),
+                  width: 1.0,
                 ),
               ),
-              child: NavigationBar(
-                backgroundColor: isDark
-                    ? const Color(0xFF16100D)
-                    : const Color(0xFFEADCC4),
-                indicatorColor: isDark
-                    ? const Color(0xFF3B2C1E)
-                    : const Color(0xFFDEC59E),
-                selectedIndex: _index,
-                onDestinationSelected: (v) => setState(() => _index = v),
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.menu_book_outlined),
-                    selectedIcon: Icon(Icons.menu_book),
-                    label: 'Biblia',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.search_outlined),
-                    selectedIcon: Icon(Icons.search),
-                    label: 'Búsqueda',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.translate_outlined),
-                    selectedIcon: Icon(Icons.translate),
-                    label: 'Diccionario',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.bookmarks_outlined),
-                    selectedIcon: Icon(Icons.bookmarks),
-                    label: 'Mi Estudio',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.settings_outlined),
-                    selectedIcon: Icon(Icons.settings),
-                    label: 'Ajustes',
-                  ),
-                ],
-              ),
+            ),
+            child: NavigationBar(
+              backgroundColor: isDark
+                  ? const Color(0xFF1B1613)
+                  : const Color(0xFFEDE4CE),
+              indicatorColor: isDark
+                  ? const Color(0xFF382A1D)
+                  : const Color(0xFFE2D3B5),
+              selectedIndex: _index,
+              onDestinationSelected: (v) => setState(() => _index = v),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.menu_book_outlined),
+                  selectedIcon: Icon(Icons.menu_book),
+                  label: 'Biblia',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.search_outlined),
+                  selectedIcon: Icon(Icons.search),
+                  label: 'Búsqueda',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.translate_outlined),
+                  selectedIcon: Icon(Icons.translate),
+                  label: 'Diccionario',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.bookmarks_outlined),
+                  selectedIcon: Icon(Icons.bookmarks),
+                  label: 'Mi Estudio',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings),
+                  label: 'Ajustes',
+                ),
+              ],
             ),
           ),
         ),

@@ -88,7 +88,7 @@ def build_releases_payload() -> list[dict]:
             "body": (
                 "# 📜 Berea Interlineal v1.3.1: Edición Manuscrito Alejandrino\n\n"
                 "### 🎨 Nueva Experiencia Visual y Didáctica\n"
-                "* **Fondo de Pergamino Alejandrino**: Reemplazo del blanco digital por un tono cálido de papiro y arena marfil (`#F5EEDB`) en Modo Claro, y códice en penumbra (`#181412`) en Modo Oscuro.\n"
+                "* **Fondo de Pergamino Alejandrino**: Reemplazo del blanco digital por un tono cálido de papiro y arena marfil (`#F5EEDB`) en Modo Claro, y códice en penumbra (`#181412`) en Modo Oscuro. Cero líneas de libreta, cero distracciones.\n"
                 "* **Pantalla de Bienvenida Solemne**: Presentación majestuosa con atmósfera de cuero antiguo, resplandor dorado, barra de carga en oro ámbar y el lema oficial de **Hechos 17:11** (*«...escudriñando cada día las Escrituras»*).\n\n"
                 "### 💾 Persistencia y Rendimiento\n"
                 "* **Persistencia Real en SQLite**: Base de datos dedicada permanente (`logos_user_data.db`) para marcadores, notas e historial.\n"

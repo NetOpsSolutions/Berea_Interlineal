@@ -504,7 +504,6 @@ class BibleScreenState extends State<BibleScreen> {
             : null;
 
         return Scaffold(
-          backgroundColor: Colors.transparent,
           appBar: AppBar(
             title: Text(
               chapterMode ? '${_book.name} $_chapter' : 'Biblia Interlineal',
@@ -1913,58 +1912,45 @@ class _InterlinearWordTile extends StatelessWidget {
     final prefix = isHebrew ? 'H' : 'G';
 
     final isDark = t.brightness == Brightness.dark;
-    final tileGradient = isDark
-        ? const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF2C221A), Color(0xFF1E1712)],
+    final tileDecoration = isDark
+        ? BoxDecoration(
+            color: const Color(0xFF2A221C),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: const Color(0xFF4D3B2C),
+              width: 1.0,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x24000000),
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
           )
-        : const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFCF8EE), Color(0xFFF0E1C6)],
+        : BoxDecoration(
+            color: const Color(0xFFF3EAD5), // Papiro suave
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: const Color(0xFFDFCFAF),
+              width: 1.0,
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x12000000),
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
           );
-    final tileBorder = isDark
-        ? Border.all(color: const Color(0xFFD4A359).withValues(alpha: 0.7), width: 1.2)
-        : Border.all(color: const Color(0xFFC8B392), width: 1.2);
-    final tileShadow = [
-      if (isDark) ...[
-        BoxShadow(
-          color: const Color(0xFFF59E0B).withValues(alpha: 0.18),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-        const BoxShadow(
-          color: Color(0x55000000),
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-      ] else ...[
-        const BoxShadow(
-          color: Color(0x286E4F28),
-          blurRadius: 5,
-          offset: Offset(0, 2),
-        ),
-        const BoxShadow(
-          color: Color(0x15FFFFFF),
-          blurRadius: 0,
-          offset: Offset(0, -1),
-        ),
-      ],
-    ];
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         constraints: const BoxConstraints(minWidth: 88, maxWidth: 138),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: tileGradient,
-          border: tileBorder,
-          boxShadow: tileShadow,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: tileDecoration,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
