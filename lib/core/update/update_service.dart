@@ -239,7 +239,7 @@ class UpdateService extends ChangeNotifier {
     await getAppVersion();
     final deviceArch = await getDeviceArchitecture();
 
-    final url = Uri.parse('https://api.github.com/repos/$githubOwner/$githubRepo/releases/latest');
+    final url = Uri.parse('https://api.github.com/repos/$githubOwner/$githubRepo/releases?per_page=5');
 
     try {
       final client = HttpClient();
@@ -256,8 +256,40 @@ class UpdateService extends ChangeNotifier {
       final responseBody = await response.transform(utf8.decoder).join();
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(responseBody) as Map<String, dynamic>;
-        final release = AppReleaseInfo.fromGitHubJson(data, deviceArch: deviceArch);
+        final dynamic decoded = jsonDecode(responseBody);
+        AppReleaseInfo? release;
+
+        if (decoded is List && decoded.isNotEmpty) {
+          // Seleccionar la release de mayor versión semántica entre las publicaciones recientes
+          for (final item in decoded) {
+            if (item is Map<String, dynamic>) {
+              final isDraft = item['draft'] as bool? ?? false;
+              if (isDraft) continue;
+
+              final candidate = AppReleaseInfo.fromGitHubJson(item, deviceArch: deviceArch);
+              if (release == null) {
+                release = candidate;
+              } else if (isRemoteVersionNewer(release.version, candidate.version)) {
+                release = candidate;
+              }
+            }
+          }
+        } else if (decoded is Map<String, dynamic>) {
+          release = AppReleaseInfo.fromGitHubJson(decoded, deviceArch: deviceArch);
+        }
+
+        if (release == null) {
+          final res = UpdateCheckResult(
+            status: UpdateStatus.noReleases,
+            currentVersion: _cachedVersion,
+            deviceArchitecture: deviceArch,
+            message: 'No se encontraron publicaciones de versiones en el repositorio.',
+          );
+          _lastResult = res;
+          _status = UpdateStatus.noReleases;
+          notifyListeners();
+          return res;
+        }
 
         if (release.apkAssets.isEmpty) {
           final res = UpdateCheckResult(

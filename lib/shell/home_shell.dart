@@ -36,8 +36,10 @@ class HomeShellState extends State<HomeShell> {
   final GlobalKey<SettingsScreenState> _settingsKey = GlobalKey<SettingsScreenState>();
 
   Timer? _updateTimer;
+  Timer? _periodicUpdateTimer;
   Timer? _autoTourTimer;
   StreamSubscription<AppReleaseInfo>? _notificationTapSub;
+  String? _lastInAppPromptTag;
 
   bool _showInteractiveTour = false;
   String _tourVersionLabel = UpdateService.fallbackVersion;
@@ -51,6 +53,7 @@ class HomeShellState extends State<HomeShell> {
   @override
   void dispose() {
     _updateTimer?.cancel();
+    _periodicUpdateTimer?.cancel();
     _autoTourTimer?.cancel();
     _notificationTapSub?.cancel();
     super.dispose();
@@ -113,10 +116,17 @@ class HomeShellState extends State<HomeShell> {
       }
     });
 
-    _updateTimer = Timer(const Duration(seconds: 5), () {
+    // 1. Revisión inicial rápida a los 4 segundos tras arrancar la app
+    _updateTimer = Timer(const Duration(seconds: 4), () {
       if (mounted && !_showInteractiveTour) {
         _checkUpdateSilently();
       }
+      // 2. Revisión automática continua y periódica cada 2 minutos mientras la app esté abierta
+      _periodicUpdateTimer = Timer.periodic(const Duration(minutes: 2), (_) {
+        if (mounted && !_showInteractiveTour) {
+          _checkUpdateSilently();
+        }
+      });
     });
   }
 
@@ -127,22 +137,25 @@ class HomeShellState extends State<HomeShell> {
       if (res.hasUpdate && res.releaseInfo != null) {
         final release = res.releaseInfo!;
 
-        // Publicar en el Centro de Notificaciones nativo de Android
+        // 1. Publicar en el Centro de Notificaciones nativo de Android
         await UpdateService.instance.showSystemUpdateNotification(release);
         if (!mounted) return;
 
-        // Mostrar aviso in-app con alto contraste garantizado (claro/oscuro)
-        AppSnackBar.show(
-          context,
-          icon: Icons.system_update_rounded,
-          tone: AppSnackBarTone.update,
-          message: 'Nueva versión ${release.tagName} disponible',
-          actionLabel: 'VER NOVEDADES',
-          duration: const Duration(seconds: 10),
-          onAction: () {
-            showUpdateDialog(context, release);
-          },
-        );
+        // 2. Mostrar aviso in-app con alto contraste garantizado una sola vez por versión
+        if (_lastInAppPromptTag != release.tagName) {
+          _lastInAppPromptTag = release.tagName;
+          AppSnackBar.show(
+            context,
+            icon: Icons.system_update_rounded,
+            tone: AppSnackBarTone.update,
+            message: 'Nueva versión ${release.tagName} disponible',
+            actionLabel: 'VER NOVEDADES',
+            duration: const Duration(seconds: 10),
+            onAction: () {
+              showUpdateDialog(context, release);
+            },
+          );
+        }
       }
     } catch (_) {}
   }
