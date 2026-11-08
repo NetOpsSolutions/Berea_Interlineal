@@ -169,6 +169,20 @@ class UpdateService extends ChangeNotifier {
 
   DeviceArchitecture? _cachedArchitecture;
 
+  String? _lastReleasesEtag;
+  AppReleaseInfo? _cachedLatestRelease;
+  DateTime? _lastCheckTime;
+
+  DateTime? get lastCheckTime => _lastCheckTime;
+
+  /// Indica si es seguro realizar una comprobación automática silenciosa
+  /// respetando una ventana de enfriamiento (cooldown de 5 minutos por defecto)
+  /// para evitar bloqueos por tasa de peticiones de GitHub (60 req/h).
+  bool canCheckSilently({Duration minCooldown = const Duration(minutes: 5)}) {
+    if (_lastCheckTime == null) return true;
+    return DateTime.now().difference(_lastCheckTime!) >= minCooldown;
+  }
+
   UpdateStatus _status = UpdateStatus.idle;
   UpdateCheckResult? _lastResult;
   DownloadProgress? _currentProgress;
@@ -233,11 +247,17 @@ class UpdateService extends ChangeNotifier {
   /// Consulta la API de GitHub Releases para verificar si hay una nueva versión
   /// y autoselecciona el paquete APK que coincide con la arquitectura de la CPU.
   Future<UpdateCheckResult> checkForUpdates({bool isManual = false}) async {
+    // Si es comprobación automática silenciosa y no ha vencido el cooldown, retornar último resultado conocido
+    if (!isManual && !canCheckSilently(minCooldown: const Duration(minutes: 5)) && _lastResult != null) {
+      return _lastResult!;
+    }
+
     _status = UpdateStatus.checking;
     notifyListeners();
 
     await getAppVersion();
     final deviceArch = await getDeviceArchitecture();
+    _lastCheckTime = DateTime.now();
 
     final url = Uri.parse('https://api.github.com/repos/$githubOwner/$githubRepo/releases?per_page=5');
 
@@ -251,11 +271,31 @@ class UpdateService extends ChangeNotifier {
       if (githubToken != null && githubToken!.isNotEmpty) {
         request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $githubToken');
       }
+      // Cabecera condicional ETag: si nada cambió en GitHub, responde HTTP 304 con coste 0 en el Rate Limit
+      if (_lastReleasesEtag != null && _lastReleasesEtag!.isNotEmpty && !isManual) {
+        request.headers.set(HttpHeaders.ifNoneMatchHeader, _lastReleasesEtag!);
+      }
 
       final response = await request.close().timeout(const Duration(seconds: 12));
       final responseBody = await response.transform(utf8.decoder).join();
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 304) {
+        // HTTP 304 Not Modified: GitHub confirma que no hay releases nuevas.
+        // ¡Esta respuesta NO cuenta contra el límite de 60 peticiones/hora de GitHub!
+        final cached = _cachedLatestRelease;
+        final res = UpdateCheckResult(
+          status: UpdateStatus.upToDate,
+          currentVersion: _cachedVersion,
+          releaseInfo: cached,
+          deviceArchitecture: deviceArch,
+          message: 'Berea Interlineal está actualizado a la última versión disponible (v$_cachedVersion).',
+        );
+        _lastResult = res;
+        _status = UpdateStatus.upToDate;
+        notifyListeners();
+        return res;
+      } else if (response.statusCode == 200) {
+        _lastReleasesEtag = response.headers.value(HttpHeaders.etagHeader);
         final dynamic decoded = jsonDecode(responseBody);
         AppReleaseInfo? release;
 
@@ -267,7 +307,9 @@ class UpdateService extends ChangeNotifier {
               if (isDraft) continue;
 
               final candidate = AppReleaseInfo.fromGitHubJson(item, deviceArch: deviceArch);
-              if (release == null) {
+              _cachedLatestRelease = release;
+
+        if (release == null) {
                 release = candidate;
               } else if (isRemoteVersionNewer(release.version, candidate.version)) {
                 release = candidate;

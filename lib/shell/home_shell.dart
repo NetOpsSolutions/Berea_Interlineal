@@ -26,7 +26,7 @@ class HomeShell extends StatefulWidget {
   State<HomeShell> createState() => HomeShellState();
 }
 
-class HomeShellState extends State<HomeShell> {
+class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   int _index = 0;
 
   final GlobalKey<BibleScreenState> _bibleKey = GlobalKey<BibleScreenState>();
@@ -47,16 +47,28 @@ class HomeShellState extends State<HomeShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _setupUpdateNotificationsAndTour();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _updateTimer?.cancel();
     _periodicUpdateTimer?.cancel();
     _autoTourTimer?.cancel();
     _notificationTapSub?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Al volver a la app o reconectar pantalla/red, verificar si venció la ventana de enfriamiento (5 min)
+      if (UpdateService.instance.canCheckSilently(minCooldown: const Duration(minutes: 5))) {
+        _checkUpdateSilently();
+      }
+    }
   }
 
   /// Permite iniciar o repetir manualmente la guía visual interactiva en cualquier momento
@@ -116,13 +128,13 @@ class HomeShellState extends State<HomeShell> {
       }
     });
 
-    // 1. Revisión inicial rápida a los 4 segundos tras arrancar la app
-    _updateTimer = Timer(const Duration(seconds: 4), () {
+    // 1. Espera de cortesía de 15 segundos: arranque suave sin competir por I/O, BD ni CPU
+    _updateTimer = Timer(const Duration(seconds: 15), () {
       if (mounted && !_showInteractiveTour) {
         _checkUpdateSilently();
       }
-      // 2. Revisión automática continua y periódica cada 2 minutos mientras la app esté abierta
-      _periodicUpdateTimer = Timer.periodic(const Duration(minutes: 2), (_) {
+      // 2. Revisión periódica prudente cada 15 minutos mientras la app esté en uso prolongado
+      _periodicUpdateTimer = Timer.periodic(const Duration(minutes: 15), (_) {
         if (mounted && !_showInteractiveTour) {
           _checkUpdateSilently();
         }
