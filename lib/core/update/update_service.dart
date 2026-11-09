@@ -305,10 +305,14 @@ class UpdateService extends ChangeNotifier {
             if (item is Map<String, dynamic>) {
               final isDraft = item['draft'] as bool? ?? false;
               if (isDraft) continue;
+              final isPrerelease = item['prerelease'] as bool? ?? false;
+              if (isPrerelease) continue;
 
               final candidate = AppReleaseInfo.fromGitHubJson(item, deviceArch: deviceArch);
-              _cachedLatestRelease = release;
-
+              _cachedLatestRelease = release;
+
+
+
         if (release == null) {
                 release = candidate;
               } else if (isRemoteVersionNewer(release.version, candidate.version)) {
