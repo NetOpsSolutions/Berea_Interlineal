@@ -263,13 +263,13 @@ void main() {
       expect(restored.apkFileName, equals('berea_interlineal_1.3.2_arm64-v8a.apk'));
     });
 
-    test('Simulated demo release autoselects device architecture for v1.3.2', () {
+    test('Simulated demo release autoselects device architecture for v1.4.0', () {
       const arm64 = DeviceArchitecture(
         primaryAbi: 'arm64-v8a',
         supportedAbis: ['arm64-v8a', 'armeabi-v7a'],
       );
       final demo = UpdateService.instance.getSimulatedDemoRelease(arch: arm64);
-      expect(demo.tagName, equals('v1.3.2'));
+      expect(demo.tagName, equals('v1.4.0'));
       expect(demo.apkAbi, equals('arm64-v8a'));
       expect(demo.apkFileName, contains('arm64'));
       expect(demo.releaseNotes, contains('arm64-v8a'));

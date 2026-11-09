@@ -31,6 +31,12 @@ class TourStepsFactory {
     Future<void> Function()? onPrepareSettingsReadingStep,
     Future<void> Function()? onPrepareSettingsUpdaterStep,
     Future<void> Function()? onPrepareSettingsReplayStep,
+    GlobalKey? tourDrawerButtonKey,
+    GlobalKey? tourBottomNavDictionaryKey,
+    GlobalKey? tourBottomNavStudyKey,
+    GlobalKey? tourBookSummaryButtonKey,
+    GlobalKey? tourDrawerTheologicalKey,
+    GlobalKey? tourThemeToggleKey,
   }) {
     final cleanVer = normalizeVersion(version);
 
@@ -74,6 +80,7 @@ class TourStepsFactory {
           onPrepareSettingsReadingStep: onPrepareSettingsReadingStep,
           onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
           onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
+          tourThemeToggleKey: tourThemeToggleKey,
         );
       case '1.4.0':
       default:
@@ -82,6 +89,13 @@ class TourStepsFactory {
           dictionaryControlsKey: dictionaryControlsKey,
           studyTabsKey: studyTabsKey,
           bibleVerseKeyResolver: bibleVerseKeyResolver,
+          tourDrawerButtonKey: tourDrawerButtonKey,
+          tourBottomNavDictionaryKey: tourBottomNavDictionaryKey,
+          tourBottomNavStudyKey: tourBottomNavStudyKey,
+          tourBookSummaryButtonKey: tourBookSummaryButtonKey,
+          tourDrawerTheologicalKey: tourDrawerTheologicalKey,
+          tourThemeToggleKey: tourThemeToggleKey,
+          onPrepareBibleStep: onPrepareBibleStep,
         );
     }
   }
@@ -321,6 +335,7 @@ class TourStepsFactory {
     Future<void> Function()? onPrepareSettingsReadingStep,
     Future<void> Function()? onPrepareSettingsUpdaterStep,
     Future<void> Function()? onPrepareSettingsReplayStep,
+    GlobalKey? tourThemeToggleKey,
   }) {
     return [
       // Paso 1: Nueva Identidad Oficial "Berea Interlineal"
@@ -398,18 +413,18 @@ class TourStepsFactory {
         targetKeyResolver: () => settingsUpdaterKeyResolver?.call() ?? settingsKey,
       ),
 
-      // Paso 6: Contraste Visual Accesible WCAG AAA
+      // Paso 6: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
       TourStepConfig(
-        badge: 'ACCESIBILIDAD',
-        icon: Icons.contrast_rounded,
-        title: 'Legibilidad Óptima en Temas Claro y Oscuro',
+        badge: 'TEMA RÁPIDO',
+        isNewFeature: true,
+        icon: Icons.light_mode_rounded,
+        title: 'Alternador de Modo Claro y Oscuro (☀️/🌙)',
         description:
-            'Contraste visual accesible WCAG AAA calibrado en todas las pantallas, tarjetas y modos de lectura para proteger tu vista.',
-        pointerLabel: '🌗 Tema, modos y escala de letra',
-        demoKind: TourDemoKind.readingPreferences,
-        tabIndex: 4,
-        onPrepareStep: onPrepareSettingsReadingStep,
-        targetKeyResolver: () => settingsReadingKeyResolver?.call() ?? settingsKey,
+            '¡Novedad a partir de la v1.3.2! Cambia al instante entre el modo claro (Pergamino Diurno) y el modo oscuro (Noche Alejandrina) con un solo toque desde la barra superior usando el icono de sol y luna, sin necesidad de ir a Ajustes.',
+        pointerLabel: '☀️/🌙 Alterna modo claro u oscuro',
+        demoKind: TourDemoKind.topBarControls,
+        tabIndex: 0,
+        targetKeyResolver: () => tourThemeToggleKey ?? bibleAppBarKeyResolver?.call() ?? bibleKey,
       ),
 
       // Paso 7: Repetir Guía de Uso
@@ -436,67 +451,136 @@ class TourStepsFactory {
     required GlobalKey dictionaryControlsKey,
     required GlobalKey studyTabsKey,
     GlobalKey? Function()? bibleVerseKeyResolver,
+    GlobalKey? tourDrawerButtonKey,
+    GlobalKey? tourBottomNavDictionaryKey,
+    GlobalKey? tourBottomNavStudyKey,
+    GlobalKey? tourBookSummaryButtonKey,
+    GlobalKey? tourDrawerTheologicalKey,
+    GlobalKey? tourThemeToggleKey,
+    Future<void> Function()? onPrepareBibleStep,
   }) {
     return [
+      // Paso 1: BIENVENIDA & LECTURA
+      TourStepConfig(
+        badge: 'BIENVENIDA & LECTURA',
+        icon: Icons.auto_stories_rounded,
+        title: 'Lector Bíblico Interlineal Continuo',
+        description:
+            'Lee fluidamente las Escrituras en español con su texto original en Hebreo y Griego. Toca cualquier palabra interlineal para ver su análisis gramatical y raíz. (Función consolidada)',
+        pointerLabel: '📖 Texto bíblico e interlineal',
+        demoKind: TourDemoKind.interlinearWords,
+        tabIndex: 0,
+        onPrepareStep: onPrepareBibleStep,
+        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 2: NUEVA NAVEGACIÓN
+      TourStepConfig(
+        badge: 'NUEVA NAVEGACIÓN',
+        isNewFeature: true,
+        icon: Icons.menu_rounded,
+        title: 'Nuevo Menú Lateral: Persiana de Estudio (☰)',
+        description:
+            '¡Gran novedad de la v1.4.0! Toca el icono ☰ o desliza tu dedo desde el borde izquierdo hacia la derecha para desplegar la persiana con todas las herramientas avanzadas.',
+        pointerLabel: '☰ Menú persiana lateral',
+        demoKind: TourDemoKind.topBarControls,
+        tabIndex: 0,
+        targetKeyResolver: () => tourDrawerButtonKey ?? bibleKey,
+      ),
+
+      // Paso 3: TEMA RÁPIDO
+      TourStepConfig(
+        badge: 'TEMA RÁPIDO',
+        isNewFeature: true,
+        icon: Icons.light_mode_rounded,
+        title: 'Alternador de Modo Claro y Oscuro (☀️/🌙)',
+        description:
+            'Cambia al instante entre la lectura en Pergamino Diurno y Noche Alejandrina con un solo toque en el icono de sol y luna en la barra superior, sin entrar a Ajustes.',
+        pointerLabel: '☀️/🌙 Alternador rápido de tema',
+        demoKind: TourDemoKind.topBarControls,
+        tabIndex: 0,
+        targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,
+      ),
+
+      // Paso 4: NUEVO MÓDULO
       TourStepConfig(
         badge: 'NUEVO MÓDULO',
         isNewFeature: true,
-        icon: Icons.auto_stories_rounded,
-        title: 'Autor, Destinatarios, Contexto y Aplicación',
+        icon: Icons.history_edu_rounded,
+        title: 'Resumen Bíblico de los 66 Libros',
         description:
-            'Ficha técnica detallada de cada libro antes de leerlo, con contexto histórico, puntos más resaltantes y cómo aplica a tu vida diaria.',
-        pointerLabel: '📜 Resumen de los 66 libros',
+            'Descubre el autor, fecha de redacción, contexto histórico, puntos clave y lecciones prácticas de cada libro. ¡Disponible en la persiana y también con el botón de pergamino en el lector!',
+        pointerLabel: '📜 Ficha técnica y resumen',
         demoKind: TourDemoKind.futureModule,
         tabIndex: 0,
-        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () => tourBookSummaryButtonKey ?? bibleKey,
       ),
+
+      // Paso 5: NUEVO MÓDULO
       TourStepConfig(
-        badge: 'BIOGRAFÍAS',
+        badge: 'NUEVO MÓDULO',
         isNewFeature: true,
         icon: Icons.person_search_rounded,
-        title: 'Vida, Ministerio y Llamamiento de los Escritores',
+        title: 'Biografías de Escritores Sagrados',
         description:
-            'Conoce el trasfondo histórico de Moisés, David, Isaías, los Apóstoles y profetas con hipervínculos a sus escritos.',
-        pointerLabel: '👤 Galería de escritores bíblicos',
+            'Conoce la vida, vocación y legado de los hombres inspirados por Dios (Moisés, David, Lucas, Pablo...), con enlaces interactivos a sus nombres en los idiomas originales.',
+        pointerLabel: '👤 Escritores inspirados',
         demoKind: TourDemoKind.futureModule,
         tabIndex: 0,
-        targetKeyResolver: () => bibleKey,
+        targetKeyResolver: () => tourDrawerButtonKey ?? bibleKey,
       ),
+
+      // Paso 6: LÉXICO Y RAÍCES
       TourStepConfig(
-        badge: 'DIFUSIÓN',
-        isNewFeature: true,
-        icon: Icons.share_rounded,
-        title: 'Comparte Versículos en Estados y Chats',
+        badge: 'LÉXICO Y RAÍCES',
+        icon: Icons.translate_rounded,
+        title: 'Diccionario Strong Griego y Hebreo',
         description:
-            'Genera imágenes elegantes de pasajes bíblicos con fondos devocionales en alta resolución para WhatsApp e Instagram con un solo toque.',
-        pointerLabel: '📲 Tarjetas gráficas devocionales',
-        demoKind: TourDemoKind.futureModule,
-        tabIndex: 0,
-        targetKeyResolver: () => bibleKey,
+            'Accesible al instante en la barra inferior. Busca definiciones exhaustivas, concordancia y palabras derivadas con hipervínculos directos. (Función consolidada)',
+        pointerLabel: '🔤 Diccionario Strong',
+        demoKind: TourDemoKind.typewriterDictionary,
+        tabIndex: 1,
+        targetKeyResolver: () => tourBottomNavDictionaryKey ?? dictionaryControlsKey,
       ),
+
+      // Paso 7: ESTUDIO PERSONAL
       TourStepConfig(
-        badge: 'DEVOCIONAL DIARIO',
-        isNewFeature: true,
-        icon: Icons.wb_sunny_rounded,
-        title: 'Palabra Diaria con Acceso al Interlineal',
+        badge: 'ESTUDIO PERSONAL',
+        icon: Icons.bookmark_added_rounded,
+        title: 'Mi Estudio: Notas, Marcadores e Historial',
         description:
-            'Notificación matutina inspiradora y botón directo para estudiar los términos originales del pasaje diario.',
-        pointerLabel: '☀️ Versículo del día',
-        demoKind: TourDemoKind.futureModule,
-        tabIndex: 3,
-        targetKeyResolver: () => studyTabsKey,
+            'Todo tu trabajo personal guardado de forma permanente en SQLite: notas devocionales, historial de versículos y marcadores ordenados. (Función consolidada)',
+        pointerLabel: '📑 Panel de Mi Estudio',
+        demoKind: TourDemoKind.studyCollections,
+        tabIndex: 2,
+        targetKeyResolver: () => tourBottomNavStudyKey ?? studyTabsKey,
       ),
+
+      // Paso 8: TEOLOGÍA VISUAL
       TourStepConfig(
-        badge: 'ESTUDIO COMPARATIVO',
+        badge: 'TEOLOGÍA VISUAL',
         isNewFeature: true,
-        icon: Icons.alt_route_rounded,
-        title: 'Treasury of Scripture Knowledge Integrado',
+        icon: Icons.palette_rounded,
+        title: '5 Resaltadores Teológicos con Filtro Rápido',
         description:
-            'Consulta referencias cruzadas TSK en línea vinculadas directamente a cada versículo de estudio.',
-        pointerLabel: '🔀 Referencias cruzadas TSK',
+            'Clasifica versículos por colores doctrinales: 🟡 Promesas, 🟢 Mandamientos, 🔵 Atributos de Dios, 🔴 Advertencias y 🟣 Profecía. ¡Ahora puedes filtrarlos directamente desde el menú lateral!',
+        pointerLabel: '🎨 Resaltados teológicos',
         demoKind: TourDemoKind.futureModule,
         tabIndex: 2,
-        targetKeyResolver: () => dictionaryControlsKey,
+        targetKeyResolver: () => tourDrawerTheologicalKey ?? tourBottomNavStudyKey ?? studyTabsKey,
+      ),
+
+      // Paso 9: AYUDA PERMANENTE
+      TourStepConfig(
+        badge: 'AYUDA PERMANENTE',
+        icon: Icons.explore_rounded,
+        title: 'Tu Guía Siempre a Mano',
+        description:
+            'Puedes volver a repasar este recorrido interactivo cuando lo desees desde el menú lateral o desde Ajustes ➔ Ver guía de uso.',
+        pointerLabel: '🧭 Guía de uso permanente',
+        demoKind: TourDemoKind.replayGuide,
+        tabIndex: 0,
+        targetKeyResolver: () => tourDrawerButtonKey ?? bibleKey,
       ),
     ];
   }

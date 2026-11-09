@@ -1,3 +1,4 @@
+import 'package:berea_interlineal/shell/widgets/berea_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -167,8 +168,10 @@ void main() {
       studyTabsKey: k4,
       settingsKey: k5,
     );
-    expect(v140.length, equals(5));
-    expect(v140.first.badge, equals('NUEVO MÓDULO'));
+    expect(v140.length, equals(9));
+    expect(v140.first.badge, equals('BIENVENIDA & LECTURA'));
+    expect(v140[2].badge, equals('TEMA RÁPIDO'));
+    expect(v132[5].badge, equals('TEMA RÁPIDO'));
   });
 
   test('Phase 3 StudyService highlights, typography settings, and chapter verses work end-to-end', () async {
@@ -235,6 +238,10 @@ void main() {
     expect(study.shouldShowVersionTour('1.3.2'), isTrue);
     await study.markVersionTourSeen('1.3.2');
     expect(study.shouldShowVersionTour('1.3.2'), isFalse);
+
+    expect(study.shouldShowVersionTour('1.4.0'), isTrue);
+    await study.markVersionTourSeen('1.4.0');
+    expect(study.shouldShowVersionTour('1.4.0'), isFalse);
   });
 
   testWidgets('HomeShell replays InteractiveTourOverlay from Settings "Ver guía de uso"', (WidgetTester tester) async {
@@ -251,8 +258,22 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Ir a la pestaña Ajustes
-    await tester.tap(find.text('Ajustes'));
+    // Abrir Drawer tocando el icono de menú hamburguesa
+    await tester.tap(find.byIcon(Icons.menu_rounded));
+    await tester.pumpAndSettle();
+
+    final drawerScrollable = find.descendant(
+      of: find.byType(BereaDrawer),
+      matching: find.byType(Scrollable),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Ajustes del Sistema'),
+      150,
+      scrollable: drawerScrollable,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Ajustes del Sistema'));
     await tester.pumpAndSettle();
 
     // Desplazar hasta la sección Acerca de la Aplicación
@@ -272,24 +293,24 @@ void main() {
     final guidePos = tester.getCenter(find.text('Ver guía de uso'));
     expect(guidePos.dy, greaterThan(welcomePos.dy));
 
-    // Iniciar manualmente la guía visual interactiva v1.3.2 (7 pasos)
+    // Iniciar manualmente la guía visual interactiva integral v1.4.0 (8 pasos)
     await tester.tap(find.text('Ver guía de uso'));
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(InteractiveTourOverlay), findsOneWidget);
-    expect(find.text('1 / 7'), findsOneWidget);
-    expect(find.text('Inspirados en Hechos 17:11'), findsOneWidget);
+    expect(find.text('1 / 9'), findsOneWidget);
+    expect(find.text('Lector Bíblico Interlineal Continuo'), findsOneWidget);
 
     // Avanzar al paso 2 y paso 3
     await tester.tap(find.text('Siguiente'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('2 / 7'), findsOneWidget);
-    expect(find.text('Lectura Continua y Expansión al Toque'), findsOneWidget);
+    expect(find.text('2 / 9'), findsOneWidget);
+    expect(find.text('Nuevo Menú Lateral: Persiana de Estudio (☰)'), findsOneWidget);
 
     await tester.tap(find.text('Siguiente'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('3 / 7'), findsOneWidget);
-    expect(find.text('Fuentes Ezra SIL, Cardo y Frank Ruhl Libre'), findsOneWidget);
+    expect(find.text('3 / 9'), findsOneWidget);
+    expect(find.text('Alternador de Modo Claro y Oscuro (☀️/🌙)'), findsOneWidget);
 
     // Cerrar guía con "Omitir" y drenar temporizadores pendientes
     await tester.tap(find.text('Omitir'));

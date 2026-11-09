@@ -669,4 +669,141 @@ class DatabaseService {
       hebrewEntries: hebrew,
     );
   }
+
+  // -------------------------------------------------------------------------
+  // RESÚMENES BÍBLICOS Y BIOGRAFÍAS (v1.4.0)
+  // -------------------------------------------------------------------------
+
+  Future<List<BookSummary>> getAllBookSummaries() async {
+    await initialize();
+    if (_memoryMode) return [];
+    final rows = await _db!.rawQuery('''
+      SELECT 
+        s.book_id,
+        s.book_code,
+        b.name AS book_name,
+        s.testament,
+        s.category,
+        s.author_id,
+        a.name_es AS author_name,
+        a.strong_code,
+        s.recipients,
+        s.date_written,
+        s.historical_context,
+        s.key_themes,
+        s.key_verse_ref,
+        s.practical_application
+      FROM book_summaries s
+      LEFT JOIN books b ON b.rowid = s.book_id
+      LEFT JOIN biblical_authors a ON a.author_id = s.author_id
+      ORDER BY s.book_id ASC
+    ''');
+    return rows.map((r) => BookSummary.fromMap(r)).toList();
+  }
+
+  Future<BookSummary?> getBookSummaryByCode(String bookCode) async {
+    await initialize();
+    if (_memoryMode) return null;
+    final rows = await _db!.rawQuery('''
+      SELECT 
+        s.book_id,
+        s.book_code,
+        b.name AS book_name,
+        s.testament,
+        s.category,
+        s.author_id,
+        a.name_es AS author_name,
+        a.strong_code,
+        s.recipients,
+        s.date_written,
+        s.historical_context,
+        s.key_themes,
+        s.key_verse_ref,
+        s.practical_application
+      FROM book_summaries s
+      LEFT JOIN books b ON b.rowid = s.book_id
+      LEFT JOIN biblical_authors a ON a.author_id = s.author_id
+      WHERE s.book_code = ? OR b.id = ?
+      LIMIT 1
+    ''', [bookCode, bookCode]);
+    if (rows.isEmpty) return null;
+    return BookSummary.fromMap(rows.first);
+  }
+
+  Future<BookSummary?> getBookSummaryById(int bookId) async {
+    await initialize();
+    if (_memoryMode) return null;
+    final rows = await _db!.rawQuery('''
+      SELECT 
+        s.book_id,
+        s.book_code,
+        b.name AS book_name,
+        s.testament,
+        s.category,
+        s.author_id,
+        a.name_es AS author_name,
+        a.strong_code,
+        s.recipients,
+        s.date_written,
+        s.historical_context,
+        s.key_themes,
+        s.key_verse_ref,
+        s.practical_application
+      FROM book_summaries s
+      LEFT JOIN books b ON b.rowid = s.book_id
+      LEFT JOIN biblical_authors a ON a.author_id = s.author_id
+      WHERE s.book_id = ?
+      LIMIT 1
+    ''', [bookId]);
+    if (rows.isEmpty) return null;
+    return BookSummary.fromMap(rows.first);
+  }
+
+  Future<List<BiblicalAuthor>> getAllBiblicalAuthors() async {
+    await initialize();
+    if (_memoryMode) return [];
+    final rows = await _db!.query('biblical_authors', orderBy: 'author_id ASC');
+    return rows.map((r) => BiblicalAuthor.fromMap(r)).toList();
+  }
+
+  Future<BiblicalAuthor?> getBiblicalAuthorById(int authorId) async {
+    await initialize();
+    if (_memoryMode) return null;
+    final rows = await _db!.query(
+      'biblical_authors',
+      where: 'author_id = ?',
+      whereArgs: [authorId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return BiblicalAuthor.fromMap(rows.first);
+  }
+
+  Future<List<BookSummary>> getBooksByAuthorId(int authorId) async {
+    await initialize();
+    if (_memoryMode) return [];
+    final rows = await _db!.rawQuery('''
+      SELECT 
+        s.book_id,
+        s.book_code,
+        b.name AS book_name,
+        s.testament,
+        s.category,
+        s.author_id,
+        a.name_es AS author_name,
+        a.strong_code,
+        s.recipients,
+        s.date_written,
+        s.historical_context,
+        s.key_themes,
+        s.key_verse_ref,
+        s.practical_application
+      FROM book_summaries s
+      LEFT JOIN books b ON b.rowid = s.book_id
+      LEFT JOIN biblical_authors a ON a.author_id = s.author_id
+      WHERE s.author_id = ?
+      ORDER BY s.book_id ASC
+    ''', [authorId]);
+    return rows.map((r) => BookSummary.fromMap(r)).toList();
+  }
 }

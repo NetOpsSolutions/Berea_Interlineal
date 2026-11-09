@@ -135,3 +135,116 @@ class GlobalSearchResult {
 
   bool get isEmpty => totalCount == 0;
 }
+
+class BiblicalAuthor {
+  final int authorId;
+  final String nameEs;
+  final String nameOriginal;
+  final String? strongCode;
+  final String era;
+  final String occupation;
+  final String callingVerse;
+  final String biography;
+
+  const BiblicalAuthor({
+    required this.authorId,
+    required this.nameEs,
+    required this.nameOriginal,
+    this.strongCode,
+    required this.era,
+    required this.occupation,
+    required this.callingVerse,
+    required this.biography,
+  });
+
+  factory BiblicalAuthor.fromMap(Map<String, Object?> m) => BiblicalAuthor(
+        authorId: (m['author_id'] as int?) ?? 0,
+        nameEs: (m['name_es'] as String?) ?? '',
+        nameOriginal: (m['name_original'] as String?) ?? '',
+        strongCode: m['strong_code'] as String?,
+        era: (m['era'] as String?) ?? '',
+        occupation: (m['occupation'] as String?) ?? '',
+        callingVerse: (m['calling_verse'] as String?) ?? '',
+        biography: (m['biography'] as String?) ?? '',
+      );
+
+  Map<String, Object?> toMap() => {
+        'author_id': authorId,
+        'name_es': nameEs,
+        'name_original': nameOriginal,
+        'strong_code': strongCode,
+        'era': era,
+        'occupation': occupation,
+        'calling_verse': callingVerse,
+        'biography': biography,
+      };
+}
+
+class BookSummary {
+  final int bookId;
+  final String bookCode;
+  final String bookName;
+  final String testament;
+  final String category;
+  final int authorId;
+  final String authorName;
+  final String? authorStrongCode;
+  final String recipients;
+  final String dateWritten;
+  final String historicalContext;
+  final String keyThemes;
+  final String keyVerseRef;
+  final String practicalApplication;
+
+  const BookSummary({
+    required this.bookId,
+    required this.bookCode,
+    required this.bookName,
+    required this.testament,
+    required this.category,
+    required this.authorId,
+    required this.authorName,
+    this.authorStrongCode,
+    required this.recipients,
+    required this.dateWritten,
+    required this.historicalContext,
+    required this.keyThemes,
+    required this.keyVerseRef,
+    required this.practicalApplication,
+  });
+
+  factory BookSummary.fromMap(Map<String, Object?> m) => BookSummary(
+        bookId: (m['book_id'] as int?) ?? 0,
+        bookCode: (m['book_code'] as String?) ?? '',
+        bookName: (m['book_name'] as String?) ?? (m['name'] as String?) ?? '',
+        testament: (m['testament'] as String?) ?? '',
+        category: (m['category'] as String?) ?? '',
+        authorId: (m['author_id'] as int?) ?? 0,
+        authorName: (m['author_name'] as String?) ?? (m['name_es'] as String?) ?? '',
+        authorStrongCode: m['strong_code'] as String?,
+        recipients: (m['recipients'] as String?) ?? '',
+        dateWritten: (m['date_written'] as String?) ?? '',
+        historicalContext: (m['historical_context'] as String?) ?? '',
+        keyThemes: (m['key_themes'] as String?) ?? '',
+        keyVerseRef: (m['key_verse_ref'] as String?) ?? '',
+        practicalApplication: (m['practical_application'] as String?) ?? '',
+      );
+
+  Map<String, Object?> toMap() => {
+        'book_id': bookId,
+        'book_code': bookCode,
+        'book_name': bookName,
+        'testament': testament,
+        'category': category,
+        'author_id': authorId,
+        'author_name': authorName,
+        'author_strong_code': authorStrongCode,
+        'recipients': recipients,
+        'date_written': dateWritten,
+        'historical_context': historicalContext,
+        'key_themes': keyThemes,
+        'key_verse_ref': keyVerseRef,
+        'practical_application': practicalApplication,
+      };
+}
+

@@ -10,17 +10,26 @@ import '../../data/parsing_decoder.dart';
 import '../../data/study_service.dart';
 import '../dictionary/strong_detail_screen.dart';
 import '../dictionary/widgets/linked_strong_text.dart';
+import '../summaries/book_summary_sheet.dart';
 
 class BibleScreen extends StatefulWidget {
   final String? initialBookId;
   final int? initialChapter;
   final int? initialVerse;
+  final VoidCallback? onOpenDrawer;
+  final GlobalKey? tourDrawerButtonKey;
+  final GlobalKey? tourBookSummaryButtonKey;
+  final GlobalKey? tourThemeToggleKey;
 
   const BibleScreen({
     super.key,
     this.initialBookId,
     this.initialChapter,
     this.initialVerse,
+    this.onOpenDrawer,
+    this.tourDrawerButtonKey,
+    this.tourBookSummaryButtonKey,
+    this.tourThemeToggleKey,
   });
 
   @override
@@ -41,6 +50,22 @@ class BibleScreenState extends State<BibleScreen> {
   bool _loading = false;
 
   final ScrollController _chapterScrollController = ScrollController();
+
+  Future<void> _openCurrentBookSummary() async {
+    final summary = await DatabaseService.instance.getBookSummaryByCode(_bookId);
+    if (!mounted) return;
+    if (summary != null) {
+      BookSummarySheet.show(
+        context,
+        summary: summary,
+        onOpenVerse: (b, c, v) => goToVerse(b, c, v),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ficha técnica no disponible para este libro.')),
+      );
+    }
+  }
   final Map<int, GlobalKey> _verseKeys = {};
   final GlobalKey tourAppBarActionsKey = GlobalKey(debugLabel: 'tourAppBarActions');
   final GlobalKey tourSingleVerseKey = GlobalKey(debugLabel: 'tourSingleVerse');
@@ -505,11 +530,38 @@ class BibleScreenState extends State<BibleScreen> {
 
         return Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              key: widget.tourDrawerButtonKey,
+              icon: const Icon(Icons.menu_rounded),
+              tooltip: 'Menú persiana de estudio',
+              onPressed: widget.onOpenDrawer ?? () => Scaffold.of(context).openDrawer(),
+            ),
             title: Text(
               chapterMode ? '${_book.name} $_chapter' : 'Biblia Interlineal',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             actions: [
+              IconButton(
+                key: widget.tourThemeToggleKey,
+                icon: Icon(
+                  theme.brightness == Brightness.dark
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFFFBBF24)
+                      : const Color(0xFFB45309),
+                ),
+                tooltip: theme.brightness == Brightness.dark
+                    ? 'Cambiar a modo claro (☀️ Pergamino Diurno)'
+                    : 'Cambiar a modo oscuro (🌙 Noche Alejandrina)',
+                onPressed: () => StudyService.instance.toggleTheme(),
+              ),
+              IconButton(
+                key: widget.tourBookSummaryButtonKey,
+                icon: const Icon(Icons.history_edu_rounded),
+                tooltip: 'Ficha histórica y resumen de ${_book.name}',
+                onPressed: _openCurrentBookSummary,
+              ),
               Row(
                 key: tourAppBarActionsKey,
                 mainAxisSize: MainAxisSize.min,

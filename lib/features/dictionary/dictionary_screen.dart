@@ -8,11 +8,13 @@ import 'strong_detail_screen.dart';
 class DictionaryScreen extends StatefulWidget {
   final String initialLanguage;
   final GlobalKey? tourControlsKey;
+  final VoidCallback? onOpenDrawer;
 
   const DictionaryScreen({
     super.key,
     required this.initialLanguage,
     this.tourControlsKey,
+    this.onOpenDrawer,
   });
   @override
   State<DictionaryScreen> createState() => _DictionaryScreenState();
@@ -72,7 +74,30 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       listenable: StudyService.instance,
       builder: (context, _) {
         return Scaffold(
-          appBar: AppBar(title: Text('Diccionario Strong ${_lbl(_language)}')),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.menu_rounded),
+              tooltip: 'Menú persiana de estudio',
+              onPressed: widget.onOpenDrawer ?? () => Scaffold.of(context).openDrawer(),
+            ),
+            title: Text('Diccionario Strong ${_lbl(_language)}'),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  t.brightness == Brightness.dark
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                  color: t.brightness == Brightness.dark
+                      ? const Color(0xFFFBBF24)
+                      : const Color(0xFFB45309),
+                ),
+                tooltip: t.brightness == Brightness.dark
+                    ? 'Cambiar a modo claro (☀️ Pergamino Diurno)'
+                    : 'Cambiar a modo oscuro (🌙 Noche Alejandrina)',
+                onPressed: () => StudyService.instance.toggleTheme(),
+              ),
+            ],
+          ),
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),

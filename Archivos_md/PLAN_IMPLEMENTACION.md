@@ -8,6 +8,7 @@ Este plan detalla la hoja de ruta técnica y funcional para consolidar **Berea I
 > * **Firmado Oficial y Play Protect**: Consultar [PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_FIRMADO_PRODUCCION_Y_PLAY_PROTECT.md) para el keystore oficial, refirmado de v1.3.0/v1.3.1/v1.3.2 y certificación contra falsos positivos en Android.
 > * **Estandarización de Guías de Uso, Limpieza de Ajustes y Releases**: Consultar [PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_ESTANDARIZACION_GUIAS_Y_RELEASES.md) para el despliegue de guías interactivas dinámicas por versión (v1.3.0, v1.3.1, v1.3.2, v1.4.0+), purga de menús residuales en Ajustes, almacenamiento local en `release_builds/` y publicación automatizada en GitHub Releases.
 > * **Entorno Visual Pergamino e Introducción Solemne**: Consultar [PLAN_DESPLIEGUE_PERGAMINO_E_INTRODUCCION.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_DESPLIEGUE_PERGAMINO_E_INTRODUCCION.md) para la especificación del fondo cálido de Pergamino Alejandrino (Claro/Oscuro), la nueva pantalla de bienvenida con el lema de Hechos 17:11 y su documentación como novedad en la v1.3.1.
+> * **Versión 1.4.0 (Resumen Bíblico, Biografías y Menú Híbrido)**: Consultar [PLAN_DESPLIEGUE_V1.4.0_MODULO_RESUMEN_Y_DRAWER.md](file:///d:/user/Desktop/SMART%20FILES/OCHOA%20MORA/TRABAJOS%20EN%20PHYTON/LogosKLogos/V0/Archivos_md/PLAN_DESPLIEGUE_V1.4.0_MODULO_RESUMEN_Y_DRAWER.md) para la arquitectura de navegación híbrida (Barra inferior de 3 botones + Persiana lateral), la enciclopedia histórica de 66 libros, biografías de escritores y publicación como Borrador (Draft) en GitHub Releases.
 
 ---
 
@@ -21,6 +22,7 @@ flowchart TD
     ResumenBiblico --> Fase4["🚀 Fase 4: Herramientas de Estudio Bíblico e Interlineal (PRÓXIMA FASE)"]
     Fase4 --> Fase5["Fase 5: Difusión en WhatsApp y Versículo Diario"]
     Fase5 --> Fase6["Fase 6: Búsqueda Morfológica, Respaldo y Multiplataforma"]
+    Fase6 --> Fase7["🎓 Fase 7: Formación Teológica y Ministerial (Hermenéutica y Homilética)"]
 ```
 
 ---
@@ -522,6 +524,95 @@ flowchart TD
 
 ---
 
+## 🎓 Fase 7: Módulo de Formación Teológica y Ministerial (Hermenéutica, Homilética y Exégesis)
+
+> [!NOTE]
+> **PROPÓSITO ACADÉMICO Y PASTORAL**:
+> Este módulo dota a **Berea Interlineal** de una dimensión pedagógica de instituto bíblico y seminario teológico. Está diseñado para creyentes, líderes, predicadores, maestros de escuela dominical y estudiantes que buscan herramientas rigurosas para la interpretación fiel de las Escrituras, la confección homilética de sermones y el desenvolvimiento ético y elocuente en el púlpito.
+
+```mermaid
+flowchart LR
+    subgraph S1["1. Hermenéutica Bíblica"]
+        H1["Reglas de Interpretación"] --> H2["Exégesis vs. Eiségesis"]
+        H2 --> H3["Géneros Literarios"]
+    end
+    subgraph S2["2. Homilética y Bosquejos"]
+        HM1["Tipos de Sermón (Expositivo, Textual, Temático)"] --> HM2["Pasos para Construir un Sermón"]
+        HM2 --> HM3["Plantillas de Bosquejo en SQLite"]
+    end
+    subgraph S3["3. Desenvolvimiento Pastoral"]
+        O1["Oratoria y Voz"] --> O2["Lenguaje Corporal y Conexión"]
+        O2 --> O3["Errores Frecuentes al Predicar"]
+    end
+    S1 & S2 & S3 --> BereaInterlineal["Enlace con Interlineal y Diccionario Strong"]
+```
+
+### 1. Hermenéutica Bíblica: La Ciencia y el Arte de la Interpretación
+1. **Fundamentos Esenciales**:
+   * **¿Qué es la Hermenéutica?**: Del griego *hermeneuo* (G2059 - interpretar, traducir, explicar). La disciplina que establece los principios y reglas para comprender el significado exacto del texto sagrado.
+   * **Exégesis vs. Eiségesis (La Distinción Cardinal)**:
+     * **Exégesis** (*sacar hacia afuera*): El método piadoso y científico que busca extraer del texto lo que el autor bíblico original quiso decir a sus primeros lectores bajo la inspiración divina.
+     * **Eiségesis** (*meter hacia adentro*): El grave error de proyectar ideas preconcebidas, doctrinas humanas o prejuicios personales dentro del texto bíblico, forzando a la Biblia a decir lo que el lector desea.
+2. **Las 5 Reglas de Oro de la Interpretación Bíblica**:
+   * *Regla 1: La Escritura es su propio intérprete (Analogía de la Fe)*: Los pasajes oscuros o difíciles deben entenderse a la luz de los pasajes claros.
+   * *Regla 2: El Contexto es Rey*: El contexto inmediato (versículos anteriores y posteriores), el contexto del libro y el contexto canónico completo. «Un texto fuera de contexto es un pretexto».
+   * *Regla 3: Significado Gramatical e Histórico*: Estudio etimológico de las raíces hebreas y griegas (usando directamente los códigos Strong integrados en Berea) y la situación histórica de la época.
+   * *Regla 4: Sentido Literal y Tipológico*: Entender el texto en su sentido natural y ordinario, a menos que el lenguaje figurado, parabólico o poético indique lo contrario.
+   * *Regla 5: El Propósito Redentor Centrado en Cristo*: Toda la Escritura apunta al plan soberano de redención en Jesucristo (Lucas 24:27, 44).
+3. **Guía por Géneros Literarios**:
+   * *Narrativa Histórica*: Cómo extraer principios sin convertir descripciones en mandamientos normativos.
+   * *Poesía y Sabiduría*: Paralelismos hebreos (sinónimo, antitético, sintético) y figuras retóricas.
+   * *Profecía y Apocalíptica*: Simbolismo bíblico, cumplimiento histórico y cumplimiento escatológico.
+   * *Epístolas*: Argumentación lógica, resolución de controversias doctrinales y aplicación ética.
+
+---
+
+### 2. Homilética Bíblica: El Arte y la Preparación del Sermón
+1. **¿Qué es la Homilética?**: Del griego *homilia* (G3657 - plática, conversación, comunión). La disciplina pastoral que enseña a comunicar la verdad bíblica con fidelidad textual, claridad pedagógica y poder transformador para el corazón del oyente.
+2. **Los 3 Tipos Clásicos de Sermón**:
+   * **Sermón Expositivo (El Estándar Supremo)**:
+     * Nace de un pasaje bíblico continuo (uno o varios versículos). El tema, los puntos principales y las subdivisiones provienen directamente de la estructura del texto sagrado.
+   * **Sermón Textual**:
+     * Basado en un solo versículo o frase bíblica que provee tanto la proposición central como las divisiones principales.
+   * **Sermón Temático**:
+     * Se enfoca en una doctrina o tema específico (ej. la justificación por fe, el perdón, la oración) reuniendo pasajes de diferentes libros bíblicos bajo una tesis coherente.
+3. **Los 7 Pasos Metodológicos para Construir un Sermón (Del Estudio al Púlpito)**:
+   * **Paso 1: Oración y Lectura Devocional**: Dependencia del Espíritu Santo y lectura repetida del pasaje en diferentes versiones.
+   * **Paso 2: Análisis Exegético con Berea**: Consulta del texto original en hebreo/griego, análisis de raíces con Strong y cotejo de términos morfológicos.
+   * **Paso 3: Descubrimiento de la Proposición Central (*Big Idea*)**: Formular en una sola frase clara y contundente: *«¿Cuál es la verdad única que el pasaje enseña?»*.
+   * **Paso 4: Formulación del Título y Bosquejo**:
+     * Título atractivo, bíblico y memorizable.
+     * Puntos principales (2 a 4 divisiones con paralelismo sintáctico y sustento bíblico).
+   * **Paso 5: La Introducción**: Cómo captar la atención en los primeros 90 segundos, crear interés y plantear la necesidad humana que el texto resolverá.
+   * **Paso 6: Ilustraciones Relevantes**: Ventanas que dejan entrar la luz a la verdad; cómo usar relatos cotidianos o históricos sin eclipsar el texto sagrado.
+   * **Paso 7: Conclusión y Llamado Práctico**: La respuesta a la pregunta: *«¿Y ahora qué debo hacer con esta verdad?»*. Aplicación pastoral y decisión.
+
+---
+
+### 3. Desenvolvimiento Pastoral, Oratoria y Ética del Predicador
+1. **La Vida del Mensajero como el Sermón Principal**:
+   * La autoridad espiritual emana de la integridad personal, la comunión secreta con Dios y la humildad pastoral.
+2. **Desenvolvimiento en el Púlpito y Expresión Corporal**:
+   * **Contacto Visual**: Mirar a toda la congregación de forma natural, sin fijar la vista en el techo, en las notas o en un solo sector.
+   * **Postura y Ademanes**: Movimientos corporales naturales que refuercen las palabras; evitar rigidez artificial o teatralidad exagerada.
+   * **Manejo de la Voz**: Modulación, ritmo, pausas enfáticas y claridad fonética; evitar tanto la monotonía soporífera como los gritos histriónicos continuos.
+   * **Manejo del Tiempo**: Respeto riguroso por el horario establecido (un buen sermón no es el más largo, sino el más claro y bíblico).
+3. **Decálogo de Errores Comunes al Predicar**:
+   * *Error 1: Moralismo sin Evangelio* (enseñar conducta sin la gracia capacitadora de Cristo).
+   * *Error 2: El sermón autobiográfico* (el predicador como protagonista en vez de Cristo).
+   * *Error 3: Saltar de versículo en versículo sin explicar ninguno*.
+   * *Error 4: Falta de aplicación práctica al mundo real*.
+   * *Error 5: Falta de preparación* (confundir la improvisación con la guía del Espíritu Santo).
+
+---
+
+### 4. Integración Práctica en Berea Interlineal
+* **Acceso desde el Menú Lateral Persiana**: Entrada dedicada titulada **«🎓 Instituto Bíblico y Formación Ministerial»**.
+* **Cuaderno Homilético de Sermones**: Espacio integrado con la base SQLite para que el usuario redacte, ordene y guarde sus propios bosquejos de sermones vinculados a los versículos estudiados.
+* **Fichas Didácticas Desplegables**: Formato interactivo tipo acordeón con modo lectura en Pergamino Alejandrino.
+
+---
+
 ## 🗓️ Hoja de Ruta Actualizada (Milestones)
 
 | Hito | Alcance | Estado / Prioridad |
@@ -538,3 +629,4 @@ flowchart TD
 | **M10: Resumen Bíblico y Biografías** | Fichas técnicas de los 66 libros (autor, fecha, destinatarios, contexto, puntos clave, aplicación) y perfiles biográficos de escritores | ⭐⭐⭐ Alta |
 | **M11: Estandarización Universal de Guías y Releases** | Adaptar guías interactivas a cada versión (v1.3.0, v1.3.1, v1.3.2, v1.4.0+), purgar ajustes de depuración, firmar con release key y desplegar en GitHub Releases | ⭐⭐⭐ Alta |
 | **M12: Entorno Pergamino Alejandrino & Intro Solemne** | Fondo papiro/vitela (#F5EEDB / #181412), splash con halo dorado y Hechos 17:11 (documentado como novedad oficial en v1.3.1) | ⭐⭐⭐ Alta |
+| **M13: Instituto de Formación Ministerial** | Módulo de Hermenéutica (Exégesis vs Eiségesis), Homilética (pasos para sermones), oratoria pastoral y cuaderno de bosquejos | ⭐⭐ Media (v1.5.0+) |

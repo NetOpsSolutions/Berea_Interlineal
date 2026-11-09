@@ -103,6 +103,94 @@ class BookCatalog {
         .replaceAll('í', 'i')
         .replaceAll('ó', 'o')
         .replaceAll('ú', 'u')
+        .replaceAll('1ra', '1')
+        .replaceAll('2da', '2')
+        .replaceAll('3ra', '3')
+        .replaceAll('primera', '1')
+        .replaceAll('segunda', '2')
+        .replaceAll('tercera', '3')
         .replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
+
+  /// Analiza y normaliza una referencia textual bíblica en español
+  /// (ej. 'Éxodo 3:4', '1 Samuel 16:7', 'Daniel 2:19-23') a sus coordenadas canónicas.
+  static ScriptureReference? parseReference(String refStr, {String? defaultBookCode}) {
+    final ref = refStr.trim();
+    if (ref.isEmpty) return null;
+
+    final match = RegExp(
+      r'^(?:([1-3]?\s*[A-Za-zÁÉÍÓÚáéíóúñÑ]+)\s+)?(\d+)\s*:\s*(\d+)',
+    ).firstMatch(ref);
+    if (match == null) return null;
+
+    final bName = match.group(1)?.trim();
+    final ch = int.tryParse(match.group(2) ?? '1') ?? 1;
+    final vs = int.tryParse(match.group(3) ?? '1') ?? 1;
+
+    if (bName != null && bName.isNotEmpty) {
+      final book = findByNameOrId(bName);
+      if (book != null) {
+        return ScriptureReference(
+          bookId: book.id,
+          bookName: book.name,
+          chapter: ch,
+          verse: vs,
+          rawText: ref,
+        );
+      }
+    }
+
+    if (defaultBookCode != null) {
+      final book = byId(defaultBookCode);
+      if (book != null) {
+        return ScriptureReference(
+          bookId: book.id,
+          bookName: book.name,
+          chapter: ch,
+          verse: vs,
+          rawText: ref,
+        );
+      }
+    }
+
+    return null;
+  }
+
+  /// Descompone cadenas compuestas con múltiples pasajes separados por ';'
+  /// (ej. 'Hechos 12:12; 1 Pedro 5:13', 'Daniel 1:8; 2:19-23') heredando
+  /// el libro canónico contextual si no se especifica explícitamente en partes subsiguientes.
+  static List<ScriptureReference> parseMultiReferences(String text, {String? fallbackBookCode}) {
+    final results = <ScriptureReference>[];
+    String? currentBookCode = fallbackBookCode;
+    final parts = text.split(';').map((p) => p.trim()).where((p) => p.isNotEmpty);
+
+    for (final part in parts) {
+      final parsed = parseReference(part, defaultBookCode: currentBookCode);
+      if (parsed != null) {
+        results.add(parsed);
+        currentBookCode = parsed.bookId;
+      }
+    }
+    return results;
+  }
+}
+
+/// Representa una referencia bíblica canónica normalizada
+class ScriptureReference {
+  final String bookId;
+  final String bookName;
+  final int chapter;
+  final int verse;
+  final String rawText;
+
+  const ScriptureReference({
+    required this.bookId,
+    required this.bookName,
+    required this.chapter,
+    required this.verse,
+    required this.rawText,
+  });
+
+  @override
+  String toString() => '$bookName $chapter:$verse';
 }

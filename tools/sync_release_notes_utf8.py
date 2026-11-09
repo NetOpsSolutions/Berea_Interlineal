@@ -101,16 +101,20 @@ def build_releases_payload() -> list[dict]:
         {
             "tag": "v1.3.2",
             "id": 425000889,
-            "name": "Berea Interlineal v1.3.2 - Nueva Identidad, Guía Visual & Fase 3 UI/UX",
+            "name": "Berea Interlineal v1.3.2 - Nueva Identidad, Alternador Rápido Sol/Luna & Guía Visual",
             "body": (
                 "## 🚀 Novedades en Berea Interlineal v1.3.2 (Build 7)\n\n"
+                "### ☀️/🌙 Novedad Destacada: Alternador Rápido de Modo Claro y Oscuro (Sol y Luna)\n"
+                "- **Acceso Inmediato en la Barra Superior**: A partir de la versión 1.3.2 ya no es necesario acceder a la sección de Ajustes para alternar entre el modo claro (*Pergamino Diurno*) y el modo oscuro (*Noche Alejandrina*). Ahora cuentas con un botón accesible directamente en la barra superior (`AppBar`) de todas las pantallas principales (Biblia, Diccionario y Mi Estudio).\n"
+                "- **Icono Dinámico Alternante**: El icono alterna inteligentemente: muestra un Sol radiante (☀️) en modo oscuro para volver al día con un solo toque, y una Luna solemne (🌙) en modo claro para proteger la vista en lecturas nocturnas sin distracciones.\n"
+                "- **Sincronización Total en Caliente**: Cambio de ambiente visual instantáneo en toda la aplicación preservando tu posición exacta de lectura y estudio.\n\n"
+                "### 🧭 Guía Visual Interactiva Contextual (Tour v1.3.2 Actualizado)\n"
+                "- **Paso Didáctico Dedicado al Alternador Sol/Luna**: El recorrido guiado interactivo de 7 pasos señala e ilustra el uso del nuevo botón alternador en la barra superior para que el usuario aproveche esta mejora ergonómica desde el primer momento.\n"
+                "- **Aparición Inteligente y Repetible**: Se muestra automáticamente una sola vez al instalar o actualizar, y queda siempre disponible bajo demanda en *Ajustes → Ver guía de uso*.\n\n"
                 "### ✨ Transición Oficial a Berea Interlineal (Hechos 17:11)\n"
                 "- **Nueva Identidad Visual Oficial**: Logotipo renovado inspirado en Hechos 17:11 (Biblia sagrada abierta iluminada con la lente de aumento exegética en oro pulido y destellos azul zafiro).\n"
                 "- **Iconos Adaptativos Multi-resolución**: Integrados en Android (`mipmap-*` y adaptativo v26) e iOS (`AppIcon.appiconset`).\n"
                 "- **Repositorio Oficial**: `https://github.com/NetOpsSolutions/Berea_Interlineal`, manteniendo compatibilidad continua de actualizaciones OTA para todas las instalaciones previas.\n\n"
-                "### 🧭 Guía Visual Interactiva Contextual (Tour v1.3.2)\n"
-                "- **Recorrido Guiado Paso a Paso**: Al instalar o actualizar a esta versión se despliega automáticamente una presentación interactiva tipo Spotlight con las 7 novedades clave.\n"
-                "- **Aparición Inteligente Única**: Se muestra una sola vez por versión y queda siempre disponible bajo demanda en *Ajustes → Ver guía de uso*.\n\n"
                 "### 📖 Experiencia de Lectura por Capítulo Completo (Fase 3 UI/UX)\n"
                 "- **Lectura Continua de Capítulos Bíblicos**: Desplazamiento vertical fluido de capítulos completos con despliegue interlineal al instante al tocar cualquier versículo.\n"
                 "- **Gestos Táctiles Swipe**: Desliza a la izquierda o a la derecha para avanzar o retroceder de capítulo con naturalidad.\n\n"

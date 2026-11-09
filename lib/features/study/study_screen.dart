@@ -17,6 +17,8 @@ class StudyScreen extends StatefulWidget {
   final String initialHighlightColorFilter;
   final GlobalKey? tourTabsKey;
 
+  final VoidCallback? onOpenDrawer;
+
   const StudyScreen({
     super.key,
     this.onOpenVerse,
@@ -24,13 +26,22 @@ class StudyScreen extends StatefulWidget {
     this.initialNotesFilter = StudyNotesFilter.all,
     this.initialHighlightColorFilter = 'all',
     this.tourTabsKey,
+    this.onOpenDrawer,
   });
 
   @override
-  State<StudyScreen> createState() => _StudyScreenState();
+  State<StudyScreen> createState() => StudyScreenState();
 }
 
-class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStateMixin {
+class StudyScreenState extends State<StudyScreen> with SingleTickerProviderStateMixin {
+  void setHighlightFilter(String colorKey) {
+    if (_tabController.index != 1) {
+      _tabController.animateTo(1);
+    }
+    setState(() {
+      _highlightFilter = colorKey;
+    });
+  }
   late TabController _tabController;
   late StudyNotesFilter _notesFilter;
   late String _highlightFilter;
@@ -76,6 +87,7 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
     return ListenableBuilder(
       listenable: StudyService.instance,
       builder: (context, _) {
+        final theme = Theme.of(context);
         final bookmarks = StudyService.instance.bookmarks;
         final highlights = StudyService.instance.highlights;
         final verseNotes = StudyService.instance.verseNotes;
@@ -84,7 +96,28 @@ class _StudyScreenState extends State<StudyScreen> with SingleTickerProviderStat
 
         return Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.menu_rounded),
+              tooltip: 'Menú persiana de estudio',
+              onPressed: widget.onOpenDrawer ?? () => Scaffold.of(context).openDrawer(),
+            ),
             title: const Text('Mi Estudio'),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  theme.brightness == Brightness.dark
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFFFBBF24)
+                      : const Color(0xFFB45309),
+                ),
+                tooltip: theme.brightness == Brightness.dark
+                    ? 'Cambiar a modo claro (☀️ Pergamino Diurno)'
+                    : 'Cambiar a modo oscuro (🌙 Noche Alejandrina)',
+                onPressed: () => StudyService.instance.toggleTheme(),
+              ),
+            ],
             bottom: TabBar(
               key: widget.tourTabsKey,
               controller: _tabController,

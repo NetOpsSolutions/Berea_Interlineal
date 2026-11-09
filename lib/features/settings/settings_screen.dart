@@ -529,12 +529,71 @@ class SettingsScreenState extends State<SettingsScreen> {
         ];
 
       case '1.3.2':
-      default:
         return const [
           _VersionFeatureItem(
             icon: Icons.verified_rounded,
             title: 'Identidad Oficial Berea Interlineal',
             desc: 'Nuevo logotipo inspirado en Hechos 17:11 con Biblia iluminada y lupa exegética.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.menu_book_rounded,
+            title: 'Lectura por Capítulo Completo y Swipe',
+            desc: 'Scroll continuo con expansión interlineal al toque y gestos laterales entre capítulos.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.text_fields_rounded,
+            title: 'Tipografías Académicas SIL OFL',
+            desc: 'Fuentes Ezra SIL, Frank Ruhl Libre, Cardo y Gentium Plus con selector «TT».',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.palette_rounded,
+            title: '5 Resaltadores Teológicos',
+            desc: 'Clasifica versículos o frases en Promesas, Mandamientos, Atributos, Advertencias y Profecía.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.notifications_active_outlined,
+            title: 'Notificaciones Nativas y Contraste AAA',
+            desc: 'Avisos de actualización en la bandeja de Android con legibilidad óptima claro/oscuro.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.explore_rounded,
+            title: 'Guía de Uso Interactiva Contextual',
+            desc: 'Recorrido animado automático tras actualizar, repetible siempre en «Ver guía de uso».',
+          ),
+        ];
+
+      case '1.4.0':
+      default:
+        return const [
+          _VersionFeatureItem(
+            icon: Icons.menu_rounded,
+            title: 'Navegación Híbrida y Menú Persiana Lateral',
+            desc: 'Barra inferior rápida de 3 botones esenciales y menú persiana deslizable con herramientas avanzadas.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.history_edu_rounded,
+            title: 'Resumen Bíblico Canónico de los 66 Libros',
+            desc: 'Fichas exhaustivas con autor, fecha, destinatarios, contexto, temas clave, versículo interactivo y aplicación práctica.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.person_search_rounded,
+            title: 'Biografías de Escritores Sagrados',
+            desc: 'Vida, llamamiento, grafía original en hebreo/griego y códigos Strong enlazados a definiciones léxicas.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.palette_rounded,
+            title: 'Filtros Teológicos Rápidos en Mi Estudio',
+            desc: 'Acceso directo desde la persiana para filtrar versículos en Promesas, Mandamientos, Atributos, Advertencias y Profecía.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.light_mode_rounded,
+            title: 'Alternador Rápido de Tema (Sol / Luna ☀️/🌙)',
+            desc: 'Cambia al instante entre modo claro y oscuro con un toque en la barra superior o en la persiana, sin entrar a Ajustes.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.explore_rounded,
+            title: 'Guía de Uso Integral de 9 Pasos',
+            desc: 'Recorrido interactivo coordinado que repasa las funciones consolidadas y presenta las novedades de la versión 1.4.0.',
           ),
           _VersionFeatureItem(
             icon: Icons.menu_book_rounded,

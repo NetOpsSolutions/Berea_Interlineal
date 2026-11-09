@@ -61,12 +61,15 @@ Con diccionarios Strong griego y hebreo, análisis morfológico, concordancia cr
 - **🔄 Sistema de Actualización In-App (OTA)**:
   - Verificación y descarga directa de APKs oficiales desde GitHub Releases con confirmación de usuario.
 
-### Versión 1.3.2 (Próxima Publicación / En Desarrollo) — Identidad Oficial Berea, Guía Visual y Fase 3 UI/UX
+### Versión 1.3.2 (Próxima Publicación / En Desarrollo) — Identidad Oficial Berea, Alternador Rápido Sol/Luna, Guía Visual y Fase 3 UI/UX
+- **☀️/🌙 Alternador Rápido de Tema Claro y Oscuro (Sol y Luna)**:
+  - Botón de un solo toque en la barra superior (`AppBar`) de todas las pantallas principales (Biblia, Diccionario y Mi Estudio) para alternar al instante entre el modo claro (*Pergamino Diurno*) y el modo oscuro (*Noche Alejandrina*), sin necesidad de navegar a Ajustes.
+  - Icono dinámico alternante: muestra un Sol dorado en modo oscuro (para volver al día) y una Luna solemne en modo claro (para lectura nocturna).
 - **✨ Transición Oficial de Identidad ("Berea Interlineal")**:
   - Nuevo logotipo oficial inspirado en Hechos 17:11 (Biblia sagrada abierta con lente exegética de aumento iluminada en oro y azul zafiro).
   - Nuevos iconos adaptativos multi-resolución para Android (`mipmap-*`, v26) e iOS (`AppIcon`).
 - **🧭 Guía Visual Interactiva Contextual (Tour v1.3.2)**:
-  - Recorrido interactivo tipo coach-mark guiando paso a paso por las 7 innovaciones clave de la versión.
+  - Recorrido interactivo tipo coach-mark guiando paso a paso por las 7 innovaciones clave de la versión, incluyendo el nuevo botón alternador Sol/Luna en la barra superior.
 - **📖 Lectura por Capítulo Completo (Fase 3 UI/UX)**:
   - Scroll vertical continuo de capítulos completos con expansión interlineal instantánea al pulsar cualquier versículo.
   - Gestos swipe laterales para navegación fluida entre capítulos.

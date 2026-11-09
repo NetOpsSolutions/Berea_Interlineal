@@ -25,8 +25,8 @@ class UpdateService extends ChangeNotifier {
 
   static const String githubOwner = 'NetOpsSolutions';
   static const String githubRepo = 'Berea_Interlineal';
-  static const String fallbackVersion = '1.3.2';
-  static const int fallbackBuildNumber = 7;
+  static const String fallbackVersion = '1.4.0';
+  static const int fallbackBuildNumber = 8;
 
   /// Token opcional de GitHub para repositorios privados o rate limits ampliados.
   /// Se puede suministrar por variable de compilación (--dart-define=GITHUB_TOKEN=...)
@@ -716,41 +716,41 @@ class UpdateService extends ChangeNotifier {
 
     final assets = [
       const ReleaseApkAsset(
-        fileName: 'berea_interlineal_1.3.2_arm64-v8a.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.3.2/berea_interlineal_1.3.2_arm64-v8a.apk',
+        fileName: 'berea_interlineal_1.4.0_arm64-v8a.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.4.0/berea_interlineal_1.4.0_arm64-v8a.apk',
         sizeBytes: 42467328, // ~40.5 MB
         abi: 'arm64-v8a',
       ),
       const ReleaseApkAsset(
-        fileName: 'berea_interlineal_1.3.2_armeabi-v7a.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.3.2/berea_interlineal_1.3.2_armeabi-v7a.apk',
+        fileName: 'berea_interlineal_1.4.0_armeabi-v7a.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.4.0/berea_interlineal_1.4.0_armeabi-v7a.apk',
         sizeBytes: 39845888, // ~38.0 MB
         abi: 'armeabi-v7a',
       ),
       const ReleaseApkAsset(
-        fileName: 'berea_interlineal_1.3.2_x86_64.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.3.2/berea_interlineal_1.3.2_x86_64.apk',
+        fileName: 'berea_interlineal_1.4.0_x86_64.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.4.0/berea_interlineal_1.4.0_x86_64.apk',
         sizeBytes: 46137344, // ~44.0 MB
         abi: 'x86_64',
       ),
       const ReleaseApkAsset(
-        fileName: 'berea_interlineal_1.3.2_universal.apk',
-        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.3.2/berea_interlineal_1.3.2_universal.apk',
+        fileName: 'berea_interlineal_1.4.0_universal.apk',
+        downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.4.0/berea_interlineal_1.4.0_universal.apk',
         sizeBytes: 78643200, // ~75.0 MB
         abi: 'universal',
       ),
     ];
 
     const ipa = ReleaseIpaAsset(
-      fileName: 'Berea_Interlineal_1.3.2.ipa',
-      downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.3.2/Berea_Interlineal_1.3.2.ipa',
+      fileName: 'Berea_Interlineal_1.4.0.ipa',
+      downloadUrl: 'https://github.com/NetOpsSolutions/Berea_Interlineal/releases/download/v1.4.0/Berea_Interlineal_1.4.0.ipa',
       sizeBytes: 38240000, // ~36.5 MB
     );
 
     final release = AppReleaseInfo(
-      tagName: 'v1.3.2',
-      version: '1.3.2',
-      title: 'Berea Interlineal v1.3.2 - Fase 3 UI/UX y Notificaciones OTA',
+      tagName: 'v1.4.0',
+      version: '1.4.0',
+      title: 'Berea Interlineal v1.4.0 - Edición Estudio Enciclopédico y Persiana',
       releaseNotes: '''
 ## 🚀 Novedades de la Versión 1.3.2
 

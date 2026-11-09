@@ -14,8 +14,11 @@ import '../data/study_service.dart';
 import '../features/bible/bible_screen.dart';
 import '../features/dictionary/dictionary_screen.dart';
 import '../features/search/global_search_screen.dart';
+import '../features/authors/biblical_authors_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/study/study_screen.dart';
+import '../features/summaries/book_summaries_screen.dart';
+import 'widgets/berea_drawer.dart';
 
 class HomeShell extends StatefulWidget {
   final ThemeMode themeMode;
@@ -29,11 +32,21 @@ class HomeShell extends StatefulWidget {
 class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   int _index = 0;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<BibleScreenState> _bibleKey = GlobalKey<BibleScreenState>();
-  final GlobalKey _searchBarKey = GlobalKey(debugLabel: 'tourSearchBar');
+  final GlobalKey<StudyScreenState> _studyKey = GlobalKey<StudyScreenState>();
+  final GlobalKey<SettingsScreenState> _settingsKey = GlobalKey<SettingsScreenState>();
   final GlobalKey _dictionaryControlsKey = GlobalKey(debugLabel: 'tourDictionaryControls');
   final GlobalKey _studyTabsKey = GlobalKey(debugLabel: 'tourStudyTabs');
-  final GlobalKey<SettingsScreenState> _settingsKey = GlobalKey<SettingsScreenState>();
+  final GlobalKey _searchBarKey = GlobalKey(debugLabel: 'tourSearchBar');
+
+  // Claves de la guía interactiva v1.4.0
+  final GlobalKey _tourDrawerButtonKey = GlobalKey(debugLabel: 'tourDrawerButton');
+  final GlobalKey _tourBottomNavDictionaryKey = GlobalKey(debugLabel: 'tourBottomNavDictionary');
+  final GlobalKey _tourBottomNavStudyKey = GlobalKey(debugLabel: 'tourBottomNavStudy');
+  final GlobalKey _tourBookSummaryButtonKey = GlobalKey(debugLabel: 'tourBookSummaryButton');
+  final GlobalKey _tourDrawerTheologicalKey = GlobalKey(debugLabel: 'tourDrawerTheological');
+  final GlobalKey _tourThemeToggleKey = GlobalKey(debugLabel: 'tourThemeToggle');
 
   Timer? _updateTimer;
   Timer? _periodicUpdateTimer;
@@ -173,10 +186,63 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   }
 
   void _navigateToVerse(String bookId, int chapter, int verse) {
+    // Cerrar cualquier diálogo, pantalla o modal apilado sobre HomeShell
+    Navigator.of(context).popUntil((route) => route.isFirst);
     setState(() => _index = 0);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _bibleKey.currentState?.goToVerse(bookId, chapter, verse);
     });
+  }
+
+  void _openBookSummaries() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BookSummariesScreen(onOpenVerse: _navigateToVerse),
+      ),
+    );
+  }
+
+  void _openAuthors() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BiblicalAuthorsScreen(onOpenVerse: _navigateToVerse),
+      ),
+    );
+  }
+
+  void _openGlobalSearch() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GlobalSearchScreen(
+          onOpenVerse: _navigateToVerse,
+          tourSearchBarKey: _searchBarKey,
+        ),
+      ),
+    );
+  }
+
+  void _openTheologicalFilter(String colorKey) {
+    setState(() => _index = 2);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _studyKey.currentState?.setHighlightFilter(colorKey);
+    });
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SettingsScreen(
+          key: _settingsKey,
+          themeMode: widget.themeMode,
+          onToggleTheme: widget.onToggleTheme,
+          onOpenVerse: _navigateToVerse,
+          onStartInteractiveGuide: () {
+            Navigator.of(context).pop();
+            startInteractiveTour();
+          },
+        ),
+      ),
+    );
   }
 
   List<TourStepConfig> _buildTourSteps() {
@@ -192,6 +258,12 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
       settingsReadingKeyResolver: () => _settingsKey.currentState?.tourReadingSectionKey,
       settingsUpdaterKeyResolver: () => _settingsKey.currentState?.tourUpdaterKey,
       settingsReplayGuideKeyResolver: () => _settingsKey.currentState?.tourReplayGuideKey,
+      tourDrawerButtonKey: _tourDrawerButtonKey,
+      tourBottomNavDictionaryKey: _tourBottomNavDictionaryKey,
+      tourBottomNavStudyKey: _tourBottomNavStudyKey,
+      tourBookSummaryButtonKey: _tourBookSummaryButtonKey,
+      tourDrawerTheologicalKey: _tourDrawerTheologicalKey,
+      tourThemeToggleKey: _tourThemeToggleKey,
       onPrepareBibleStep: () async {
         await _bibleKey.currentState?.prepareForInteractiveTourStep1();
       },
@@ -219,25 +291,23 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final screens = [
-      BibleScreen(key: _bibleKey),
-      GlobalSearchScreen(
-        onOpenVerse: _navigateToVerse,
-        tourSearchBarKey: _searchBarKey,
+      BibleScreen(
+        key: _bibleKey,
+        onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        tourDrawerButtonKey: _tourDrawerButtonKey,
+        tourBookSummaryButtonKey: _tourBookSummaryButtonKey,
+        tourThemeToggleKey: _tourThemeToggleKey,
       ),
       DictionaryScreen(
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
+        onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       StudyScreen(
+        key: _studyKey,
         onOpenVerse: _navigateToVerse,
         tourTabsKey: _studyTabsKey,
-      ),
-      SettingsScreen(
-        key: _settingsKey,
-        themeMode: widget.themeMode,
-        onToggleTheme: widget.onToggleTheme,
-        onOpenVerse: _navigateToVerse,
-        onStartInteractiveGuide: startInteractiveTour,
+        onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
     ];
 
@@ -247,6 +317,16 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
       fit: StackFit.expand,
       children: [
         Scaffold(
+          key: _scaffoldKey,
+          drawer: BereaDrawer(
+            onOpenBookSummaries: _openBookSummaries,
+            onOpenAuthors: _openAuthors,
+            onOpenSearch: _openGlobalSearch,
+            onSelectTheologicalHighlight: _openTheologicalFilter,
+            onOpenSettings: _openSettings,
+            onStartTour: startInteractiveTour,
+            tourTheologicalKey: _tourDrawerTheologicalKey,
+          ),
           body: IndexedStack(index: _index, children: screens),
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
@@ -268,31 +348,23 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
                   : const Color(0xFFE2D3B5),
               selectedIndex: _index,
               onDestinationSelected: (v) => setState(() => _index = v),
-              destinations: const [
-                NavigationDestination(
+              destinations: [
+                const NavigationDestination(
                   icon: Icon(Icons.menu_book_outlined),
                   selectedIcon: Icon(Icons.menu_book),
                   label: 'Biblia',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.search_outlined),
-                  selectedIcon: Icon(Icons.search),
-                  label: 'Búsqueda',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.translate_outlined),
-                  selectedIcon: Icon(Icons.translate),
+                  key: _tourBottomNavDictionaryKey,
+                  icon: const Icon(Icons.translate_outlined),
+                  selectedIcon: const Icon(Icons.translate),
                   label: 'Diccionario',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.bookmarks_outlined),
-                  selectedIcon: Icon(Icons.bookmarks),
+                  key: _tourBottomNavStudyKey,
+                  icon: const Icon(Icons.bookmarks_outlined),
+                  selectedIcon: const Icon(Icons.bookmarks),
                   label: 'Mi Estudio',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: 'Ajustes',
                 ),
               ],
             ),
