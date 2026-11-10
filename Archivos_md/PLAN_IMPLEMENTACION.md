@@ -23,6 +23,7 @@ flowchart TD
     Fase4 --> Fase5["Fase 5: Difusión en WhatsApp y Versículo Diario"]
     Fase5 --> Fase6["Fase 6: Búsqueda Morfológica, Respaldo y Multiplataforma"]
     Fase6 --> Fase7["🎓 Fase 7: Formación Teológica y Ministerial (Hermenéutica y Homilética)"]
+    Fase7 --> Fase8["🎶 Fase 8: Himnarios Congregacionales (Gloria y Triunfo / Fe y Alabanza)"]
 ```
 
 ---
@@ -613,6 +614,114 @@ flowchart LR
 
 ---
 
+## 🎶 Fase 8: Módulo de Himnología y Alabanza Congregacional (Gloria y Triunfo / Fe y Alabanza)
+
+> [!NOTE]
+> **PROPÓSITO DEVOCIONAL Y LITÚRGICO**:
+> La adoración congregacional y la himnodia histórica son inseparables del estudio bíblico y la vida de la iglesia. Este módulo incorpora dos de los himnarios más emblemáticos, amados y utilizados por las congregaciones hispanas: **«Gloria y Triunfo»** y **«Fe y Alabanza»**, ofreciendo a creyentes, directores de alabanza, pastores y músicos una herramienta litúrgica completa, 100% offline y vinculada directamente con las Sagradas Escrituras.
+
+```mermaid
+flowchart LR
+    subgraph Himnarios["1. Colecciones Integradas"]
+        H1["📖 Himnario Gloria y Triunfo"]
+        H2["📖 Himnario Fe y Alabanza"]
+    end
+    subgraph Funciones["2. Herramientas Litúrgicas"]
+        F1["Búsqueda por Número (#) y Letra"]
+        F2["Índice Temático y Doctrinal"]
+        F3["Modo Atril / Púlpito (Pantalla Activa)"]
+        F4["Listas de Alabanza para Cultos"]
+    end
+    subgraph Vinculacion["3. Ecosistema Berea"]
+        V1["Pasajes Bíblicos Lema"] --> V2["Salto al Interlineal Hebreo/Griego"]
+        V3["Estética Pergamino Alejandrino"]
+    end
+    Himnarios --> Funciones --> Vinculacion
+```
+
+### 1. Himnarios Incluidos y Rigor Textual
+1. **Himnario «Gloria y Triunfo»**:
+   * Himnario evangélico histórico con centenares de himnos clásicos de la fe reformada, metodista, pentecostal y de avivamiento.
+   * Contenido fielmente digitalizado: número oficial, título original, autor de la letra, compositor de la música y año de composición.
+2. **Himnario «Fe y Alabanza»**:
+   * Colección fundamental de alabanza congregacional, himnos solemnes y cánticos espirituales de profunda riqueza doctrinal, consagración y adoración.
+
+---
+
+### 2. Características y Funcionalidades del Módulo
+* **Búsqueda Ultrarrápida Dual**:
+  * *Por Número*: Ingreso directo del número del himno (ej. `#1`, `#84`, `#245`) para acceso inmediato durante el servicio de culto.
+  * *Por Texto o Letra*: Búsqueda en tiempo real por título, estrofa, palabras clave o coro.
+* **Clasificación Temática Canónica**:
+  * Adoración y Alabanza a Dios
+  * Salvación, Redención y Gracia
+  * La Sangre de Cristo y el Perdón
+  * El Espíritu Santo y Avivamiento
+  * Consagración, Santidad y Vida Cristiana
+  * Oración, Fe y Consolación
+  * La Segunda Venida y Esperanza Celestial
+  * Misiones y Evangelismo
+  * Santa Cena y Bautismo
+* **Visualizador de Himno en Pergamino Alejandrino**:
+  * Estrofas claramente numeradas con sangría litúrgica.
+  * Coro / Estribillo resaltado en estilo distintivo (negrita ámbar/bronce) para fácil seguimiento en el canto congregacional.
+  * Ajuste de tamaño de fuente dinámico (slider o gesto pellizco) para lectura a distancia desde el púlpito o banco.
+  * Modo atril (*Keep Awake*): Opción de mantener la pantalla encendida mientras se entona el himno para evitar bloqueos involuntarios.
+* **Conexión Bíblica con Berea Interlineal**:
+  * Cada himno cuenta con su **pasaje bíblico lema o de inspiración** (ej. *«Cuan grande es Él»* ➔ *Salmo 8:1* / *«Castillo Fuerte»* ➔ *Salmo 46:1*).
+  * Al pulsar la referencia bíblica, la aplicación abre directamente el pasaje en el lector interlineal con sus raíces originales en hebreo y griego.
+* **Herramientas para Líderes y Músicos**:
+  * *Favoritos*: Guardar himnos preferidos para devocional personal.
+  * *Listas de Culto*: Capacidad de crear y ordenar listas de cánticos para servicios semanales (ej. «Culto de Oración - Martes», «Santa Cena»).
+  * *Compartir Letra*: Compartir la letra completa del himno con formato limpio y estilizado a través de WhatsApp o portapapeles.
+
+---
+
+### 3. Modelo de Datos SQLite Local (`logos_k_logos.db`)
+
+Para garantizar respuesta inmediata (< 1 ms) y disponibilidad 100% offline:
+
+```sql
+-- 1. Catálogo de Himnarios
+CREATE TABLE IF NOT EXISTS hymnals (
+    hymnal_id INTEGER PRIMARY KEY,          -- 1 = Gloria y Triunfo, 2 = Fe y Alabanza
+    name TEXT NOT NULL,                     -- Nombre oficial
+    code TEXT NOT NULL UNIQUE,              -- 'gloria_y_triunfo', 'fe_y_alabanza'
+    description TEXT
+);
+
+-- 2. Tabla de Himnos
+CREATE TABLE IF NOT EXISTS hymns (
+    hymn_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    hymnal_id INTEGER NOT NULL,             -- Clave foránea hacia hymnals
+    number INTEGER NOT NULL,                -- Número oficial del himno en el himnario
+    title TEXT NOT NULL,                    -- Título del himno
+    author TEXT,                            -- Autor de la letra (ej. 'Martín Lutero', 'Fanny Crosby')
+    composer TEXT,                          -- Compositor musical (ej. 'John B. Dykes')
+    category TEXT NOT NULL,                 -- Categoría temática
+    biblical_reference TEXT,                -- Cita bíblica lema (ej. 'Salmo 46:1')
+    lyrics TEXT NOT NULL,                   -- Estrofas completas estructuradas
+    chorus TEXT,                            -- Letra del coro/estribillo
+    FOREIGN KEY (hymnal_id) REFERENCES hymnals(hymnal_id)
+);
+
+-- Índices de búsqueda y ordenamiento
+CREATE INDEX IF NOT EXISTS idx_hymns_number ON hymns(hymnal_id, number);
+CREATE INDEX IF NOT EXISTS idx_hymns_category ON hymns(category);
+CREATE INDEX IF NOT EXISTS idx_hymns_title ON hymns(title);
+```
+
+---
+
+### 4. Integración en la Interfaz de Berea
+* **Acceso desde el Menú Lateral Persiana (Drawer)**:
+  * Entrada dedicada: **«🎶 Himnarios Cristianos»**.
+  * Selector intuitivo en la cabecera entre **Gloria y Triunfo** y **Fe y Alabanza**.
+* **Acceso Rápido desde Mi Estudio**:
+  * Pestaña complementaria para consultar «Mis Himnos Favoritos» y listas de culto preparadas.
+
+---
+
 ## 🗓️ Hoja de Ruta Actualizada (Milestones)
 
 | Hito | Alcance | Estado / Prioridad |
@@ -630,3 +739,4 @@ flowchart LR
 | **M11: Estandarización Universal de Guías y Releases** | Adaptar guías interactivas a cada versión (v1.3.0, v1.3.1, v1.3.2, v1.4.0+), purgar ajustes de depuración, firmar con release key y desplegar en GitHub Releases | ⭐⭐⭐ Alta |
 | **M12: Entorno Pergamino Alejandrino & Intro Solemne** | Fondo papiro/vitela (#F5EEDB / #181412), splash con halo dorado y Hechos 17:11 (documentado como novedad oficial en v1.3.1) | ⭐⭐⭐ Alta |
 | **M13: Instituto de Formación Ministerial** | Módulo de Hermenéutica (Exégesis vs Eiségesis), Homilética (pasos para sermones), oratoria pastoral y cuaderno de bosquejos | ⭐⭐ Media (v1.5.0+) |
+| **M14: Himnarios Congregacionales** | Integración de los himnarios Gloria y Triunfo y Fe y Alabanza con búsqueda por número/letra, índice temático, favoritos y enlace a versículos | ⭐⭐ Media (v1.6.0+) |

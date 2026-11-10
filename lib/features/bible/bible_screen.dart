@@ -1064,20 +1064,53 @@ class _ChapterVerseBlockState extends State<_ChapterVerseBlock> {
                   ),
                 ),
 
-                // Botón sutil para expandir/contraer herramientas e interlineal
-                InkWell(
-                  onTap: widget.onToggleExpand,
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      widget.isExpanded
-                          ? Icons.expand_less_rounded
-                          : Icons.unfold_more_rounded,
-                      size: 18,
-                      color: widget.isExpanded
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline.withAlpha(150),
+                // Botón táctil para expandir/contraer herramientas e interlineal
+                Tooltip(
+                  message: widget.isExpanded
+                      ? 'Plegar interlineal'
+                      : 'Desplegar interlineal y herramientas',
+                  child: InkWell(
+                    onTap: widget.onToggleExpand,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 2, left: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: widget.isExpanded
+                            ? theme.colorScheme.primary
+                            : (isDark
+                                ? const Color(0xFF2E241D)
+                                : const Color(0xFFEADBBE)),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: widget.isExpanded
+                              ? theme.colorScheme.primary
+                              : (isDark
+                                  ? const Color(0xFF6B533E)
+                                  : const Color(0xFFC7B38E)),
+                          width: 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? const Color(0x30000000)
+                                : const Color(0x14000000),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        widget.isExpanded
+                            ? Icons.expand_less_rounded
+                            : Icons.unfold_more_rounded,
+                        size: 18,
+                        color: widget.isExpanded
+                            ? theme.colorScheme.onPrimary
+                            : (isDark
+                                ? const Color(0xFFFBBF24)
+                                : const Color(0xFF92400E)),
+                      ),
                     ),
                   ),
                 ),
@@ -2030,15 +2063,34 @@ class _InterlinearWordTile extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 4),
-            Text(
-              word.translation,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: t.textTheme.bodySmall?.copyWith(
-                color: t.colorScheme.onSurfaceVariant,
-                fontSize: 11.5,
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF1E1712)
+                    : const Color(0xFFEADBBE),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF4D3B2C)
+                      : const Color(0xFFD4BFA0),
+                  width: 0.8,
+                ),
+              ),
+              child: Text(
+                word.translation,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: isDark
+                      ? const Color(0xFFFFF3DB)
+                      : const Color(0xFF261D17),
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.1,
+                ),
               ),
             ),
           ],
