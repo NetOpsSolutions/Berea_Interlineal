@@ -114,10 +114,10 @@ def patch_worktree():
     # 4. Actualizar versión en pubspec.yaml
     pub_file = WT / "pubspec.yaml"
     text = pub_file.read_text(encoding="utf-8")
-    text = text.replace("version: 1.3.1+4", "version: 1.3.7+7")
-    text = text.replace("version: 1.3.2+5", "version: 1.3.7+7")
+    import re
+    text = re.sub(r"^version: .*", "version: 1.3.7+9", text, flags=re.MULTILINE)
     pub_file.write_text(text, encoding="utf-8")
-    print("  [OK] pubspec.yaml actualizado a versión 1.3.7+7.")
+    print(f"  [OK] pubspec.yaml actualizado: {[l for l in text.splitlines() if l.startswith('version:')]}")
 
 def compile_v137():
     print("\n[3/5] Compilando APKs de Berea Interlineal v1.3.7...")
@@ -126,6 +126,15 @@ def compile_v137():
 
     print("  -> Compilando Split APKs...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=WT)
+
+    # Instalar inmediatamente en emulador si está conectado
+    x86_apk = WT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
+    adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
+    if x86_apk.exists() and adb_path.exists():
+        print("\n  -> Instalando automáticamente en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
+        print("  [OK] v1.3.7 instalada y ejecutada en emulador.\n")
 
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=WT)

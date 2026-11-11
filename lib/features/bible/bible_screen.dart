@@ -530,12 +530,14 @@ class BibleScreenState extends State<BibleScreen> {
 
         return Scaffold(
           appBar: AppBar(
-            leading: IconButton(
-              key: widget.tourDrawerButtonKey,
-              icon: const Icon(Icons.menu_rounded),
-              tooltip: 'Menú persiana de estudio',
-              onPressed: widget.onOpenDrawer ?? () => Scaffold.of(context).openDrawer(),
-            ),
+            leading: widget.onOpenDrawer != null
+                ? IconButton(
+                    key: widget.tourDrawerButtonKey,
+                    icon: const Icon(Icons.menu_rounded),
+                    tooltip: 'Menú persiana de estudio',
+                    onPressed: widget.onOpenDrawer,
+                  )
+                : null,
             title: Text(
               chapterMode ? '${_book.name} $_chapter' : 'Biblia Interlineal',
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -556,12 +558,13 @@ class BibleScreenState extends State<BibleScreen> {
                     : 'Cambiar a modo oscuro (🌙 Noche Alejandrina)',
                 onPressed: () => StudyService.instance.toggleTheme(),
               ),
-              IconButton(
-                key: widget.tourBookSummaryButtonKey,
-                icon: const Icon(Icons.history_edu_rounded),
-                tooltip: 'Ficha histórica y resumen de ${_book.name}',
-                onPressed: _openCurrentBookSummary,
-              ),
+              if (widget.tourBookSummaryButtonKey != null)
+                IconButton(
+                  key: widget.tourBookSummaryButtonKey,
+                  icon: const Icon(Icons.history_edu_rounded),
+                  tooltip: 'Ficha histórica y resumen de ${_book.name}',
+                  onPressed: _openCurrentBookSummary,
+                ),
               Row(
                 key: tourAppBarActionsKey,
                 mainAxisSize: MainAxisSize.min,

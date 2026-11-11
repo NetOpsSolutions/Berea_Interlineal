@@ -110,10 +110,10 @@ def patch_worktree():
     # 4. Actualizar versión en pubspec.yaml
     pub_file = WT / "pubspec.yaml"
     text = pub_file.read_text(encoding="utf-8")
-    text = text.replace("version: 1.3.1+4", "version: 1.3.5+6")
-    text = text.replace("version: 1.3.2+5", "version: 1.3.5+6")
+    import re
+    text = re.sub(r"^version: .*", "version: 1.3.5+8", text, flags=re.MULTILINE)
     pub_file.write_text(text, encoding="utf-8")
-    print("  [OK] pubspec.yaml actualizado a versión 1.3.5+6.")
+    print(f"  [OK] pubspec.yaml actualizado: {[l for l in text.splitlines() if l.startswith('version:')]}")
 
 def compile_v135():
     print("\n[3/5] Compilando APKs de Berea Interlineal v1.3.5...")
