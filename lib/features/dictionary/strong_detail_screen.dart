@@ -25,6 +25,7 @@ class StrongDetailScreen extends StatefulWidget {
 class _StrongDetailScreenState extends State<StrongDetailScreen> {
   late Future<StrongEntry?> _entryFuture;
   late Future<List<Occurrence>> _occurrencesFuture;
+  late Future<List<StrongRelationItem>> _relationsFuture;
 
   @override
   void initState() {
@@ -37,6 +38,8 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
         DatabaseService.instance.getStrong(widget.language, widget.code);
     _occurrencesFuture =
         DatabaseService.instance.getOccurrences(widget.language, widget.code);
+    _relationsFuture =
+        DatabaseService.instance.getStrongRelations(widget.language, widget.code);
   }
 
   String get _languageLabel =>
@@ -187,43 +190,73 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Derivación con Hipervínculos a otros Strong
-                _Section(
-                  title: 'Derivación',
-                  child: LinkedStrongText(
-                    text: entry.derivation,
-                    currentLanguage: widget.language,
-                  ),
-                ),
+                // Derivación con Hipervínculos a otros Strong y badge de Raíz Primaria
+                _buildDerivationSection(entry, theme),
 
                 // Definición Strong con Hipervínculos a otros Strong
-                _Section(
-                  title: 'Definición Strong',
-                  child: LinkedStrongText(
-                    text: entry.definition,
-                    currentLanguage: widget.language,
+                if (entry.definition.trim().isNotEmpty)
+                  _Section(
+                    title: 'Definición Strong',
+                    icon: Icons.auto_stories_outlined,
+                    child: LinkedStrongText(
+                      text: entry.definition,
+                      currentLanguage: widget.language,
+                    ),
                   ),
-                ),
 
                 // Definición en RV con Hipervínculos a otros Strong
-                _Section(
-                  title: 'Definición en RV',
-                  child: LinkedStrongText(
-                    text: entry.rvDefinition,
-                    currentLanguage: widget.language,
+                if (entry.rvDefinition.trim().isNotEmpty)
+                  _Section(
+                    title: 'Definición en RV',
+                    icon: Icons.translate_rounded,
+                    child: LinkedStrongText(
+                      text: entry.rvDefinition,
+                      currentLanguage: widget.language,
+                    ),
                   ),
-                ),
 
                 // Léxico STEPBible con Hipervínculos a otros Strong
-                _Section(
-                  title: 'Léxico STEPBible',
-                  child: LinkedStrongText(
-                    text: entry.stepbible,
-                    currentLanguage: widget.language,
+                if (entry.stepbible.trim().isNotEmpty)
+                  _Section(
+                    title: 'Léxico Académico Extendido (STEPBible / Tyndale)',
+                    icon: Icons.menu_book_rounded,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest.withAlpha(120),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withAlpha(100),
+                        ),
+                      ),
+                      child: LinkedStrongText(
+                        text: entry.stepbible,
+                        currentLanguage: widget.language,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          height: 1.45,
+                          letterSpacing: 0.1,
+                        ),
+                      ),
+                    ),
                   ),
+
+                // Relaciones Léxicas y Exegéticas (Similitudes + Familia de Palabras)
+                FutureBuilder<List<StrongRelationItem>>(
+                  future: _relationsFuture,
+                  builder: (context, relSnapshot) {
+                    final relations = relSnapshot.data ?? const <StrongRelationItem>[];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSimilaritiesSection(entry, relations, theme),
+                        _buildDerivedFamilySection(relations, theme),
+                      ],
+                    );
+                  },
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
 
                 // Sección "Dónde aparece": Acordeón desplegable con versículos completos y palabra resaltada
                 FutureBuilder<List<Occurrence>>(
@@ -232,6 +265,7 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
                     if (!occSnapshot.hasData || occSnapshot.data!.isEmpty) {
                       return const _Section(
                         title: 'Dónde aparece',
+                        icon: Icons.format_list_numbered_rounded,
                         child: Text(
                           'Concordancia no cargada. Importa el dataset completo para ver ocurrencias por libro.',
                         ),
@@ -242,6 +276,7 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
 
                     return _Section(
                       title: 'Dónde aparece (Toca un libro para desplegar versículos)',
+                      icon: Icons.format_list_numbered_rounded,
                       child: _OccurrencesAccordion(
                         occurrences: occurrences,
                         strongCode: widget.code,
@@ -254,6 +289,322 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDerivationSection(StrongEntry entry, ThemeData theme) {
+    final raw = entry.derivation.trim();
+    final isPrimaryRoot = raw.isEmpty ||
+        raw.toLowerCase().contains('raíz prim') ||
+        raw.toLowerCase().contains('palabra prim');
+
+    if (isPrimaryRoot) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.spa_rounded, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Text(
+                  'Derivación',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withAlpha(80),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withAlpha(80),
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check_circle_outline_rounded,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Raíz primaria (no proviene de otra palabra bíblica)',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _Section(
+      title: 'Derivación',
+      icon: Icons.account_tree_outlined,
+      child: LinkedStrongText(
+        text: entry.derivation,
+        currentLanguage: widget.language,
+      ),
+    );
+  }
+
+  Widget _buildSimilaritiesSection(
+    StrongEntry entry,
+    List<StrongRelationItem> relations,
+    ThemeData theme,
+  ) {
+    final compRelations = relations
+        .where((r) => r.relationType == 'compares_with' || r.relationType == 'synonym')
+        .toList();
+    final hasNote = entry.similarities.trim().isNotEmpty;
+    if (!hasNote && compRelations.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.balance_rounded, size: 20, color: Color(0xFFD97706)),
+              const SizedBox(width: 8),
+              Text(
+                'Similitudes y Comparaciones Teológicas',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF92400E),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (compRelations.isNotEmpty) ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: compRelations.map((rel) {
+                final prefix = rel.language == 'hebrew' ? 'H' : 'G';
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => StrongDetailScreen(
+                          language: rel.language,
+                          code: rel.code,
+                        ),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF2C2218) : const Color(0xFFFEF3C7),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF78350F) : const Color(0xFFF59E0B),
+                        width: 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(20),
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFD97706),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$prefix${rel.code}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          rel.lemma,
+                          style: StudyService.instance.originalScriptStyle(
+                            isHebrew: rel.language == 'hebrew',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFFFDE68A) : const Color(0xFF78350F),
+                          ),
+                        ),
+                        if (rel.pronunciation.isNotEmpty) ...[
+                          const SizedBox(width: 4),
+                          Text(
+                            '(${rel.pronunciation})',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (hasNote)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF251C15) : const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF6B4826) : const Color(0xFFFDE68A),
+                  width: 1.0,
+                ),
+              ),
+              child: Text(
+                entry.similarities,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  height: 1.5,
+                  color: isDark ? const Color(0xFFF3F4F6) : const Color(0xFF374151),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDerivedFamilySection(
+    List<StrongRelationItem> relations,
+    ThemeData theme,
+  ) {
+    final derived = relations.where((r) => r.relationType == 'parent_of').toList();
+    if (derived.isEmpty) return const SizedBox.shrink();
+
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.nature_people_rounded, size: 20, color: Color(0xFF059669)),
+              const SizedBox(width: 8),
+              Text(
+                'Familia de Palabras Derivadas (${derived.length})',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? const Color(0xFFA7F3D0) : const Color(0xFF065F46),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: derived.map((rel) {
+              final prefix = rel.language == 'hebrew' ? 'H' : 'G';
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => StrongDetailScreen(
+                        language: rel.language,
+                        code: rel.code,
+                      ),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF132B20) : const Color(0xFFECFDF5),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF047857) : const Color(0xFF6EE7B7),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF059669),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '$prefix${rel.code}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        rel.lemma,
+                        style: StudyService.instance.originalScriptStyle(
+                          isHebrew: rel.language == 'hebrew',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFFA7F3D0) : const Color(0xFF064E3B),
+                        ),
+                      ),
+                      if (rel.pronunciation.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          '(${rel.pronunciation})',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF4B5563),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
@@ -458,8 +809,9 @@ class _BookExpansionTileState extends State<_BookExpansionTile> {
 class _Section extends StatelessWidget {
   final String title;
   final Widget child;
+  final IconData? icon;
 
-  const _Section({required this.title, required this.child});
+  const _Section({required this.title, required this.child, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -470,11 +822,21 @@ class _Section extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+              ],
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           child,

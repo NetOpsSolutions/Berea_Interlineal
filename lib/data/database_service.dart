@@ -475,6 +475,43 @@ class DatabaseService {
     return r.isEmpty ? null : StrongEntry.fromMap(r.first);
   }
 
+  /// Obtiene relaciones de una palabra Strong (palabras que derivan de ella, de las que proviene, o comparaciones)
+  Future<List<StrongRelationItem>> getStrongRelations(String language, int code) async {
+    await initialize();
+    if (_memoryMode) return [];
+    final db = _db!;
+    try {
+      final rows = await db.rawQuery('''
+        SELECT r.relation_type, s.language, s.code, s.lemma, s.pronunciation
+        FROM strong_relations r
+        JOIN strong_entries s ON s.language = r.source_language AND s.code = r.target_code
+        WHERE r.source_language = ? AND r.source_code = ?
+        ORDER BY r.relation_type ASC, s.code ASC
+      ''', [language, code]);
+      return rows.map((r) => StrongRelationItem.fromMap(r)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Obtiene entradas Strong por lista de códigos
+  Future<List<StrongEntry>> getStrongsByCodes(String language, List<int> codes) async {
+    await initialize();
+    if (codes.isEmpty) return [];
+    final db = _db!;
+    try {
+      final placeholders = List.filled(codes.length, '?').join(',');
+      final rows = await db.rawQuery('''
+        SELECT * FROM strong_entries 
+        WHERE language = ? AND code IN ($placeholders)
+        ORDER BY code ASC
+      ''', [language, ...codes]);
+      return rows.map((r) => StrongEntry.fromMap(r)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   Future<List<Occurrence>> getOccurrences(String language, int code) async {
     await initialize();
     if (_memoryMode) return _occIndex['$language:$code'] ?? [];

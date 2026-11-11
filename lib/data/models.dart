@@ -59,9 +59,24 @@ class StrongEntry {
   final String definition;
   final String rvDefinition;
   final String stepbible;
-  const StrongEntry({required this.language, required this.code, required this.lemma,
-      required this.pronunciation, required this.derivation, required this.definition,
-      required this.rvDefinition, required this.stepbible});
+  final String similarities;
+  final String compareCodes;
+  final String derivedCodes;
+
+  const StrongEntry({
+    required this.language,
+    required this.code,
+    required this.lemma,
+    required this.pronunciation,
+    required this.derivation,
+    required this.definition,
+    required this.rvDefinition,
+    required this.stepbible,
+    this.similarities = '',
+    this.compareCodes = '',
+    this.derivedCodes = '',
+  });
+
   factory StrongEntry.fromMap(Map<String, Object?> m) => StrongEntry(
         language: (m['language'] as String?) ?? '',
         code: (m['code'] as int?) ?? 0,
@@ -71,10 +86,48 @@ class StrongEntry {
         definition: (m['definition'] as String?) ?? '',
         rvDefinition: (m['rv_definition'] as String?) ?? '',
         stepbible: (m['stepbible'] as String?) ?? '',
+        similarities: (m['similarities'] as String?) ?? '',
+        compareCodes: (m['compare_codes'] as String?) ?? '',
+        derivedCodes: (m['derived_codes'] as String?) ?? '',
       );
-  Map<String, Object?> toMap() => {'language': language, 'code': code, 'lemma': lemma,
-      'pronunciation': pronunciation, 'derivation': derivation, 'definition': definition,
-      'rv_definition': rvDefinition, 'stepbible': stepbible};
+
+  Map<String, Object?> toMap() => {
+        'language': language,
+        'code': code,
+        'lemma': lemma,
+        'pronunciation': pronunciation,
+        'derivation': derivation,
+        'definition': definition,
+        'rv_definition': rvDefinition,
+        'stepbible': stepbible,
+        'similarities': similarities,
+        'compare_codes': compareCodes,
+        'derived_codes': derivedCodes,
+      };
+}
+
+class StrongRelationItem {
+  final String language;
+  final int code;
+  final String lemma;
+  final String pronunciation;
+  final String relationType; // 'derives_from', 'parent_of', 'compares_with', 'synonym'
+
+  const StrongRelationItem({
+    required this.language,
+    required this.code,
+    required this.lemma,
+    required this.pronunciation,
+    required this.relationType,
+  });
+
+  factory StrongRelationItem.fromMap(Map<String, Object?> m) => StrongRelationItem(
+        language: (m['language'] as String?) ?? '',
+        code: (m['code'] as int?) ?? 0,
+        lemma: (m['lemma'] as String?) ?? '',
+        pronunciation: (m['pronunciation'] as String?) ?? '',
+        relationType: (m['relation_type'] as String?) ?? '',
+      );
 }
 
 class Occurrence {

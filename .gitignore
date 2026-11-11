@@ -87,3 +87,8 @@ android/*.keystore
 *.keystore
 key.properties
 
+# Local tool caches and captures
+tools/*.sqlite
+*.png
+*.xml
+

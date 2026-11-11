@@ -59,8 +59,8 @@ class _LinkedStrongTextState extends State<LinkedStrongText> {
     final theme = Theme.of(context);
     final baseStyle = widget.style ?? theme.textTheme.bodyMedium;
 
-    if (widget.text.isEmpty) {
-      return Text('—', style: baseStyle);
+    if (widget.text.trim().isEmpty) {
+      return const SizedBox.shrink();
     }
 
     final spans = _buildSpans(widget.text, theme, baseStyle);
