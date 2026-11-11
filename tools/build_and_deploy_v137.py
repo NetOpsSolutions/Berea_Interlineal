@@ -254,6 +254,8 @@ def patch_worktree():
             onOpenSearch: _openGlobalSearch,
             onSelectTheologicalHighlight: _openTheologicalFilter,
             onOpenSettings: _openSettings,
+            onStartTour: startInteractiveTour,
+            tourTheologicalKey: _tourDrawerTheologicalKey,
           ),
           body: IndexedStack(index: _index, children: screens),
           bottomNavigationBar: Container(
@@ -276,20 +278,22 @@ def patch_worktree():
                   : const Color(0xFFE2D3B5),
               selectedIndex: _index,
               onDestinationSelected: (v) => setState(() => _index = v),
-              destinations: const [
-                NavigationDestination(
+              destinations: [
+                const NavigationDestination(
                   icon: Icon(Icons.menu_book_outlined),
                   selectedIcon: Icon(Icons.menu_book),
                   label: 'Biblia',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.translate_outlined),
-                  selectedIcon: Icon(Icons.translate),
+                  key: _tourBottomNavDictionaryKey,
+                  icon: const Icon(Icons.translate_outlined),
+                  selectedIcon: const Icon(Icons.translate),
                   label: 'Diccionario',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.bookmarks_outlined),
-                  selectedIcon: Icon(Icons.bookmarks),
+                  key: _tourBottomNavStudyKey,
+                  icon: const Icon(Icons.bookmarks_outlined),
+                  selectedIcon: const Icon(Icons.bookmarks),
                   label: 'Mi Estudio',
                 ),
               ],
