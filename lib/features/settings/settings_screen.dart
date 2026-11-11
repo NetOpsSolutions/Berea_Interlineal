@@ -118,15 +118,6 @@ class SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     _buildSectionHeader(theme, 'Lectura y Visualización'),
                     SwitchListTile(
-                      title: const Text('Modo oscuro'),
-                      subtitle: const Text('Alterna entre tema claro y tema oscuro'),
-                      secondary: Icon(
-                        widget.themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                      ),
-                      value: widget.themeMode == ThemeMode.dark,
-                      onChanged: (_) => widget.onToggleTheme(),
-                    ),
-                    SwitchListTile(
                       title: const Text('Lectura por capítulo completo'),
                       subtitle: const Text(
                         'Vista corrida con scroll vertical fluido, swipe lateral e interlineal expandible',
@@ -375,21 +366,6 @@ class SettingsScreenState extends State<SettingsScreen> {
 
                 // ── 6. Bloque: Recursos y Licencias ─────────────────────────────
                 _buildSectionHeader(theme, 'Recursos y Licencias'),
-                ListTile(
-                  leading: const Icon(Icons.code_rounded),
-                  title: const Text('Repositorio Oficial'),
-                  subtitle: const Text('https://github.com/NetOpsSolutions/Berea_Interlineal'),
-                  trailing: Icon(
-                    Icons.open_in_new_rounded,
-                    size: 18,
-                    color: theme.colorScheme.outline,
-                  ),
-                  onTap: () {
-                    UpdateService.instance.openUrl(
-                      'https://github.com/NetOpsSolutions/Berea_Interlineal',
-                    );
-                  },
-                ),
                 const ListTile(
                   leading: Icon(Icons.source_outlined),
                   title: Text('Fuentes textuales y tipográficas'),
@@ -559,6 +535,64 @@ class SettingsScreenState extends State<SettingsScreen> {
             icon: Icons.explore_rounded,
             title: 'Guía de Uso Interactiva Contextual',
             desc: 'Recorrido animado automático tras actualizar, repetible siempre en «Ver guía de uso».',
+          ),
+        ];
+
+      case '1.3.5':
+        return const [
+          _VersionFeatureItem(
+            icon: Icons.account_tree_outlined,
+            title: '100% de Derivaciones y Etimologías',
+            desc: 'Poblado íntegro en las 8.674 palabras hebreas y 5.523 griegas, identificando raíces semíticas y helénicas.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.menu_book_rounded,
+            title: 'Léxico Académico Extendido STEPBible',
+            desc: 'Definiciones contextuales de Tyndale House (Cambridge) integradas al español.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.verified_outlined,
+            title: 'Cero Guiones y Distintivo de Raíz Primaria',
+            desc: 'Supresión total de guiones vacíos y distintivo formal para términos que no provienen de otra palabra.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.link_rounded,
+            title: 'Hipervínculos Táctiles en Derivaciones',
+            desc: 'Acceso directo a códigos Strong referenciados dentro de las etimologías.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.light_mode_rounded,
+            title: 'Alternador Rápido Sol / Luna (☀️/🌙)',
+            desc: 'Cambio instantáneo de modo claro u oscuro en la barra superior sin entrar a Ajustes.',
+          ),
+        ];
+
+      case '1.3.7':
+        return const [
+          _VersionFeatureItem(
+            icon: Icons.balance_rounded,
+            title: 'Similitudes y Contrastes Teológicos',
+            desc: 'Análisis doctrinal de palabras afines en hebreo y griego mediante pastillas táctiles doradas.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.park_outlined,
+            title: 'Familia de Palabras Derivadas (Árbol Léxico)',
+            desc: 'Visualización y navegación entre todos los términos bíblicos nacidos de la misma raíz.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.account_tree_outlined,
+            title: '100% de Derivaciones y Léxico STEPBible',
+            desc: 'Cobertura lexicográfica completa sin guiones vacíos y con enlaces táctiles.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.table_chart_rounded,
+            title: 'Tabla Relacional SQLite strong_relations',
+            desc: 'Estructura relacional de alta velocidad para conexiones semánticas y etimológicas.',
+          ),
+          _VersionFeatureItem(
+            icon: Icons.light_mode_rounded,
+            title: 'Alternador Rápido Sol / Luna (☀️/🌙)',
+            desc: 'Cambio instantáneo de modo claro u oscuro en la barra superior sin entrar a Ajustes.',
           ),
         ];
 
@@ -847,7 +881,7 @@ class _UpdaterCardState extends State<_UpdaterCard> {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Versión actual: v$currentVer • GitHub Releases',
+                          'Versión actual: v$currentVer',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -903,7 +937,7 @@ class _UpdaterCardState extends State<_UpdaterCard> {
                         )
                       : const Icon(Icons.system_update_rounded, size: 19),
                   label: Text(
-                    _isChecking ? 'Comprobando en GitHub...' : 'Comprobar actualizaciones',
+                    _isChecking ? 'Comprobando actualizaciones...' : 'Comprobar actualizaciones',
                   ),
                 ),
               ),

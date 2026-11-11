@@ -82,6 +82,40 @@ class TourStepsFactory {
           onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
           tourThemeToggleKey: tourThemeToggleKey,
         );
+      case '1.3.5':
+        return _buildV135Steps(
+          bibleKey: bibleKey,
+          dictionaryControlsKey: dictionaryControlsKey,
+          studyTabsKey: studyTabsKey,
+          settingsKey: settingsKey,
+          bibleVerseKeyResolver: bibleVerseKeyResolver,
+          bibleAppBarKeyResolver: bibleAppBarKeyResolver,
+          settingsReadingKeyResolver: settingsReadingKeyResolver,
+          settingsUpdaterKeyResolver: settingsUpdaterKeyResolver,
+          settingsReplayGuideKeyResolver: settingsReplayGuideKeyResolver,
+          onPrepareBibleStep: onPrepareBibleStep,
+          onPrepareSettingsReadingStep: onPrepareSettingsReadingStep,
+          onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
+          onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
+          tourThemeToggleKey: tourThemeToggleKey,
+        );
+      case '1.3.7':
+        return _buildV137Steps(
+          bibleKey: bibleKey,
+          dictionaryControlsKey: dictionaryControlsKey,
+          studyTabsKey: studyTabsKey,
+          settingsKey: settingsKey,
+          bibleVerseKeyResolver: bibleVerseKeyResolver,
+          bibleAppBarKeyResolver: bibleAppBarKeyResolver,
+          settingsReadingKeyResolver: settingsReadingKeyResolver,
+          settingsUpdaterKeyResolver: settingsUpdaterKeyResolver,
+          settingsReplayGuideKeyResolver: settingsReplayGuideKeyResolver,
+          onPrepareBibleStep: onPrepareBibleStep,
+          onPrepareSettingsReadingStep: onPrepareSettingsReadingStep,
+          onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
+          onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
+          tourThemeToggleKey: tourThemeToggleKey,
+        );
       case '1.4.0':
       default:
         return _buildV140Steps(
@@ -421,13 +455,302 @@ class TourStepsFactory {
         title: 'Alternador de Modo Claro y Oscuro (☀️/🌙)',
         description:
             '¡Novedad a partir de la v1.3.2! Cambia al instante entre el modo claro (Pergamino Diurno) y el modo oscuro (Noche Alejandrina) con un solo toque desde la barra superior usando el icono de sol y luna, sin necesidad de ir a Ajustes.',
-        pointerLabel: '☀️/🌙 Alterna modo claro u oscuro',
+        pointerLabel: '☀️/🌙 Modo Claro / Oscuro',
         demoKind: TourDemoKind.topBarControls,
         tabIndex: 0,
-        targetKeyResolver: () => tourThemeToggleKey ?? bibleAppBarKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,
       ),
 
       // Paso 7: Repetir Guía de Uso
+      TourStepConfig(
+        badge: 'AYUDA SIEMPRE ACTIVA',
+        icon: Icons.explore_rounded,
+        title: 'Vuelve a Ver esta Guía de Uso',
+        description:
+            'Acceso permanente en Ajustes → Ver guía de uso para volver a reproducir este recorrido interactivo bajo demanda.',
+        pointerLabel: '👆 Repetir guía de uso',
+        demoKind: TourDemoKind.replayGuide,
+        tabIndex: 4,
+        onPrepareStep: onPrepareSettingsReplayStep,
+        targetKeyResolver: () => settingsReplayGuideKeyResolver?.call() ?? settingsKey,
+      ),
+    ];
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // 🔹 Versión 1.3.5: Edición Léxica (8 pasos)
+  // ───────────────────────────────────────────────────────────────────────────
+  static List<TourStepConfig> _buildV135Steps({
+    required GlobalKey bibleKey,
+    required GlobalKey dictionaryControlsKey,
+    required GlobalKey studyTabsKey,
+    required GlobalKey settingsKey,
+    GlobalKey? Function()? bibleVerseKeyResolver,
+    GlobalKey? Function()? bibleAppBarKeyResolver,
+    GlobalKey? Function()? settingsReadingKeyResolver,
+    GlobalKey? Function()? settingsUpdaterKeyResolver,
+    GlobalKey? Function()? settingsReplayGuideKeyResolver,
+    Future<void> Function()? onPrepareBibleStep,
+    Future<void> Function()? onPrepareSettingsReadingStep,
+    Future<void> Function()? onPrepareSettingsUpdaterStep,
+    Future<void> Function()? onPrepareSettingsReplayStep,
+    GlobalKey? tourThemeToggleKey,
+  }) {
+    return [
+      // Paso 1: Identidad & Lector Bíblico Interlineal
+      TourStepConfig(
+        badge: 'IDENTIDAD Y LECTURA',
+        icon: Icons.auto_stories_rounded,
+        title: 'Berea Interlineal: Texto Original con Máxima Fluidez',
+        description:
+            'Lectura continua y solemne con textos originales en Hebreo (BHS) y Griego (NA28) alineados palabra por palabra.',
+        pointerLabel: '📖 Lector Bíblico Interlineal',
+        demoKind: TourDemoKind.bereaIdentity,
+        tabIndex: 0,
+        onPrepareStep: onPrepareBibleStep,
+        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 2: Despliegue de Capítulo Completo
+      TourStepConfig(
+        badge: 'LECTURA CONTINUA',
+        icon: Icons.menu_book_rounded,
+        title: 'Despliegue de Capítulo Completo',
+        description:
+            'Lee el capítulo íntegro de un tirón. Toca cualquier versículo para desplegar al instante sus herramientas de análisis.',
+        pointerLabel: '📖 Alterna capítulo / versículo',
+        demoKind: TourDemoKind.chapterUnfold,
+        tabIndex: 0,
+        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 3: Tipografía Bíblica SIL
+      TourStepConfig(
+        badge: 'TIPOGRAFÍA SIL',
+        icon: Icons.font_download_rounded,
+        title: 'Fuentes Académicas Ezra SIL y Gentium Plus',
+        description:
+            'Puntuación masorética hebrea y acentuación politónica griega nítidas y legibles en cualquier tamaño de pantalla.',
+        pointerLabel: '🔤 Selector tipográfico TT',
+        demoKind: TourDemoKind.topBarControls,
+        tabIndex: 0,
+        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 4: Resaltadores Teológicos
+      TourStepConfig(
+        badge: 'HERRAMIENTAS',
+        icon: Icons.format_paint_rounded,
+        title: 'Resalta Versículos o Frases Seleccionadas',
+        description:
+            '5 colores teológicos (Promesas, Mandamientos, Atributos de Dios, Advertencias, Profecía) con notas y marcadores persistentes.',
+        pointerLabel: '🎨 Resaltador y herramientas',
+        demoKind: TourDemoKind.studyCollections,
+        tabIndex: 0,
+        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 5: Diccionario Enriquecido (Novedad v1.3.5)
+      TourStepConfig(
+        badge: 'NOVEDAD v1.3.5',
+        isNewFeature: true,
+        icon: Icons.translate_rounded,
+        title: '100% Derivaciones y Léxico STEPBible',
+        description:
+            '¡Gran enriquecimiento léxico! 14.197 términos con etimologías completas, léxico académico Tyndale STEPBible, supresión de guiones vacíos e hipervínculos táctiles entre códigos Strong.',
+        pointerLabel: '🏛️ Léxico STEPBible y Raíces',
+        demoKind: TourDemoKind.strongHyperlinks,
+        tabIndex: 2,
+        targetKeyResolver: () => dictionaryControlsKey,
+      ),
+
+      // Paso 6: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
+      TourStepConfig(
+        badge: 'TEMA RÁPIDO',
+        isNewFeature: true,
+        icon: Icons.light_mode_rounded,
+        title: 'Alternador de Modo Claro y Oscuro (☀️/🌙)',
+        description:
+            'Cambia al instante entre el modo claro (Pergamino Diurno) y el modo oscuro (Noche Alejandrina) con un solo toque desde la barra superior, sin entrar a Ajustes.',
+        pointerLabel: '☀️/🌙 Modo Claro / Oscuro',
+        demoKind: TourDemoKind.topBarControls,
+        tabIndex: 0,
+        targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,
+      ),
+
+      // Paso 7: Avisos Nativos OTA
+      TourStepConfig(
+        badge: 'ACTUALIZACIONES',
+        icon: Icons.system_update_rounded,
+        title: 'Avisos Nativos con Confirmación Explícita',
+        description:
+            'Notificaciones del sistema cuando hay una nueva versión disponible, mostrando notas de cambios y confirmación previa de descarga.',
+        pointerLabel: '🔔 Centro de actualizaciones',
+        demoKind: TourDemoKind.otaNotification,
+        tabIndex: 4,
+        onPrepareStep: onPrepareSettingsUpdaterStep,
+        targetKeyResolver: () => settingsUpdaterKeyResolver?.call() ?? settingsKey,
+      ),
+
+      // Paso 8: Repetir Guía de Uso
+      TourStepConfig(
+        badge: 'AYUDA SIEMPRE ACTIVA',
+        icon: Icons.explore_rounded,
+        title: 'Vuelve a Ver esta Guía de Uso',
+        description:
+            'Acceso permanente en Ajustes → Ver guía de uso para volver a reproducir este recorrido interactivo bajo demanda.',
+        pointerLabel: '👆 Repetir guía de uso',
+        demoKind: TourDemoKind.replayGuide,
+        tabIndex: 4,
+        onPrepareStep: onPrepareSettingsReplayStep,
+        targetKeyResolver: () => settingsReplayGuideKeyResolver?.call() ?? settingsKey,
+      ),
+    ];
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // 🔹 Versión 1.3.7: Edición Exegética (10 pasos)
+  // ───────────────────────────────────────────────────────────────────────────
+  static List<TourStepConfig> _buildV137Steps({
+    required GlobalKey bibleKey,
+    required GlobalKey dictionaryControlsKey,
+    required GlobalKey studyTabsKey,
+    required GlobalKey settingsKey,
+    GlobalKey? Function()? bibleVerseKeyResolver,
+    GlobalKey? Function()? bibleAppBarKeyResolver,
+    GlobalKey? Function()? settingsReadingKeyResolver,
+    GlobalKey? Function()? settingsUpdaterKeyResolver,
+    GlobalKey? Function()? settingsReplayGuideKeyResolver,
+    Future<void> Function()? onPrepareBibleStep,
+    Future<void> Function()? onPrepareSettingsReadingStep,
+    Future<void> Function()? onPrepareSettingsUpdaterStep,
+    Future<void> Function()? onPrepareSettingsReplayStep,
+    GlobalKey? tourThemeToggleKey,
+  }) {
+    return [
+      // Paso 1: Identidad & Lector Bíblico Interlineal
+      TourStepConfig(
+        badge: 'IDENTIDAD Y LECTURA',
+        icon: Icons.auto_stories_rounded,
+        title: 'Berea Interlineal: Texto Original con Máxima Fluidez',
+        description:
+            'Lectura continua y solemne con textos originales en Hebreo (BHS) y Griego (NA28) alineados palabra por palabra.',
+        pointerLabel: '📖 Lector Bíblico Interlineal',
+        demoKind: TourDemoKind.bereaIdentity,
+        tabIndex: 0,
+        onPrepareStep: onPrepareBibleStep,
+        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 2: Despliegue de Capítulo Completo
+      TourStepConfig(
+        badge: 'LECTURA CONTINUA',
+        icon: Icons.menu_book_rounded,
+        title: 'Despliegue de Capítulo Completo',
+        description:
+            'Lee el capítulo íntegro de un tirón. Toca cualquier versículo para desplegar al instante sus herramientas de análisis.',
+        pointerLabel: '📖 Alterna capítulo / versículo',
+        demoKind: TourDemoKind.chapterUnfold,
+        tabIndex: 0,
+        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 3: Tipografía Bíblica SIL
+      TourStepConfig(
+        badge: 'TIPOGRAFÍA SIL',
+        icon: Icons.font_download_rounded,
+        title: 'Fuentes Académicas Ezra SIL y Gentium Plus',
+        description:
+            'Puntuación masorética hebrea y acentuación politónica griega nítidas y legibles en cualquier tamaño de pantalla.',
+        pointerLabel: '🔤 Selector tipográfico TT',
+        demoKind: TourDemoKind.topBarControls,
+        tabIndex: 0,
+        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 4: Resaltadores Teológicos
+      TourStepConfig(
+        badge: 'HERRAMIENTAS',
+        icon: Icons.format_paint_rounded,
+        title: 'Resalta Versículos o Frases Seleccionadas',
+        description:
+            '5 colores teológicos (Promesas, Mandamientos, Atributos de Dios, Advertencias, Profecía) con notas y marcadores persistentes.',
+        pointerLabel: '🎨 Resaltador y herramientas',
+        demoKind: TourDemoKind.studyCollections,
+        tabIndex: 0,
+        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+      ),
+
+      // Paso 5: Diccionario Enriquecido
+      TourStepConfig(
+        badge: 'LÉXICO ACADÉMICO',
+        icon: Icons.translate_rounded,
+        title: '100% Derivaciones y Léxico STEPBible',
+        description:
+            '14.197 términos con etimologías completas, léxico académico Tyndale STEPBible e hipervínculos táctiles entre códigos Strong.',
+        pointerLabel: '🏛️ Léxico STEPBible y Raíces',
+        demoKind: TourDemoKind.strongHyperlinks,
+        tabIndex: 2,
+        targetKeyResolver: () => dictionaryControlsKey,
+      ),
+
+      // Paso 6: Similitudes y Comparaciones Teológicas (Novedad v1.3.7)
+      TourStepConfig(
+        badge: 'NOVEDAD v1.3.7',
+        isNewFeature: true,
+        icon: Icons.compare_arrows_rounded,
+        title: 'Similitudes y Comparaciones Teológicas',
+        description:
+            '¡Análisis exegético profundo! Compara matices entre términos afines: érets (tierra política) vs adamáh (tierra cultivable) vs tebél (el mundo cósmico), bará vs asáh, agapáo vs philéo.',
+        pointerLabel: '⚖️ Similitudes Teológicas',
+        demoKind: TourDemoKind.typewriterDictionary,
+        tabIndex: 2,
+        targetKeyResolver: () => dictionaryControlsKey,
+      ),
+
+      // Paso 7: Familias de Palabras Derivadas (Novedad v1.3.7)
+      TourStepConfig(
+        badge: 'NOVEDAD v1.3.7',
+        isNewFeature: true,
+        icon: Icons.account_tree_rounded,
+        title: 'Árbol Léxico y Familias Derivadas',
+        description:
+            'Visualiza con pastillas doradas táctiles todas las palabras bíblicas que brotan de una misma raíz común, conectadas mediante la tabla relacional SQLite.',
+        pointerLabel: '🌿 Familias Derivadas',
+        demoKind: TourDemoKind.strongHyperlinks,
+        tabIndex: 2,
+        targetKeyResolver: () => dictionaryControlsKey,
+      ),
+
+      // Paso 8: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
+      TourStepConfig(
+        badge: 'TEMA RÁPIDO',
+        isNewFeature: true,
+        icon: Icons.light_mode_rounded,
+        title: 'Alternador de Modo Claro y Oscuro (☀️/🌙)',
+        description:
+            'Cambia al instante entre el modo claro (Pergamino Diurno) y el modo oscuro (Noche Alejandrina) con un solo toque desde la barra superior, sin entrar a Ajustes.',
+        pointerLabel: '☀️/🌙 Modo Claro / Oscuro',
+        demoKind: TourDemoKind.topBarControls,
+        tabIndex: 0,
+        targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,
+      ),
+
+      // Paso 9: Avisos Nativos OTA
+      TourStepConfig(
+        badge: 'ACTUALIZACIONES',
+        icon: Icons.system_update_rounded,
+        title: 'Avisos Nativos con Confirmación Explícita',
+        description:
+            'Notificaciones del sistema cuando hay una nueva versión disponible, mostrando notas de cambios y confirmación previa de descarga.',
+        pointerLabel: '🔔 Centro de actualizaciones',
+        demoKind: TourDemoKind.otaNotification,
+        tabIndex: 4,
+        onPrepareStep: onPrepareSettingsUpdaterStep,
+        targetKeyResolver: () => settingsUpdaterKeyResolver?.call() ?? settingsKey,
+      ),
+
+      // Paso 10: Repetir Guía de Uso
       TourStepConfig(
         badge: 'AYUDA SIEMPRE ACTIVA',
         icon: Icons.explore_rounded,
@@ -496,7 +819,7 @@ class TourStepsFactory {
         title: 'Alternador de Modo Claro y Oscuro (☀️/🌙)',
         description:
             'Cambia al instante entre la lectura en Pergamino Diurno y Noche Alejandrina con un solo toque en el icono de sol y luna en la barra superior, sin entrar a Ajustes.',
-        pointerLabel: '☀️/🌙 Alternador rápido de tema',
+        pointerLabel: '☀️/🌙 Modo Claro / Oscuro',
         demoKind: TourDemoKind.topBarControls,
         tabIndex: 0,
         targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,

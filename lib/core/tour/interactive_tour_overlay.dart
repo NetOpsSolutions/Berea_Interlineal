@@ -263,7 +263,11 @@ class _InteractiveTourOverlayState extends State<InteractiveTourOverlay>
     Rect rect,
     bool placeCardBelow,
   ) {
-    final clampedCenterX = rect.center.dx.clamp(95.0, size.width - 95.0);
+    final pillWidth = math.min(210.0, size.width - 24.0);
+    final halfPill = pillWidth / 2;
+    final pillLeft = (rect.center.dx - halfPill).clamp(12.0, size.width - pillWidth - 12.0);
+    final arrowOffset = (rect.center.dx - pillLeft).clamp(16.0, pillWidth - 16.0);
+    final arrowAlignmentX = (arrowOffset / halfPill) - 1.0;
 
     return AnimatedBuilder(
       animation: _pulseController,
@@ -279,14 +283,17 @@ class _InteractiveTourOverlayState extends State<InteractiveTourOverlay>
 
         return Positioned(
           top: topPos,
-          left: clampedCenterX - 95,
-          width: 190,
+          left: pillLeft,
+          width: pillWidth,
           child: IgnorePointer(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (placeCardBelow)
-                  Icon(Icons.arrow_drop_up_rounded, color: pillColor, size: 22),
+                  Align(
+                    alignment: Alignment(arrowAlignmentX, 0),
+                    child: Icon(Icons.arrow_drop_up_rounded, color: pillColor, size: 22),
+                  ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                   decoration: BoxDecoration(
@@ -305,16 +312,19 @@ class _InteractiveTourOverlayState extends State<InteractiveTourOverlay>
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: _step.isNewFeature ? Colors.black : Colors.white,
                       fontSize: 11.5,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: 0.2,
+                      letterSpacing: 0.1,
                     ),
                   ),
                 ),
                 if (!placeCardBelow)
-                  Icon(Icons.arrow_drop_down_rounded, color: pillColor, size: 22),
+                  Align(
+                    alignment: Alignment(arrowAlignmentX, 0),
+                    child: Icon(Icons.arrow_drop_down_rounded, color: pillColor, size: 22),
+                  ),
               ],
             ),
           ),
