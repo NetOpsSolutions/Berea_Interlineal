@@ -425,6 +425,15 @@ def compile_v137():
     print("  -> Compilando Split APKs (arm64-v8a, armeabi-v7a, x86_64)...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=WT)
 
+    # Instalar inmediatamente en emulador si está conectado
+    x86_apk = WT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
+    adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
+    if x86_apk.exists() and adb_path.exists():
+        print("\n  -> Instalando automáticamente v1.3.7 en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
+        print("  [OK] v1.3.7 instalada y abierta en emulador.\n")
+
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=WT)
 
