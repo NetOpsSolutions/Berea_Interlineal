@@ -194,10 +194,14 @@ def patch_worktree():
         tourDrawerButtonKey: _tourDrawerButtonKey,
         tourBookSummaryButtonKey: _tourBookSummaryButtonKey,
         tourThemeToggleKey: _tourThemeToggleKey,
+        tourChapterModeButtonKey: _tourChapterModeKey,
+        tourTypographyButtonKey: _tourTypographyKey,
+        tourTheologicalPaletteKey: _tourTheologicalPaletteKey,
       ),
       DictionaryScreen(
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
+        tourFirstItemKey: _tourDictionaryFirstItemKey,
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       StudyScreen(
@@ -212,6 +216,10 @@ def patch_worktree():
       BibleScreen(
         key: _bibleKey,
         tourThemeToggleKey: _tourThemeToggleKey,
+        tourChapterModeButtonKey: _tourChapterModeKey,
+        tourTypographyButtonKey: _tourTypographyKey,
+        tourTheologicalPaletteKey: _tourTheologicalPaletteKey,
+        showExegesisSections: false,
       ),
       GlobalSearchScreen(
         onOpenVerse: _navigateToVerse,
@@ -220,6 +228,8 @@ def patch_worktree():
       DictionaryScreen(
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
+        tourFirstItemKey: _tourDictionaryFirstItemKey,
+        showExegesisSections: false,
       ),
       StudyScreen(
         key: _studyKey,
@@ -399,6 +409,23 @@ def patch_worktree():
     wt_test_file.write_text(w_text, encoding="utf-8")
     print("  [OK] Adaptado widget_test.dart para 5 pestañas clásicas en wt_v135.")
 
+    # 4. Desactivar secciones de exégesis (Similitudes y Familias) exclusivas de v1.3.7+
+    detail_file = WT / "lib/features/dictionary/strong_detail_screen.dart"
+    d_text = detail_file.read_text(encoding="utf-8")
+    d_text = d_text.replace("this.showExegesisSections = true,", "this.showExegesisSections = false,")
+    detail_file.write_text(d_text, encoding="utf-8")
+
+    dict_file = WT / "lib/features/dictionary/dictionary_screen.dart"
+    di_text = dict_file.read_text(encoding="utf-8")
+    di_text = di_text.replace("this.showExegesisSections = true,", "this.showExegesisSections = false,")
+    dict_file.write_text(di_text, encoding="utf-8")
+
+    bible_file = WT / "lib/features/bible/bible_screen.dart"
+    b_text = bible_file.read_text(encoding="utf-8")
+    b_text = b_text.replace("this.showExegesisSections = true,", "this.showExegesisSections = false,")
+    bible_file.write_text(b_text, encoding="utf-8")
+    print("  [OK] Exégesis estrictamente desactivada para v1.3.5.")
+
 def compile_v135():
     print("\n[3/5] Compilando APKs de Berea Interlineal v1.3.5...")
     print("  -> Verificando estática con flutter analyze...")
@@ -409,6 +436,15 @@ def compile_v135():
 
     print("  -> Compilando Split APKs (arm64-v8a, armeabi-v7a, x86_64)...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=WT)
+
+    # Instalar inmediatamente en emulador si está conectado
+    x86_apk = WT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
+    adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
+    if x86_apk.exists() and adb_path.exists():
+        print("\n  -> Instalando automáticamente v1.3.5 en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
+        print("  [OK] v1.3.5 instalada y abierta en emulador.\n")
 
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=WT)

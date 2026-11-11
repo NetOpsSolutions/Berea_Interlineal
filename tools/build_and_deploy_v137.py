@@ -199,10 +199,14 @@ def patch_worktree():
         tourDrawerButtonKey: _tourDrawerButtonKey,
         tourBookSummaryButtonKey: _tourBookSummaryButtonKey,
         tourThemeToggleKey: _tourThemeToggleKey,
+        tourChapterModeButtonKey: _tourChapterModeKey,
+        tourTypographyButtonKey: _tourTypographyKey,
+        tourTheologicalPaletteKey: _tourTheologicalPaletteKey,
       ),
       DictionaryScreen(
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
+        tourFirstItemKey: _tourDictionaryFirstItemKey,
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       StudyScreen(
@@ -217,6 +221,10 @@ def patch_worktree():
       BibleScreen(
         key: _bibleKey,
         tourThemeToggleKey: _tourThemeToggleKey,
+        tourChapterModeButtonKey: _tourChapterModeKey,
+        tourTypographyButtonKey: _tourTypographyKey,
+        tourTheologicalPaletteKey: _tourTheologicalPaletteKey,
+        showExegesisSections: true,
       ),
       GlobalSearchScreen(
         onOpenVerse: _navigateToVerse,
@@ -225,6 +233,8 @@ def patch_worktree():
       DictionaryScreen(
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
+        tourFirstItemKey: _tourDictionaryFirstItemKey,
+        showExegesisSections: true,
       ),
       StudyScreen(
         key: _studyKey,
