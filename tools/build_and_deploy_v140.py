@@ -22,6 +22,7 @@ try:
 except Exception:
     pass
 
+sys.path.append(str(Path(__file__).resolve().parent))
 from deploy_draft_release import upload_draft_release
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -81,6 +82,9 @@ def compile_v140():
     print("\n[1/3] Compilando APKs de Berea Interlineal v1.4.0...")
     print("  -> Verificando estática con flutter analyze...")
     run_cmd(["flutter", "analyze"], cwd=ROOT)
+
+    print("  -> Ejecutando pruebas unitarias...")
+    run_cmd(["flutter", "test"], cwd=ROOT)
 
     print("  -> Compilando Split APKs...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=ROOT)
