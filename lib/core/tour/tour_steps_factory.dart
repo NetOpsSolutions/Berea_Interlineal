@@ -41,6 +41,8 @@ class TourStepsFactory {
     GlobalKey? tourTypographyButtonKey,
     GlobalKey? tourTheologicalPaletteKey,
     GlobalKey? tourDictionaryFirstItemKey,
+    GlobalKey? tourSimilaritiesKey,
+    GlobalKey? tourDerivedFamilyKey,
   }) {
     final cleanVer = normalizeVersion(version);
 
@@ -106,6 +108,8 @@ class TourStepsFactory {
           tourTypographyButtonKey: tourTypographyButtonKey,
           tourTheologicalPaletteKey: tourTheologicalPaletteKey,
           tourDictionaryFirstItemKey: tourDictionaryFirstItemKey,
+          tourSimilaritiesKey: tourSimilaritiesKey,
+          tourDerivedFamilyKey: tourDerivedFamilyKey,
         );
       case '1.3.7':
         return _buildV137Steps(
@@ -127,6 +131,8 @@ class TourStepsFactory {
           tourTypographyButtonKey: tourTypographyButtonKey,
           tourTheologicalPaletteKey: tourTheologicalPaletteKey,
           tourDictionaryFirstItemKey: tourDictionaryFirstItemKey,
+          tourSimilaritiesKey: tourSimilaritiesKey,
+          tourDerivedFamilyKey: tourDerivedFamilyKey,
         );
       case '1.4.0':
       default:
@@ -515,6 +521,8 @@ class TourStepsFactory {
     GlobalKey? tourTypographyButtonKey,
     GlobalKey? tourTheologicalPaletteKey,
     GlobalKey? tourDictionaryFirstItemKey,
+    GlobalKey? tourSimilaritiesKey,
+    GlobalKey? tourDerivedFamilyKey,
   }) {
     return [
       // Paso 1: Identidad & Lector Bíblico Interlineal
@@ -666,6 +674,8 @@ class TourStepsFactory {
     GlobalKey? tourTypographyButtonKey,
     GlobalKey? tourTheologicalPaletteKey,
     GlobalKey? tourDictionaryFirstItemKey,
+    GlobalKey? tourSimilaritiesKey,
+    GlobalKey? tourDerivedFamilyKey,
   }) {
     return [
       // Paso 1: Identidad & Lector Bíblico Interlineal
@@ -775,7 +785,8 @@ class TourStepsFactory {
         pointerLabel: '⚖️ Similitudes Teológicas',
         demoKind: TourDemoKind.typewriterDictionary,
         tabIndex: 2,
-        targetKeyResolver: () => tourDictionaryFirstItemKey ?? dictionaryControlsKey,
+        targetKeyResolver: () =>
+            tourSimilaritiesKey ?? tourDictionaryFirstItemKey ?? dictionaryControlsKey,
       ),
 
       // Paso 9: Familias de Palabras Derivadas (Novedad v1.3.7)
@@ -789,7 +800,8 @@ class TourStepsFactory {
         pointerLabel: '🌿 Familias Derivadas',
         demoKind: TourDemoKind.strongHyperlinks,
         tabIndex: 2,
-        targetKeyResolver: () => tourDictionaryFirstItemKey ?? dictionaryControlsKey,
+        targetKeyResolver: () =>
+            tourDerivedFamilyKey ?? tourDictionaryFirstItemKey ?? dictionaryControlsKey,
       ),
 
       // Paso 10: Avisos Nativos OTA

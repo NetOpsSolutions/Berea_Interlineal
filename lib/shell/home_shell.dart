@@ -51,6 +51,8 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   final GlobalKey _tourTypographyKey = GlobalKey(debugLabel: 'tourTypography');
   final GlobalKey _tourTheologicalPaletteKey = GlobalKey(debugLabel: 'tourTheologicalPalette');
   final GlobalKey _tourDictionaryFirstItemKey = GlobalKey(debugLabel: 'tourDictionaryFirstItem');
+  final GlobalKey _tourSimilaritiesKey = GlobalKey(debugLabel: 'tourSimilarities');
+  final GlobalKey _tourDerivedFamilyKey = GlobalKey(debugLabel: 'tourDerivedFamily');
 
   Timer? _updateTimer;
   Timer? _periodicUpdateTimer;
@@ -272,6 +274,8 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
       tourTypographyButtonKey: _tourTypographyKey,
       tourTheologicalPaletteKey: _tourTheologicalPaletteKey,
       tourDictionaryFirstItemKey: _tourDictionaryFirstItemKey,
+      tourSimilaritiesKey: _tourSimilaritiesKey,
+      tourDerivedFamilyKey: _tourDerivedFamilyKey,
       onPrepareBibleStep: () async {
         await _bibleKey.currentState?.prepareForInteractiveTourStep1();
       },
@@ -313,6 +317,8 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
         tourFirstItemKey: _tourDictionaryFirstItemKey,
+        tourSimilaritiesKey: _tourSimilaritiesKey,
+        tourDerivedFamilyKey: _tourDerivedFamilyKey,
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       StudyScreen(

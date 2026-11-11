@@ -202,6 +202,8 @@ def patch_worktree():
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
         tourFirstItemKey: _tourDictionaryFirstItemKey,
+        tourSimilaritiesKey: _tourSimilaritiesKey,
+        tourDerivedFamilyKey: _tourDerivedFamilyKey,
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       StudyScreen(
