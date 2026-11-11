@@ -174,12 +174,12 @@ void main() {
       settingsKey: k5,
       tourThemeToggleKey: kTheme,
     );
-    expect(v135.length, equals(8));
+    expect(v135.length, equals(9));
     expect(v135.first.badge, equals('IDENTIDAD Y LECTURA'));
-    expect(v135[4].badge, equals('NOVEDAD v1.3.5'));
-    expect(v135[4].title, equals('100% Derivaciones y Léxico STEPBible'));
-    expect(v135[5].badge, equals('TEMA RÁPIDO'));
-    expect(v135[5].targetKeyResolver(), equals(kTheme));
+    expect(v135[4].badge, equals('TEMA RÁPIDO'));
+    expect(v135[4].targetKeyResolver(), equals(kTheme));
+    expect(v135[6].badge, equals('NOVEDAD v1.3.5'));
+    expect(v135[6].title, equals('100% Derivaciones y Léxico STEPBible'));
 
     final v137 = TourStepsFactory.getStepsForVersion(
       version: '1.3.7',
@@ -190,12 +190,13 @@ void main() {
       settingsKey: k5,
       tourThemeToggleKey: kTheme,
     );
-    expect(v137.length, equals(10));
-    expect(v137[5].badge, equals('NOVEDAD v1.3.7'));
-    expect(v137[5].title, equals('Similitudes y Comparaciones Teológicas'));
-    expect(v137[6].title, equals('Árbol Léxico y Familias Derivadas'));
-    expect(v137[7].badge, equals('TEMA RÁPIDO'));
-    expect(v137[7].targetKeyResolver(), equals(kTheme));
+    expect(v137.length, equals(11));
+    expect(v137[4].badge, equals('TEMA RÁPIDO'));
+    expect(v137[4].targetKeyResolver(), equals(kTheme));
+    expect(v137[6].badge, equals('LÉXICO ACADÉMICO'));
+    expect(v137[7].badge, equals('NOVEDAD v1.3.7'));
+    expect(v137[7].title, equals('Similitudes y Comparaciones Teológicas'));
+    expect(v137[8].title, equals('Árbol Léxico y Familias Derivadas'));
 
     final v140 = TourStepsFactory.getStepsForVersion(
       version: '1.4.0',

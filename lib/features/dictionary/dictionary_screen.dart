@@ -8,13 +8,17 @@ import 'strong_detail_screen.dart';
 class DictionaryScreen extends StatefulWidget {
   final String initialLanguage;
   final GlobalKey? tourControlsKey;
+  final GlobalKey? tourFirstItemKey;
   final VoidCallback? onOpenDrawer;
+  final bool showExegesisSections;
 
   const DictionaryScreen({
     super.key,
     required this.initialLanguage,
     this.tourControlsKey,
+    this.tourFirstItemKey,
     this.onOpenDrawer,
+    this.showExegesisSections = true,
   });
   @override
   State<DictionaryScreen> createState() => _DictionaryScreenState();
@@ -75,11 +79,13 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       builder: (context, _) {
         return Scaffold(
           appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.menu_rounded),
-              tooltip: 'Menú persiana de estudio',
-              onPressed: widget.onOpenDrawer ?? () => Scaffold.of(context).openDrawer(),
-            ),
+            leading: widget.onOpenDrawer != null
+                ? IconButton(
+                    icon: const Icon(Icons.menu_rounded),
+                    tooltip: 'Menú persiana de estudio',
+                    onPressed: widget.onOpenDrawer,
+                  )
+                : null,
             title: Text('Diccionario Strong ${_lbl(_language)}'),
             actions: [
               IconButton(
@@ -166,6 +172,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                                       final it = _results[i];
                                       final he = it.language == 'hebrew';
                                       return ListTile(
+                                        key: i == 0 ? widget.tourFirstItemKey : null,
                                         contentPadding: const EdgeInsets.symmetric(
                                           horizontal: 8,
                                           vertical: 4,
@@ -211,6 +218,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                                             builder: (_) => StrongDetailScreen(
                                               language: it.language,
                                               code: it.code,
+                                              showExegesisSections: widget.showExegesisSections,
                                             ),
                                           ),
                                         ),

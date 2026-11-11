@@ -47,6 +47,10 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
   final GlobalKey _tourBookSummaryButtonKey = GlobalKey(debugLabel: 'tourBookSummaryButton');
   final GlobalKey _tourDrawerTheologicalKey = GlobalKey(debugLabel: 'tourDrawerTheological');
   final GlobalKey _tourThemeToggleKey = GlobalKey(debugLabel: 'tourThemeToggle');
+  final GlobalKey _tourChapterModeKey = GlobalKey(debugLabel: 'tourChapterMode');
+  final GlobalKey _tourTypographyKey = GlobalKey(debugLabel: 'tourTypography');
+  final GlobalKey _tourTheologicalPaletteKey = GlobalKey(debugLabel: 'tourTheologicalPalette');
+  final GlobalKey _tourDictionaryFirstItemKey = GlobalKey(debugLabel: 'tourDictionaryFirstItem');
 
   Timer? _updateTimer;
   Timer? _periodicUpdateTimer;
@@ -264,6 +268,10 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
       tourBookSummaryButtonKey: _tourBookSummaryButtonKey,
       tourDrawerTheologicalKey: _tourDrawerTheologicalKey,
       tourThemeToggleKey: _tourThemeToggleKey,
+      tourChapterModeButtonKey: _tourChapterModeKey,
+      tourTypographyButtonKey: _tourTypographyKey,
+      tourTheologicalPaletteKey: _tourTheologicalPaletteKey,
+      tourDictionaryFirstItemKey: _tourDictionaryFirstItemKey,
       onPrepareBibleStep: () async {
         await _bibleKey.currentState?.prepareForInteractiveTourStep1();
       },
@@ -297,10 +305,14 @@ class HomeShellState extends State<HomeShell> with WidgetsBindingObserver {
         tourDrawerButtonKey: _tourDrawerButtonKey,
         tourBookSummaryButtonKey: _tourBookSummaryButtonKey,
         tourThemeToggleKey: _tourThemeToggleKey,
+        tourChapterModeButtonKey: _tourChapterModeKey,
+        tourTypographyButtonKey: _tourTypographyKey,
+        tourTheologicalPaletteKey: _tourTheologicalPaletteKey,
       ),
       DictionaryScreen(
         initialLanguage: 'greek',
         tourControlsKey: _dictionaryControlsKey,
+        tourFirstItemKey: _tourDictionaryFirstItemKey,
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
       StudyScreen(

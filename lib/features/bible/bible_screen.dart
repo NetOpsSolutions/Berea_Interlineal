@@ -20,6 +20,10 @@ class BibleScreen extends StatefulWidget {
   final GlobalKey? tourDrawerButtonKey;
   final GlobalKey? tourBookSummaryButtonKey;
   final GlobalKey? tourThemeToggleKey;
+  final GlobalKey? tourChapterModeButtonKey;
+  final GlobalKey? tourTypographyButtonKey;
+  final GlobalKey? tourTheologicalPaletteKey;
+  final bool showExegesisSections;
 
   const BibleScreen({
     super.key,
@@ -30,6 +34,10 @@ class BibleScreen extends StatefulWidget {
     this.tourDrawerButtonKey,
     this.tourBookSummaryButtonKey,
     this.tourThemeToggleKey,
+    this.tourChapterModeButtonKey,
+    this.tourTypographyButtonKey,
+    this.tourTheologicalPaletteKey,
+    this.showExegesisSections = true,
   });
 
   @override
@@ -500,7 +508,10 @@ class BibleScreenState extends State<BibleScreen> {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => WordDetailSheet(word: w),
+        builder: (_) => WordDetailSheet(
+          word: w,
+          showExegesisSections: widget.showExegesisSections,
+        ),
       );
 
   @override
@@ -570,6 +581,7 @@ class BibleScreenState extends State<BibleScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
+                    key: widget.tourChapterModeButtonKey,
                     icon: Icon(
                       chapterMode ? Icons.menu_book_rounded : Icons.looks_one_outlined,
                       color: chapterMode ? theme.colorScheme.primary : null,
@@ -590,6 +602,7 @@ class BibleScreenState extends State<BibleScreen> {
                     onPressed: _toggleFluentMode,
                   ),
                   IconButton(
+                    key: widget.tourTypographyButtonKey,
                     icon: const Icon(Icons.text_fields_rounded),
                     tooltip: 'Tipografías académicas y tamaño de letra',
                     onPressed: _openAppearanceSheet,
@@ -663,6 +676,7 @@ class BibleScreenState extends State<BibleScreen> {
                                         activeSingleVerse.chapter,
                                         activeSingleVerse.verse,
                                       ),
+                                      tourTheologicalPaletteKey: widget.tourTheologicalPaletteKey,
                                     ),
                                   )),
                   ),
@@ -861,6 +875,7 @@ class BibleScreenState extends State<BibleScreen> {
                   ),
                   onClearHighlight: () =>
                       StudyService.instance.removeVerseHighlight(v.bookId, v.chapter, v.verse),
+                  tourTheologicalPaletteKey: v.verse == 1 ? widget.tourTheologicalPaletteKey : null,
                 ),
               );
             }),
@@ -913,6 +928,7 @@ class _ChapterVerseBlock extends StatefulWidget {
   final VoidCallback onCopyVerse;
   final void Function(String colorKey, {String? selectedFragment}) onApplyHighlight;
   final VoidCallback onClearHighlight;
+  final GlobalKey? tourTheologicalPaletteKey;
 
   const _ChapterVerseBlock({
     required this.verse,
@@ -931,6 +947,7 @@ class _ChapterVerseBlock extends StatefulWidget {
     required this.onCopyVerse,
     required this.onApplyHighlight,
     required this.onClearHighlight,
+    this.tourTheologicalPaletteKey,
   });
 
   @override
@@ -1194,6 +1211,7 @@ class _ChapterVerseBlockState extends State<_ChapterVerseBlock> {
 
           // 1. Paleta de Resaltadores Teológicos (5 colores + borrar)
           _TheologicalPaletteBar(
+            key: widget.tourTheologicalPaletteKey,
             activeColorKey: widget.highlight?.colorKey,
             onSelectColor: (key) => widget.onApplyHighlight(key),
             onClear: widget.highlight != null ? widget.onClearHighlight : null,
@@ -1541,6 +1559,7 @@ class _TheologicalPaletteBar extends StatelessWidget {
   final VoidCallback? onClear;
 
   const _TheologicalPaletteBar({
+    super.key,
     required this.activeColorKey,
     required this.onSelectColor,
     this.onClear,
@@ -1720,6 +1739,7 @@ class _SingleVerseView extends StatefulWidget {
   final VoidCallback onEditNote;
   final void Function(String colorKey, {String? selectedFragment}) onApplyHighlight;
   final VoidCallback onClearHighlight;
+  final GlobalKey? tourTheologicalPaletteKey;
 
   const _SingleVerseView({
     required this.verse,
@@ -1731,6 +1751,7 @@ class _SingleVerseView extends StatefulWidget {
     required this.onEditNote,
     required this.onApplyHighlight,
     required this.onClearHighlight,
+    this.tourTheologicalPaletteKey,
   });
 
   @override
@@ -1823,6 +1844,7 @@ class _SingleVerseViewState extends State<_SingleVerseView> {
                   const Divider(height: 1),
                   const SizedBox(height: 10),
                   _TheologicalPaletteBar(
+                    key: widget.tourTheologicalPaletteKey,
                     activeColorKey: widget.highlight?.colorKey,
                     onSelectColor: (key) => widget.onApplyHighlight(key),
                     onClear: widget.highlight != null ? widget.onClearHighlight : null,
@@ -2594,7 +2616,13 @@ class _ReaderAppearanceSheet extends StatelessWidget {
 
 class WordDetailSheet extends StatefulWidget {
   final WordToken word;
-  const WordDetailSheet({super.key, required this.word});
+  final bool showExegesisSections;
+
+  const WordDetailSheet({
+    super.key,
+    required this.word,
+    this.showExegesisSections = true,
+  });
 
   @override
   State<WordDetailSheet> createState() => _WordDetailSheetState();
@@ -2813,6 +2841,7 @@ class _WordDetailSheetState extends State<WordDetailSheet> {
                       builder: (_) => StrongDetailScreen(
                         language: widget.word.language,
                         code: widget.word.strongCode!,
+                        showExegesisSections: widget.showExegesisSections,
                       ),
                     ),
                   ),

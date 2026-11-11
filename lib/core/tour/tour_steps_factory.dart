@@ -37,6 +37,10 @@ class TourStepsFactory {
     GlobalKey? tourBookSummaryButtonKey,
     GlobalKey? tourDrawerTheologicalKey,
     GlobalKey? tourThemeToggleKey,
+    GlobalKey? tourChapterModeButtonKey,
+    GlobalKey? tourTypographyButtonKey,
+    GlobalKey? tourTheologicalPaletteKey,
+    GlobalKey? tourDictionaryFirstItemKey,
   }) {
     final cleanVer = normalizeVersion(version);
 
@@ -98,6 +102,10 @@ class TourStepsFactory {
           onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
           onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
           tourThemeToggleKey: tourThemeToggleKey,
+          tourChapterModeButtonKey: tourChapterModeButtonKey,
+          tourTypographyButtonKey: tourTypographyButtonKey,
+          tourTheologicalPaletteKey: tourTheologicalPaletteKey,
+          tourDictionaryFirstItemKey: tourDictionaryFirstItemKey,
         );
       case '1.3.7':
         return _buildV137Steps(
@@ -115,6 +123,10 @@ class TourStepsFactory {
           onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
           onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
           tourThemeToggleKey: tourThemeToggleKey,
+          tourChapterModeButtonKey: tourChapterModeButtonKey,
+          tourTypographyButtonKey: tourTypographyButtonKey,
+          tourTheologicalPaletteKey: tourTheologicalPaletteKey,
+          tourDictionaryFirstItemKey: tourDictionaryFirstItemKey,
         );
       case '1.4.0':
       default:
@@ -129,6 +141,10 @@ class TourStepsFactory {
           tourBookSummaryButtonKey: tourBookSummaryButtonKey,
           tourDrawerTheologicalKey: tourDrawerTheologicalKey,
           tourThemeToggleKey: tourThemeToggleKey,
+          tourChapterModeButtonKey: tourChapterModeButtonKey,
+          tourTypographyButtonKey: tourTypographyButtonKey,
+          tourTheologicalPaletteKey: tourTheologicalPaletteKey,
+          tourDictionaryFirstItemKey: tourDictionaryFirstItemKey,
           onPrepareBibleStep: onPrepareBibleStep,
         );
     }
@@ -478,7 +494,7 @@ class TourStepsFactory {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 🔹 Versión 1.3.5: Edición Léxica (8 pasos)
+  // 🔹 Versión 1.3.5: Edición Léxica (9 pasos calibrados con precisión de píxel)
   // ───────────────────────────────────────────────────────────────────────────
   static List<TourStepConfig> _buildV135Steps({
     required GlobalKey bibleKey,
@@ -495,6 +511,10 @@ class TourStepsFactory {
     Future<void> Function()? onPrepareSettingsUpdaterStep,
     Future<void> Function()? onPrepareSettingsReplayStep,
     GlobalKey? tourThemeToggleKey,
+    GlobalKey? tourChapterModeButtonKey,
+    GlobalKey? tourTypographyButtonKey,
+    GlobalKey? tourTheologicalPaletteKey,
+    GlobalKey? tourDictionaryFirstItemKey,
   }) {
     return [
       // Paso 1: Identidad & Lector Bíblico Interlineal
@@ -518,10 +538,11 @@ class TourStepsFactory {
         title: 'Despliegue de Capítulo Completo',
         description:
             'Lee el capítulo íntegro de un tirón. Toca cualquier versículo para desplegar al instante sus herramientas de análisis.',
-        pointerLabel: '📖 Alterna capítulo / versículo',
+        pointerLabel: '📖 Alternar modo de lectura',
         demoKind: TourDemoKind.chapterUnfold,
         tabIndex: 0,
-        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () =>
+            tourChapterModeButtonKey ?? bibleAppBarKeyResolver?.call() ?? bibleKey,
       ),
 
       // Paso 3: Tipografía Bíblica SIL
@@ -531,10 +552,11 @@ class TourStepsFactory {
         title: 'Fuentes Académicas Ezra SIL y Gentium Plus',
         description:
             'Puntuación masorética hebrea y acentuación politónica griega nítidas y legibles en cualquier tamaño de pantalla.',
-        pointerLabel: '🔤 Selector tipográfico TT',
+        pointerLabel: '🔤 Selector tipográfico «TT»',
         demoKind: TourDemoKind.topBarControls,
         tabIndex: 0,
-        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () =>
+            tourTypographyButtonKey ?? bibleAppBarKeyResolver?.call() ?? bibleKey,
       ),
 
       // Paso 4: Resaltadores Teológicos
@@ -544,27 +566,14 @@ class TourStepsFactory {
         title: 'Resalta Versículos o Frases Seleccionadas',
         description:
             '5 colores teológicos (Promesas, Mandamientos, Atributos de Dios, Advertencias, Profecía) con notas y marcadores persistentes.',
-        pointerLabel: '🎨 Resaltador y herramientas',
+        pointerLabel: '🎨 Paleta teológica (5 colores)',
         demoKind: TourDemoKind.studyCollections,
         tabIndex: 0,
-        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () =>
+            tourTheologicalPaletteKey ?? bibleVerseKeyResolver?.call() ?? bibleKey,
       ),
 
-      // Paso 5: Diccionario Enriquecido (Novedad v1.3.5)
-      TourStepConfig(
-        badge: 'NOVEDAD v1.3.5',
-        isNewFeature: true,
-        icon: Icons.translate_rounded,
-        title: '100% Derivaciones y Léxico STEPBible',
-        description:
-            '¡Gran enriquecimiento léxico! 14.197 términos con etimologías completas, léxico académico Tyndale STEPBible, supresión de guiones vacíos e hipervínculos táctiles entre códigos Strong.',
-        pointerLabel: '🏛️ Léxico STEPBible y Raíces',
-        demoKind: TourDemoKind.strongHyperlinks,
-        tabIndex: 2,
-        targetKeyResolver: () => dictionaryControlsKey,
-      ),
-
-      // Paso 6: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
+      // Paso 5: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
       TourStepConfig(
         badge: 'TEMA RÁPIDO',
         isNewFeature: true,
@@ -578,7 +587,34 @@ class TourStepsFactory {
         targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,
       ),
 
-      // Paso 7: Avisos Nativos OTA
+      // Paso 6: Diccionario Strong: Búsqueda y Filtros
+      TourStepConfig(
+        badge: 'DICCIONARIO BÍBLICO',
+        icon: Icons.search_rounded,
+        title: 'Búsqueda Rápida y Filtros Lingüísticos',
+        description:
+            'Busca al instante por código Strong (#H/#G), lema en idioma bíblico o transliteración latina, alternando con un toque entre Griego y Hebreo.',
+        pointerLabel: '🔍 Buscar código o palabra',
+        demoKind: TourDemoKind.typewriterDictionary,
+        tabIndex: 2,
+        targetKeyResolver: () => dictionaryControlsKey,
+      ),
+
+      // Paso 7: Novedad v1.3.5: 100% Derivaciones y Léxico STEPBible
+      TourStepConfig(
+        badge: 'NOVEDAD v1.3.5',
+        isNewFeature: true,
+        icon: Icons.translate_rounded,
+        title: '100% Derivaciones y Léxico STEPBible',
+        description:
+            '¡Gran enriquecimiento léxico! 14.197 términos con etimologías completas, léxico académico Tyndale STEPBible, supresión de guiones vacíos e hipervínculos táctiles entre códigos Strong.',
+        pointerLabel: '🏛️ Léxico STEPBible y Raíces',
+        demoKind: TourDemoKind.strongHyperlinks,
+        tabIndex: 2,
+        targetKeyResolver: () => tourDictionaryFirstItemKey ?? dictionaryControlsKey,
+      ),
+
+      // Paso 8: Avisos Nativos OTA
       TourStepConfig(
         badge: 'ACTUALIZACIONES',
         icon: Icons.system_update_rounded,
@@ -592,7 +628,7 @@ class TourStepsFactory {
         targetKeyResolver: () => settingsUpdaterKeyResolver?.call() ?? settingsKey,
       ),
 
-      // Paso 8: Repetir Guía de Uso
+      // Paso 9: Repetir Guía de Uso
       TourStepConfig(
         badge: 'AYUDA SIEMPRE ACTIVA',
         icon: Icons.explore_rounded,
@@ -609,7 +645,7 @@ class TourStepsFactory {
   }
 
   // ───────────────────────────────────────────────────────────────────────────
-  // 🔹 Versión 1.3.7: Edición Exegética (10 pasos)
+  // 🔹 Versión 1.3.7: Edición Exegética (11 pasos calibrados)
   // ───────────────────────────────────────────────────────────────────────────
   static List<TourStepConfig> _buildV137Steps({
     required GlobalKey bibleKey,
@@ -626,6 +662,10 @@ class TourStepsFactory {
     Future<void> Function()? onPrepareSettingsUpdaterStep,
     Future<void> Function()? onPrepareSettingsReplayStep,
     GlobalKey? tourThemeToggleKey,
+    GlobalKey? tourChapterModeButtonKey,
+    GlobalKey? tourTypographyButtonKey,
+    GlobalKey? tourTheologicalPaletteKey,
+    GlobalKey? tourDictionaryFirstItemKey,
   }) {
     return [
       // Paso 1: Identidad & Lector Bíblico Interlineal
@@ -649,10 +689,11 @@ class TourStepsFactory {
         title: 'Despliegue de Capítulo Completo',
         description:
             'Lee el capítulo íntegro de un tirón. Toca cualquier versículo para desplegar al instante sus herramientas de análisis.',
-        pointerLabel: '📖 Alterna capítulo / versículo',
+        pointerLabel: '📖 Alternar modo de lectura',
         demoKind: TourDemoKind.chapterUnfold,
         tabIndex: 0,
-        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () =>
+            tourChapterModeButtonKey ?? bibleAppBarKeyResolver?.call() ?? bibleKey,
       ),
 
       // Paso 3: Tipografía Bíblica SIL
@@ -662,10 +703,11 @@ class TourStepsFactory {
         title: 'Fuentes Académicas Ezra SIL y Gentium Plus',
         description:
             'Puntuación masorética hebrea y acentuación politónica griega nítidas y legibles en cualquier tamaño de pantalla.',
-        pointerLabel: '🔤 Selector tipográfico TT',
+        pointerLabel: '🔤 Selector tipográfico «TT»',
         demoKind: TourDemoKind.topBarControls,
         tabIndex: 0,
-        targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () =>
+            tourTypographyButtonKey ?? bibleAppBarKeyResolver?.call() ?? bibleKey,
       ),
 
       // Paso 4: Resaltadores Teológicos
@@ -675,54 +717,14 @@ class TourStepsFactory {
         title: 'Resalta Versículos o Frases Seleccionadas',
         description:
             '5 colores teológicos (Promesas, Mandamientos, Atributos de Dios, Advertencias, Profecía) con notas y marcadores persistentes.',
-        pointerLabel: '🎨 Resaltador y herramientas',
+        pointerLabel: '🎨 Paleta teológica (5 colores)',
         demoKind: TourDemoKind.studyCollections,
         tabIndex: 0,
-        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
+        targetKeyResolver: () =>
+            tourTheologicalPaletteKey ?? bibleVerseKeyResolver?.call() ?? bibleKey,
       ),
 
-      // Paso 5: Diccionario Enriquecido
-      TourStepConfig(
-        badge: 'LÉXICO ACADÉMICO',
-        icon: Icons.translate_rounded,
-        title: '100% Derivaciones y Léxico STEPBible',
-        description:
-            '14.197 términos con etimologías completas, léxico académico Tyndale STEPBible e hipervínculos táctiles entre códigos Strong.',
-        pointerLabel: '🏛️ Léxico STEPBible y Raíces',
-        demoKind: TourDemoKind.strongHyperlinks,
-        tabIndex: 2,
-        targetKeyResolver: () => dictionaryControlsKey,
-      ),
-
-      // Paso 6: Similitudes y Comparaciones Teológicas (Novedad v1.3.7)
-      TourStepConfig(
-        badge: 'NOVEDAD v1.3.7',
-        isNewFeature: true,
-        icon: Icons.compare_arrows_rounded,
-        title: 'Similitudes y Comparaciones Teológicas',
-        description:
-            '¡Análisis exegético profundo! Compara matices entre términos afines: érets (tierra política) vs adamáh (tierra cultivable) vs tebél (el mundo cósmico), bará vs asáh, agapáo vs philéo.',
-        pointerLabel: '⚖️ Similitudes Teológicas',
-        demoKind: TourDemoKind.typewriterDictionary,
-        tabIndex: 2,
-        targetKeyResolver: () => dictionaryControlsKey,
-      ),
-
-      // Paso 7: Familias de Palabras Derivadas (Novedad v1.3.7)
-      TourStepConfig(
-        badge: 'NOVEDAD v1.3.7',
-        isNewFeature: true,
-        icon: Icons.account_tree_rounded,
-        title: 'Árbol Léxico y Familias Derivadas',
-        description:
-            'Visualiza con pastillas doradas táctiles todas las palabras bíblicas que brotan de una misma raíz común, conectadas mediante la tabla relacional SQLite.',
-        pointerLabel: '🌿 Familias Derivadas',
-        demoKind: TourDemoKind.strongHyperlinks,
-        tabIndex: 2,
-        targetKeyResolver: () => dictionaryControlsKey,
-      ),
-
-      // Paso 8: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
+      // Paso 5: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
       TourStepConfig(
         badge: 'TEMA RÁPIDO',
         isNewFeature: true,
@@ -736,7 +738,61 @@ class TourStepsFactory {
         targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,
       ),
 
-      // Paso 9: Avisos Nativos OTA
+      // Paso 6: Diccionario Strong: Búsqueda y Filtros
+      TourStepConfig(
+        badge: 'DICCIONARIO BÍBLICO',
+        icon: Icons.search_rounded,
+        title: 'Búsqueda Rápida y Filtros Lingüísticos',
+        description:
+            'Busca al instante por código Strong (#H/#G), lema en idioma bíblico o transliteración latina, alternando con un toque entre Griego y Hebreo.',
+        pointerLabel: '🔍 Buscar código o palabra',
+        demoKind: TourDemoKind.typewriterDictionary,
+        tabIndex: 2,
+        targetKeyResolver: () => dictionaryControlsKey,
+      ),
+
+      // Paso 7: Diccionario Enriquecido (STEPBible + Derivaciones)
+      TourStepConfig(
+        badge: 'LÉXICO ACADÉMICO',
+        icon: Icons.translate_rounded,
+        title: '100% Derivaciones y Léxico STEPBible',
+        description:
+            '14.197 términos con etimologías completas, léxico académico Tyndale STEPBible e hipervínculos táctiles entre códigos Strong.',
+        pointerLabel: '🏛️ Léxico STEPBible y Raíces',
+        demoKind: TourDemoKind.strongHyperlinks,
+        tabIndex: 2,
+        targetKeyResolver: () => tourDictionaryFirstItemKey ?? dictionaryControlsKey,
+      ),
+
+      // Paso 8: Similitudes y Comparaciones Teológicas (Novedad v1.3.7)
+      TourStepConfig(
+        badge: 'NOVEDAD v1.3.7',
+        isNewFeature: true,
+        icon: Icons.compare_arrows_rounded,
+        title: 'Similitudes y Comparaciones Teológicas',
+        description:
+            '¡Análisis exegético profundo! Compara matices entre términos afines: érets (tierra política) vs adamáh (tierra cultivable) vs tebél (el mundo cósmico), bará vs asáh, agapáo vs philéo.',
+        pointerLabel: '⚖️ Similitudes Teológicas',
+        demoKind: TourDemoKind.typewriterDictionary,
+        tabIndex: 2,
+        targetKeyResolver: () => tourDictionaryFirstItemKey ?? dictionaryControlsKey,
+      ),
+
+      // Paso 9: Familias de Palabras Derivadas (Novedad v1.3.7)
+      TourStepConfig(
+        badge: 'NOVEDAD v1.3.7',
+        isNewFeature: true,
+        icon: Icons.account_tree_rounded,
+        title: 'Árbol Léxico y Familias Derivadas',
+        description:
+            'Visualiza con pastillas doradas táctiles todas las palabras bíblicas que brotan de una misma raíz común, conectadas mediante la tabla relacional SQLite.',
+        pointerLabel: '🌿 Familias Derivadas',
+        demoKind: TourDemoKind.strongHyperlinks,
+        tabIndex: 2,
+        targetKeyResolver: () => tourDictionaryFirstItemKey ?? dictionaryControlsKey,
+      ),
+
+      // Paso 10: Avisos Nativos OTA
       TourStepConfig(
         badge: 'ACTUALIZACIONES',
         icon: Icons.system_update_rounded,
@@ -750,7 +806,7 @@ class TourStepsFactory {
         targetKeyResolver: () => settingsUpdaterKeyResolver?.call() ?? settingsKey,
       ),
 
-      // Paso 10: Repetir Guía de Uso
+      // Paso 11: Repetir Guía de Uso
       TourStepConfig(
         badge: 'AYUDA SIEMPRE ACTIVA',
         icon: Icons.explore_rounded,
@@ -780,6 +836,10 @@ class TourStepsFactory {
     GlobalKey? tourBookSummaryButtonKey,
     GlobalKey? tourDrawerTheologicalKey,
     GlobalKey? tourThemeToggleKey,
+    GlobalKey? tourChapterModeButtonKey,
+    GlobalKey? tourTypographyButtonKey,
+    GlobalKey? tourTheologicalPaletteKey,
+    GlobalKey? tourDictionaryFirstItemKey,
     Future<void> Function()? onPrepareBibleStep,
   }) {
     return [

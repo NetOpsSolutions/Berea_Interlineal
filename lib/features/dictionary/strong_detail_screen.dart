@@ -11,11 +11,13 @@ import 'widgets/linked_strong_text.dart';
 class StrongDetailScreen extends StatefulWidget {
   final String language;
   final int code;
+  final bool showExegesisSections;
 
   const StrongDetailScreen({
     super.key,
     required this.language,
     required this.code,
+    this.showExegesisSections = true,
   });
 
   @override
@@ -242,19 +244,20 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
                   ),
 
                 // Relaciones Léxicas y Exegéticas (Similitudes + Familia de Palabras)
-                FutureBuilder<List<StrongRelationItem>>(
-                  future: _relationsFuture,
-                  builder: (context, relSnapshot) {
-                    final relations = relSnapshot.data ?? const <StrongRelationItem>[];
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSimilaritiesSection(entry, relations, theme),
-                        _buildDerivedFamilySection(relations, theme),
-                      ],
-                    );
-                  },
-                ),
+                if (widget.showExegesisSections)
+                  FutureBuilder<List<StrongRelationItem>>(
+                    future: _relationsFuture,
+                    builder: (context, relSnapshot) {
+                      final relations = relSnapshot.data ?? const <StrongRelationItem>[];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSimilaritiesSection(entry, relations, theme),
+                          _buildDerivedFamilySection(relations, theme),
+                        ],
+                      );
+                    },
+                  ),
 
                 const SizedBox(height: 8),
 
@@ -411,6 +414,7 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
                         builder: (_) => StrongDetailScreen(
                           language: rel.language,
                           code: rel.code,
+                          showExegesisSections: widget.showExegesisSections,
                         ),
                       ),
                     );
@@ -545,6 +549,7 @@ class _StrongDetailScreenState extends State<StrongDetailScreen> {
                       builder: (_) => StrongDetailScreen(
                         language: rel.language,
                         code: rel.code,
+                        showExegesisSections: widget.showExegesisSections,
                       ),
                     ),
                   );

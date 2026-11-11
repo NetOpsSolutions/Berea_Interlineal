@@ -96,11 +96,13 @@ class StudyScreenState extends State<StudyScreen> with SingleTickerProviderState
 
         return Scaffold(
           appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.menu_rounded),
-              tooltip: 'Menú persiana de estudio',
-              onPressed: widget.onOpenDrawer ?? () => Scaffold.of(context).openDrawer(),
-            ),
+            leading: widget.onOpenDrawer != null
+                ? IconButton(
+                    icon: const Icon(Icons.menu_rounded),
+                    tooltip: 'Menú persiana de estudio',
+                    onPressed: widget.onOpenDrawer,
+                  )
+                : null,
             title: const Text('Mi Estudio'),
             actions: [
               IconButton(
