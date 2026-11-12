@@ -157,13 +157,12 @@ void main() {
       settingsKey: k5,
       tourThemeToggleKey: kTheme,
     );
-    expect(v132.length, equals(7));
-    expect(v132.first.badge, equals('NUEVA IDENTIDAD'));
-    expect(v132.first.title, equals('Inspirados en Hechos 17:11'));
-    expect(v132[1].title, equals('Lectura Continua y Expansión al Toque'));
-    expect(v132[3].title, equals('Resalta Versículos o Frases Seleccionadas'));
-    expect(v132[5].badge, equals('TEMA RÁPIDO'));
-    expect(v132[5].targetKeyResolver(), equals(kTheme));
+    expect(v132.length, equals(6));
+    expect(v132.first.badge, equals('EXPERIENCIA BÍBLICA'));
+    expect(v132.first.title, equals('Lectura Continua y Expansión al Toque'));
+    expect(v132[2].title, equals('Resalta Versículos o Frases Seleccionadas'));
+    expect(v132[4].badge, equals('TEMA RÁPIDO'));
+    expect(v132[4].targetKeyResolver(), equals(kTheme));
 
     final v135 = TourStepsFactory.getStepsForVersion(
       version: '1.3.5',

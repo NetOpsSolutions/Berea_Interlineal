@@ -394,21 +394,7 @@ class TourStepsFactory {
     GlobalKey? tourThemeToggleKey,
   }) {
     return [
-      // Paso 1: Nueva Identidad Oficial "Berea Interlineal"
-      TourStepConfig(
-        badge: 'NUEVA IDENTIDAD',
-        isNewFeature: true,
-        icon: Icons.verified_rounded,
-        title: 'Inspirados en Hechos 17:11',
-        description:
-            'Nuevo logotipo oficial: la Biblia abierta iluminada y la lupa de aumento exegético sobre Hechos 17:11 («escudriñando cada día las Escrituras»).',
-        pointerLabel: '✨ Edición Oficial Berea Interlineal',
-        demoKind: TourDemoKind.bereaIdentity,
-        tabIndex: 0,
-        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
-      ),
-
-      // Paso 2: Lectura por Capítulo Completo y Gestos Laterales
+      // Paso 1: Lectura por Capítulo Completo y Gestos Laterales
       TourStepConfig(
         badge: 'EXPERIENCIA BÍBLICA',
         isNewFeature: true,
@@ -423,7 +409,7 @@ class TourStepsFactory {
         targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
       ),
 
-      // Paso 3: Tipografías Académicas SIL OFL Offline
+      // Paso 2: Tipografías Académicas SIL OFL Offline
       TourStepConfig(
         badge: 'TIPOGRAFÍA ACADÉMICA',
         isNewFeature: true,
@@ -437,7 +423,7 @@ class TourStepsFactory {
         targetKeyResolver: () => bibleAppBarKeyResolver?.call() ?? bibleKey,
       ),
 
-      // Paso 4: 5 Resaltadores Teológicos
+      // Paso 3: 5 Resaltadores Teológicos
       TourStepConfig(
         badge: 'HERRAMIENTA TEOLÓGICA',
         isNewFeature: true,
@@ -451,7 +437,7 @@ class TourStepsFactory {
         targetKeyResolver: () => studyTabsKey,
       ),
 
-      // Paso 5: Notificaciones Nativas en la Bandeja de Android
+      // Paso 4: Notificaciones Nativas en la Bandeja de Android
       TourStepConfig(
         badge: 'ACTUALIZACIONES',
         isNewFeature: true,
@@ -466,7 +452,7 @@ class TourStepsFactory {
         targetKeyResolver: () => settingsUpdaterKeyResolver?.call() ?? settingsKey,
       ),
 
-      // Paso 6: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
+      // Paso 5: Alternador Rápido de Tema Sol / Luna (☀️/🌙)
       TourStepConfig(
         badge: 'TEMA RÁPIDO',
         isNewFeature: true,
@@ -480,7 +466,7 @@ class TourStepsFactory {
         targetKeyResolver: () => tourThemeToggleKey ?? bibleKey,
       ),
 
-      // Paso 7: Repetir Guía de Uso
+      // Paso 6: Repetir Guía de Uso
       TourStepConfig(
         badge: 'AYUDA SIEMPRE ACTIVA',
         icon: Icons.explore_rounded,

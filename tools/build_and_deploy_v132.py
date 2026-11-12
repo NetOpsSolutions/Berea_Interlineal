@@ -294,12 +294,15 @@ def patch_worktree():
 
     bible_file.write_text(b_text, encoding="utf-8")
 
-    # 6. Actualizar widget_test.dart en wt_v132 para que concuerde con el paso 6 de v1.3.2
+    # 6. Actualizar widget_test.dart en wt_v132 para que concuerde con los 6 pasos funcionales de v1.3.2
     test_file = WT / "test/widget_test.dart"
     t_text = test_file.read_text(encoding="utf-8")
+    t_text = t_text.replace("expect(v132.length, equals(7));", "expect(v132.length, equals(6));")
+    t_text = t_text.replace("expect(v132.first.badge, equals('NUEVA IDENTIDAD'));", "expect(v132.first.badge, equals('EXPERIENCIA BÍBLICA'));")
+    t_text = t_text.replace("expect(v132.first.title, equals('Inspirados en Hechos 17:11'));", "expect(v132.first.title, equals('Lectura Continua y Expansión al Toque'));")
     t_text = t_text.replace(
         "expect(v132[3].title, equals('Resalta Versículos o Frases Seleccionadas'));",
-        "expect(v132[3].title, equals('Resalta Versículos o Frases Seleccionadas'));\n    expect(v132[5].title, equals('Alternador de Modo Claro y Oscuro (☀️/🌙)'));"
+        "expect(v132[2].title, equals('Resalta Versículos o Frases Seleccionadas'));\n    expect(v132[4].title, equals('Alternador de Modo Claro y Oscuro (☀️/🌙)'));"
     )
     t_text = t_text.replace("expect(v140.length, equals(5));", "expect(v140.length, equals(9));")
     t_text = t_text.replace("expect(v140.first.badge, equals('NUEVO MÓDULO'));", "expect(v140.first.badge, equals('BIENVENIDA & LECTURA'));")
