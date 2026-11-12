@@ -94,10 +94,22 @@ def patch_worktree():
     bible_replace = f"      BibleScreen(key: _bibleKey, tourThemeToggleKey: _tourThemeToggleKey),"
     if bible_target in text:
         text = text.replace(bible_target, bible_replace, 1)
-    tour_target = f"      onPrepareSettingsReplayStep: () => _prepareSettingsReplayStep(),"
-    tour_replace = f"      onPrepareSettingsReplayStep: () => _prepareSettingsReplayStep(),{nl}      tourThemeToggleKey: _tourThemeToggleKey,"
-    if tour_target in text:
-        text = text.replace(tour_target, tour_replace, 1)
+        print("  [OK] BibleScreen tourThemeToggleKey patched en wt_v132")
+    else:
+        print("  [WARN] bible_target not found in home_shell.dart")
+
+    tour_target1 = "      onPrepareSettingsReplayStep: () async {"
+    tour_target2 = "      onPrepareSettingsReplayStep: () => _prepareSettingsReplayStep(),"
+    tour_replace1 = f"      tourThemeToggleKey: _tourThemeToggleKey,{nl}      onPrepareSettingsReplayStep: () async {{"
+    tour_replace2 = f"      tourThemeToggleKey: _tourThemeToggleKey,{nl}      onPrepareSettingsReplayStep: () => _prepareSettingsReplayStep(),"
+    if tour_target1 in text:
+        text = text.replace(tour_target1, tour_replace1, 1)
+        print("  [OK] tourThemeToggleKey vinculado en getStepsForVersion en wt_v132")
+    elif tour_target2 in text:
+        text = text.replace(tour_target2, tour_replace2, 1)
+        print("  [OK] tourThemeToggleKey vinculado en getStepsForVersion en wt_v132")
+    else:
+        print("  [WARN] tour_target NOT found in home_shell.dart")
     home_file.write_text(text, encoding="utf-8")
     print("  [OK] Patched home_shell.dart")
 
@@ -136,12 +148,21 @@ def patch_worktree():
         ctor_replace = ctor_replace.replace("\n", "\r\n")
     if ctor_target in b_text:
         b_text = b_text.replace(ctor_target, ctor_replace, 1)
+        print("  [OK] Patched BibleScreen constructor en wt_v132")
+    else:
+        print("  [WARN] ctor_target not found in bible_screen.dart")
 
     # Actions AppBar: add theme button
     actions_target = f"""            actions: [{nl}              Row({nl}                key: tourAppBarActionsKey,"""
     actions_replace = f"""            actions: [{nl}              IconButton({nl}                key: widget.tourThemeToggleKey,{nl}                icon: Icon({nl}                  theme.brightness == Brightness.dark{nl}                      ? Icons.light_mode_rounded{nl}                      : Icons.dark_mode_rounded,{nl}                  color: theme.brightness == Brightness.dark{nl}                      ? const Color(0xFFFBBF24){nl}                      : const Color(0xFFB45309),{nl}                ),{nl}                tooltip: theme.brightness == Brightness.dark{nl}                    ? 'Cambiar a modo claro (☀️ Pergamino Diurno)'{nl}                    : 'Cambiar a modo oscuro (🌙 Noche Alejandrina)',{nl}                onPressed: () => StudyService.instance.toggleTheme(),{nl}              ),{nl}              Row({nl}                key: tourAppBarActionsKey,"""
+    if "\r\n" in b_text:
+        actions_target = actions_target.replace("\n", "\r\n")
+        actions_replace = actions_replace.replace("\n", "\r\n")
     if actions_target in b_text:
         b_text = b_text.replace(actions_target, actions_replace, 1)
+        print("  [OK] Patched BibleScreen actions with tourThemeToggleKey en wt_v132")
+    else:
+        print("  [WARN] actions_target not found in bible_screen.dart")
 
     # Botón expandir/contraer versículo: visible con fondo y borde nítido
     expand_btn_target = f"""                // Botón sutil para expandir/contraer herramientas e interlineal
@@ -291,6 +312,15 @@ def compile_v132():
     run_cmd(["flutter", "analyze"], cwd=WT)
     print("  -> Compilando Split APKs (arm64-v8a, armeabi-v7a, x86_64)...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=WT)
+
+    # Instalar inmediatamente en emulador si está conectado
+    x86_apk = WT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
+    adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
+    if x86_apk.exists() and adb_path.exists():
+        print("\n  -> Instalando automáticamente v1.3.2 en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
+        print("  [OK] v1.3.2 instalada y abierta en emulador.\n")
 
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=WT)

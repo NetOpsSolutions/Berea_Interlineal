@@ -405,10 +405,7 @@ class TourStepsFactory {
         pointerLabel: '✨ Edición Oficial Berea Interlineal',
         demoKind: TourDemoKind.bereaIdentity,
         tabIndex: 0,
-        targetKeyResolver: () =>
-            bibleAppBarKeyResolver?.call() ??
-            bibleVerseKeyResolver?.call() ??
-            bibleKey,
+        targetKeyResolver: () => bibleVerseKeyResolver?.call() ?? bibleKey,
       ),
 
       // Paso 2: Lectura por Capítulo Completo y Gestos Laterales
