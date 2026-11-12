@@ -82,6 +82,39 @@ def patch_worktree():
         study_file.write_text(text, encoding="utf-8")
         print("  [OK] Patched study_screen.dart")
 
+    # 3.5. Patch SettingsScreen: Eliminar selector de Modo Oscuro y Repositorio Oficial
+    settings_file = WT / "lib/features/settings/settings_screen.dart"
+    s_text = settings_file.read_text(encoding="utf-8")
+    nl = "\r\n" if "\r\n" in s_text else "\n"
+    dark_mode_target = f"""                    SwitchListTile(
+                      title: const Text('Modo oscuro'),
+                      subtitle: const Text('Alterna entre tema claro y tema oscuro'),
+                      secondary: Icon(
+                        widget.themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+                      ),
+                      value: widget.themeMode == ThemeMode.dark,
+                      onChanged: (_) => widget.onToggleTheme(),
+                    ),"""
+    repo_target = f"""                const Divider(),{nl}{nl}                // ── 6. Bloque: Recursos y Licencias ─────────────────────────────{nl}                _buildSectionHeader(theme, 'Recursos y Licencias'),{nl}                ListTile({nl}                  leading: const Icon(Icons.code_rounded),{nl}                  title: const Text('Repositorio Oficial'),{nl}                  subtitle: const Text('https://github.com/NetOpsSolutions/Berea_Interlineal'),{nl}                  trailing: Icon({nl}                    Icons.open_in_new_rounded,{nl}                    size: 18,{nl}                    color: theme.colorScheme.outline,{nl}                  ),{nl}                  onTap: () {{{nl}                    UpdateService.instance.openUrl({nl}                      'https://github.com/NetOpsSolutions/Berea_Interlineal',{nl}                    );{nl}                  }},{nl}                ),"""
+
+    if "\r\n" in s_text:
+        dark_mode_target = dark_mode_target.replace("\n", "\r\n")
+        repo_target = repo_target.replace("\n", "\r\n")
+
+    if dark_mode_target in s_text:
+        s_text = s_text.replace(dark_mode_target, "", 1)
+        print("  [OK] Eliminado switch de Modo Oscuro de Ajustes en wt_v132")
+    else:
+        print("  [WARN] dark_mode_target not found in settings_screen.dart")
+
+    if repo_target in s_text:
+        s_text = s_text.replace(repo_target, "", 1)
+        print("  [OK] Eliminada seccion Repositorio Oficial de Ajustes en wt_v132")
+    else:
+        print("  [WARN] repo_target not found in settings_screen.dart")
+
+    settings_file.write_text(s_text, encoding="utf-8")
+
     # 4. Patch HomeShell
     home_file = WT / "lib/shell/home_shell.dart"
     text = home_file.read_text(encoding="utf-8")
