@@ -50,7 +50,8 @@ RELEASE_NOTES = """# 📜 Berea Interlineal v1.3.7 — Edición Exegética
 * Cobertura del 100% de Derivaciones y Léxico STEPBible en 14.197 términos bíblicos.
 * Cero guiones «—» y distintivo de dignidad para raíces primarias.
 * Hipervínculos activos en las derivaciones.
-* Alternador rápido de Tema Sol/Luna (☀️/🌙) calibrado en la barra superior.
+* Despliegue y contracción de versículos ultra-fluido (sin destellos oscuros ni saltos, reemplazo de AnimatedContainer y AnimatedSize).
+* Alternador rápido de Tema Sol/Luna (☀️/🌙) sincronizado a 0 ms en la barra superior.
 * Pantalla de Ajustes depurada sin elementos redundantes ni enlaces a repositorio.
 
 ### 2. ⚖️ Similitudes, Sinónimos y Comparaciones Teológicas
@@ -66,8 +67,8 @@ RELEASE_NOTES = """# 📜 Berea Interlineal v1.3.7 — Edición Exegética
 ### 4. Tabla Relacional SQLite `strong_relations`
 * Estructura relacional optimizada con índices de alta velocidad para relaciones etimológicas y exegéticas.
 
-### 5. Guía Interactiva Adaptada v1.3.7
-* Recorrido guiado de 10 pasos con paradas dedicadas para la comparación de similitudes teológicas y árboles léxicos familiares.
+### 5. Guía de Uso Limpia y 100% Contextual
+* Recorrido funcional de 6 pasos calibrados sin elementos fuera de pantalla ni señalizaciones erróneas.
 
 ---
 

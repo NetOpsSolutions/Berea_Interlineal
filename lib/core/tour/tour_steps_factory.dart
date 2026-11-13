@@ -73,6 +73,9 @@ class TourStepsFactory {
           onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
         );
       case '1.3.2':
+      case '1.3.3':
+      case '1.3.5':
+      case '1.3.7':
         return _buildV132Steps(
           bibleKey: bibleKey,
           studyTabsKey: studyTabsKey,
@@ -87,52 +90,6 @@ class TourStepsFactory {
           onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
           onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
           tourThemeToggleKey: tourThemeToggleKey,
-        );
-      case '1.3.5':
-        return _buildV135Steps(
-          bibleKey: bibleKey,
-          dictionaryControlsKey: dictionaryControlsKey,
-          studyTabsKey: studyTabsKey,
-          settingsKey: settingsKey,
-          bibleVerseKeyResolver: bibleVerseKeyResolver,
-          bibleAppBarKeyResolver: bibleAppBarKeyResolver,
-          settingsReadingKeyResolver: settingsReadingKeyResolver,
-          settingsUpdaterKeyResolver: settingsUpdaterKeyResolver,
-          settingsReplayGuideKeyResolver: settingsReplayGuideKeyResolver,
-          onPrepareBibleStep: onPrepareBibleStep,
-          onPrepareSettingsReadingStep: onPrepareSettingsReadingStep,
-          onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
-          onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
-          tourThemeToggleKey: tourThemeToggleKey,
-          tourChapterModeButtonKey: tourChapterModeButtonKey,
-          tourTypographyButtonKey: tourTypographyButtonKey,
-          tourTheologicalPaletteKey: tourTheologicalPaletteKey,
-          tourDictionaryFirstItemKey: tourDictionaryFirstItemKey,
-          tourSimilaritiesKey: tourSimilaritiesKey,
-          tourDerivedFamilyKey: tourDerivedFamilyKey,
-        );
-      case '1.3.7':
-        return _buildV137Steps(
-          bibleKey: bibleKey,
-          dictionaryControlsKey: dictionaryControlsKey,
-          studyTabsKey: studyTabsKey,
-          settingsKey: settingsKey,
-          bibleVerseKeyResolver: bibleVerseKeyResolver,
-          bibleAppBarKeyResolver: bibleAppBarKeyResolver,
-          settingsReadingKeyResolver: settingsReadingKeyResolver,
-          settingsUpdaterKeyResolver: settingsUpdaterKeyResolver,
-          settingsReplayGuideKeyResolver: settingsReplayGuideKeyResolver,
-          onPrepareBibleStep: onPrepareBibleStep,
-          onPrepareSettingsReadingStep: onPrepareSettingsReadingStep,
-          onPrepareSettingsUpdaterStep: onPrepareSettingsUpdaterStep,
-          onPrepareSettingsReplayStep: onPrepareSettingsReplayStep,
-          tourThemeToggleKey: tourThemeToggleKey,
-          tourChapterModeButtonKey: tourChapterModeButtonKey,
-          tourTypographyButtonKey: tourTypographyButtonKey,
-          tourTheologicalPaletteKey: tourTheologicalPaletteKey,
-          tourDictionaryFirstItemKey: tourDictionaryFirstItemKey,
-          tourSimilaritiesKey: tourSimilaritiesKey,
-          tourDerivedFamilyKey: tourDerivedFamilyKey,
         );
       case '1.4.0':
       default:

@@ -22,14 +22,13 @@ class BereaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: StudyService.instance,
-      builder: (context, _) {
-        final currentThemeMode = StudyService.instance.themeMode;
-
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: StudyService.instance.themeModeNotifier,
+      builder: (context, currentThemeMode, _) {
         return MaterialApp(
           title: 'Berea Interlineal',
           debugShowCheckedModeBanner: false,
+          themeAnimationDuration: Duration.zero,
           theme: buildTheme(Brightness.light),
           darkTheme: buildTheme(Brightness.dark),
           themeMode: currentThemeMode,

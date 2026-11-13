@@ -857,6 +857,7 @@ class BibleScreenState extends State<BibleScreen> {
                       chapter: v.chapter,
                       verse: v.verse,
                       preview: v.translation,
+                      notify: false,
                     );
                   },
                   onRequestShowInterlinear: () {
@@ -990,8 +991,7 @@ class _ChapterVerseBlockState extends State<_ChapterVerseBlock> {
         ? (hlColor?.borderColor(isDark) ?? theme.colorScheme.primary)
         : (hlColor != null ? hlColor.borderColor(isDark).withAlpha(140) : Colors.transparent);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+    return Container(
       margin: EdgeInsets.symmetric(vertical: widget.isExpanded ? 6 : 2),
       decoration: BoxDecoration(
         color: bgColor,
@@ -1138,13 +1138,8 @@ class _ChapterVerseBlockState extends State<_ChapterVerseBlock> {
             ),
 
             // Bloque expandible con Resaltadores Teológicos + Acciones + Interlineal Académico
-            AnimatedSize(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              child: widget.isExpanded
-                  ? _buildExpandedPanel(context, theme, isDark, hlColor)
-                  : const SizedBox.shrink(),
-            ),
+            if (widget.isExpanded)
+              _buildExpandedPanel(context, theme, isDark, hlColor),
           ],
         ),
       ),
@@ -1178,17 +1173,23 @@ class _ChapterVerseBlockState extends State<_ChapterVerseBlock> {
       registerRecognizer: (r) => _recognizers.add(r),
     );
 
-    return SelectableText.rich(
+    if (widget.isExpanded) {
+      return SelectableText.rich(
+        TextSpan(children: spans),
+        contextMenuBuilder: (ctx, editableState) {
+          return _TheologicalSelectionToolbar(
+            editableTextState: editableState,
+            onSelectColor: (colorKey, selectedStr) {
+              widget.onApplyHighlight(colorKey, selectedFragment: selectedStr);
+              editableState.hideToolbar();
+            },
+          );
+        },
+      );
+    }
+
+    return Text.rich(
       TextSpan(children: spans),
-      contextMenuBuilder: (ctx, editableState) {
-        return _TheologicalSelectionToolbar(
-          editableTextState: editableState,
-          onSelectColor: (colorKey, selectedStr) {
-            widget.onApplyHighlight(colorKey, selectedFragment: selectedStr);
-            editableState.hideToolbar();
-          },
-        );
-      },
     );
   }
 
@@ -1346,6 +1347,9 @@ class _ChapterVerseBlockState extends State<_ChapterVerseBlock> {
   }
 }
 
+final _wordSplitRegex = RegExp(r'(\s+|[.,;:\(\)¡!¿?«»"—]+)');
+final _cleanWordRegex = RegExp(r'[^a-záéíóúñ0-9]');
+
 /// Construye spans enriquecidos combinando subrayados Strong discretos y resaltados de texto seleccionado
 List<InlineSpan> _buildFormattedSpans({
   required String text,
@@ -1379,8 +1383,17 @@ List<InlineSpan> _buildFormattedSpans({
   }
 
   final strongWords = words.where((w) => w.strongCode != null).toList();
-  final regex = RegExp(r'(\s+|[.,;:\(\)¡!¿?«»"—]+)');
-  final matches = regex.allMatches(text);
+  final List<({WordToken token, String clean})> cleanedStrongTokens = [];
+  if (fluentMode && strongWords.isNotEmpty) {
+    for (final w in strongWords) {
+      final wClean = w.translation.toLowerCase().replaceAll(_cleanWordRegex, '');
+      if (wClean.isNotEmpty) {
+        cleanedStrongTokens.add((token: w, clean: wClean));
+      }
+    }
+  }
+
+  final matches = _wordSplitRegex.allMatches(text);
 
   final spans = <InlineSpan>[];
   int lastEnd = 0;
@@ -1403,15 +1416,15 @@ List<InlineSpan> _buildFormattedSpans({
 
   InlineSpan buildWordSpan(String wordStr, int start, int end) {
     WordToken? matchedToken;
-    if (fluentMode && strongWords.isNotEmpty) {
-      final clean = wordStr.toLowerCase().replaceAll(RegExp(r'[^a-záéíóúñ0-9]'), '');
+    if (cleanedStrongTokens.isNotEmpty) {
+      final clean = wordStr.toLowerCase().replaceAll(_cleanWordRegex, '');
       if (clean.length > 2) {
-        for (final w in strongWords) {
-          final wClean = w.translation.toLowerCase().replaceAll(RegExp(r'[^a-záéíóúñ0-9]'), '');
+        for (final entry in cleanedStrongTokens) {
+          final wClean = entry.clean;
           if (wClean == clean ||
               (wClean.length > 2 && clean.contains(wClean)) ||
               (clean.length > 2 && wClean.contains(clean))) {
-            matchedToken = w;
+            matchedToken = entry.token;
             break;
           }
         }
@@ -2471,7 +2484,8 @@ class _ReaderAppearanceSheet extends StatelessWidget {
                   max: 1.45,
                   divisions: 12,
                   label: '$percent%',
-                  onChanged: (v) => service.setReadingFontScale(v),
+                  onChanged: (v) => service.setReadingFontScaleTransient(v),
+                  onChangeEnd: (v) => service.commitReadingFontScale(v),
                 ),
 
                 SwitchListTile(

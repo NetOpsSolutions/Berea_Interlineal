@@ -173,15 +173,11 @@ void main() {
       settingsKey: k5,
       tourThemeToggleKey: kTheme,
     );
-    expect(v135.length, equals(9));
-    expect(v135.first.badge, equals('IDENTIDAD Y LECTURA'));
+    expect(v135.length, equals(6));
+    expect(v135.first.badge, equals('EXPERIENCIA BÍBLICA'));
     expect(v135[4].badge, equals('TEMA RÁPIDO'));
     expect(v135[4].targetKeyResolver(), equals(kTheme));
-    expect(v135[6].badge, equals('NOVEDAD v1.3.5'));
-    expect(v135[6].title, equals('100% Derivaciones y Léxico STEPBible'));
 
-    final kSim = GlobalKey();
-    final kFam = GlobalKey();
     final v137 = TourStepsFactory.getStepsForVersion(
       version: '1.3.7',
       bibleKey: k1,
@@ -190,18 +186,11 @@ void main() {
       studyTabsKey: k4,
       settingsKey: k5,
       tourThemeToggleKey: kTheme,
-      tourSimilaritiesKey: kSim,
-      tourDerivedFamilyKey: kFam,
     );
-    expect(v137.length, equals(11));
+    expect(v137.length, equals(6));
+    expect(v137.first.badge, equals('EXPERIENCIA BÍBLICA'));
     expect(v137[4].badge, equals('TEMA RÁPIDO'));
     expect(v137[4].targetKeyResolver(), equals(kTheme));
-    expect(v137[6].badge, equals('LÉXICO ACADÉMICO'));
-    expect(v137[7].badge, equals('NOVEDAD v1.3.7'));
-    expect(v137[7].title, equals('Similitudes y Comparaciones Teológicas'));
-    expect(v137[7].targetKeyResolver(), equals(kSim));
-    expect(v137[8].title, equals('Árbol Léxico y Familias Derivadas'));
-    expect(v137[8].targetKeyResolver(), equals(kFam));
 
     final v140 = TourStepsFactory.getStepsForVersion(
       version: '1.4.0',

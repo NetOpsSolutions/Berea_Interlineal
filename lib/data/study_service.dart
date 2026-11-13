@@ -351,6 +351,11 @@ class StudyService extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;
   String _lastSeenTourVersion = '';
 
+  /// Notificador granular específico para el modo de tema (☀️ Pergamino / 🌙 Códice Noche)
+  /// Permite a MaterialApp reaccionar exclusivamente a cambios de tema sin reconstruirse
+  /// por operaciones de marcadores, notas, historial o escala de fuente.
+  final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.light);
+
   // ── Getters públicos ───────────────────────────────────────────────────────
   bool get isInitialized => _initialized;
   bool get fluentReadingMode => _fluentReadingMode;
@@ -450,6 +455,7 @@ class StudyService extends ChangeNotifier {
       if (kDebugMode) debugPrint('[StudyService] Error en initialize: $e');
     } finally {
       _initialized = true;
+      themeModeNotifier.value = _themeMode;
       if (_initCompleter != null && !_initCompleter!.isCompleted) {
         _initCompleter!.complete();
       }
@@ -839,9 +845,19 @@ class StudyService extends ChangeNotifier {
     await _saveUiSettingToDb(_keyGreekFont, family);
   }
 
-  Future<void> setReadingFontScale(double scale) async {
+  /// Actualiza la escala tipográfica en memoria sin escribir en disco de inmediato.
+  /// Ideal para el callback `onChanged` de sliders para garantizar 60 fps continuos sin jank.
+  void setReadingFontScaleTransient(double scale) {
     final clamped = scale.clamp(0.85, 1.45);
     if ((_readingFontScale - clamped).abs() < 0.005) return;
+    _readingFontScale = clamped;
+    notifyListeners();
+  }
+
+  /// Persiste la escala tipográfica en disco (SharedPreferences y SQLite).
+  /// Se ejecuta al soltar el slider (`onChangeEnd`) evitando bloqueos de I/O en caliente.
+  Future<void> commitReadingFontScale(double scale) async {
+    final clamped = scale.clamp(0.85, 1.45);
     _readingFontScale = clamped;
     notifyListeners();
     try {
@@ -850,9 +866,14 @@ class StudyService extends ChangeNotifier {
     await _saveUiSettingToDb(_keyFontScale, clamped.toStringAsFixed(2));
   }
 
+  Future<void> setReadingFontScale(double scale) async {
+    await commitReadingFontScale(scale);
+  }
+
   Future<void> setThemeMode(ThemeMode mode) async {
     if (_themeMode == mode) return;
     _themeMode = mode;
+    themeModeNotifier.value = mode;
     notifyListeners();
     final modeStr = mode == ThemeMode.light ? 'light' : 'dark';
     try {
@@ -1212,6 +1233,7 @@ class StudyService extends ChangeNotifier {
     required int chapter,
     required int verse,
     required String preview,
+    bool notify = false,
   }) async {
     final key = _verseKey(bookId, chapter, verse);
 
@@ -1235,7 +1257,9 @@ class StudyService extends ChangeNotifier {
       _history.removeRange(60, _history.length);
     }
 
-    notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
     await _dbUpsertHistory(item);
     await _dbTrimHistory();
   }

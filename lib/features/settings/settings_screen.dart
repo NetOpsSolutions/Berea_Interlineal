@@ -181,7 +181,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                             max: 1.45,
                             divisions: 12,
                             label: '$scalePercent%',
-                            onChanged: (v) => study.setReadingFontScale(v),
+                            onChanged: (v) => study.setReadingFontScaleTransient(v),
+                            onChangeEnd: (v) => study.commitReadingFontScale(v),
                           ),
                           const Divider(height: 16),
                           Text(

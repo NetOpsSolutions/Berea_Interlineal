@@ -56,8 +56,9 @@ RELEASE_NOTES = """# 📜 Berea Interlineal v1.4.0 — Edición Enciclopedia His
 * ⚡ **Barra Inferior Rápida de 3 Botones (Enfoque B)**: Simplificada para lectura diaria (Biblia, Diccionario, Mi Estudio).
 * 📜 **Resumen Canónico de los 66 Libros**: Fichas analíticas completas con autor, destinatarios, fecha, contexto histórico, temas centrales y aplicación práctica.
 * 👤 **Biografías de los 35 Escritores Sagrados**: Grafía original hebrea/griega, Strong interactivo y ventana modal de lectura rápida (`QuickVerseModalSheet`).
-* 🧭 **Guía de Uso Interactiva Integral de 9 Pasos**: Didáctica y repetible en cualquier momento.
-* ☀️/🌙 **Alternador Rápido Sol/Luna** en AppBar de todas las secciones principales.
+* ⚡ **Despliegue de Versículos Ultra-Fluido**: Apertura y cierre de análisis interlineal sin destellos oscuros ni saltos de texto (*rewrap* continuo, supresión de `AnimatedContainer` y `AnimatedSize`).
+* ☀️/🌙 **Sincronización Instantánea Sol/Luna**: Alternancia a 0 ms en AppBar con `themeModeNotifier` sin congelamientos de interfaz.
+* 🧭 **Guía de Uso Interactiva Integral de 9 Pasos**: Didáctica, 100% calibrada a los componentes de la interfaz y repetible en cualquier momento.
 
 ---
 
@@ -88,6 +89,15 @@ def compile_v140():
 
     print("  -> Compilando Split APKs...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=ROOT)
+
+    # Instalar automáticamente en el emulador x86_64 si está en línea
+    x86_apk = ROOT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
+    adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
+    if x86_apk.exists() and adb_path.exists():
+        print("\n  -> Instalando automáticamente v1.4.0 en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
+        print("  [OK] v1.4.0 instalada y abierta en emulador.\n")
 
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=ROOT)

@@ -56,10 +56,11 @@ RELEASE_NOTES = """# 📜 Berea Interlineal v1.3.5 — Edición Léxica
 ### 4. Hipervínculos Táctiles en Derivaciones
 * Toda referencia cruzada a otros códigos Strong citados en las derivaciones se convierte en un botón interactivo para navegación inmediata.
 
-### 5. Alternador Rápido de Tema Sol/Luna (☀️/🌙) Calibrado
-* Alterna entre Pergamino Diurno y Noche Alejandrina directamente desde la barra superior.
-* Spotlight y puntero calibrados con precisión de píxel hacia el icono.
-* Pantalla de Ajustes depurada (eliminado switch redundante y enlaces a repositorio).
+### 5. ⚡ Corrección de Despliegue de Versículos y Sincronización Sol/Luna (☀️/🌙)
+* **Despliegue y contracción de versículos ultra-fluido**: Eliminado el destello oscuro en modo claro y los saltos abruptos de texto (remoción de AnimatedContainer y AnimatedSize por renderizado directo y Text.rich ligero).
+* **Sincronización instantánea Sol/Luna**: Alternancia a 0 ms con themeModeNotifier sin latencia visual.
+* **Pantalla de Ajustes depurada**: Eliminado switch redundante de modo oscuro y enlaces externos a repositorio.
+* **Guía de uso calibrada**: Recorrido de 6 pasos estrictamente funcionales sin elementos ficticios.
 
 ### 6. Navegación Clásica Preservada
 * Mantiene la barra de navegación clásica de 5 botones (Biblia, Búsqueda, Diccionario, Mi Estudio, Ajustes).
