@@ -467,11 +467,14 @@ def compile_v137():
 
     lines = []
     for item in sorted(DEST.iterdir()):
-        if item.is_file() and item.name != "checksums.txt" and not item.name.endswith(".sha256"):
+        if item.is_file() and item.name.endswith(".apk"):
             lines.append(f"{sha256_file(item)}  {item.name}")
     chk_file = DEST / "checksums.txt"
     chk_file.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"  [OK] Checksums guardados en {chk_file}")
+    notes_file = DEST / "RELEASE_NOTES.md"
+    notes_file.write_text(RELEASE_NOTES, encoding="utf-8")
+    print(f"  [OK] Release notes guardados en {notes_file}")
 
 def deploy_v137():
     print("\n[4/5] Publicando Release v1.3.7 como BORRADOR (draft: true)...")
