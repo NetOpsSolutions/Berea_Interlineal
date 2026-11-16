@@ -38,7 +38,7 @@ class BookCatalog {
     Book(id: 'Nah', name: 'Nahúm', testament: 1, chapters: 3),
     Book(id: 'Hab', name: 'Habacuc', testament: 1, chapters: 3),
     Book(id: 'Sof', name: 'Sofonías', testament: 1, chapters: 3),
-    Book(id: 'Ha', name: 'Hageo', testament: 1, chapters: 1),
+    Book(id: 'Ha', name: 'Hageo', testament: 1, chapters: 2),
     Book(id: 'Zac', name: 'Zacarías', testament: 1, chapters: 14),
     Book(id: 'Mal', name: 'Malaquías', testament: 1, chapters: 4),
     Book(id: 'Mt', name: 'Mateo', testament: 2, chapters: 28),
