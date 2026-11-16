@@ -113,6 +113,13 @@ def patch_worktree():
     shutil.copy2(ROOT / "assets" / "data" / "logos_k_logos.db", WT / "assets" / "data" / "logos_k_logos.db")
     print("  [OK] Base de datos íntegra copiada a wt_v137.")
 
+    # Copiar credenciales de firmado de release (omitidas por .gitignore en worktree)
+    if (ROOT / "android" / "key.properties").exists():
+        shutil.copy2(ROOT / "android" / "key.properties", WT / "android" / "key.properties")
+    if (ROOT / "android" / "berea-release.jks").exists():
+        shutil.copy2(ROOT / "android" / "berea-release.jks", WT / "android" / "berea-release.jks")
+    print("  [OK] Credenciales oficiales de firmado copiadas a wt_v137.")
+
     # 1. Actualizar versión en pubspec.yaml a 1.3.7+9
     pub_file = WT / "pubspec.yaml"
     text = pub_file.read_text(encoding="utf-8")
