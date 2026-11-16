@@ -486,6 +486,7 @@ def cleanup():
     print("  [OK] Limpieza terminada.")
 
 def main():
+    deploy = "--no-deploy" not in sys.argv
     print("==================================================================")
     print(" COMPILACIÓN Y DESPLIEGUE BEREA INTERLINEAL v1.3.7 (EDICIÓN EXEGÉTICA)")
     print("==================================================================")
@@ -493,10 +494,13 @@ def main():
         setup_worktree()
         patch_worktree()
         compile_v137()
-        deploy_v137()
+        if deploy:
+            deploy_v137()
+        else:
+            print("\n[INFO] Saltando publicación en GitHub (--no-deploy activo).")
     finally:
         cleanup()
-    print("\n[ÉXITO COMPLETO] v1.3.7 compilada y desplegada como BORRADOR en GitHub.")
+    print("\n[ÉXITO COMPLETO] v1.3.7 procesada correctamente.")
 
 if __name__ == "__main__":
     main()

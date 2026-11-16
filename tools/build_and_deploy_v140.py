@@ -134,12 +134,16 @@ def deploy_v140():
     upload_draft_release(TAG_NAME, RELEASE_TITLE, RELEASE_NOTES, DEST)
 
 def main():
+    deploy = "--no-deploy" not in sys.argv
     print("==================================================================")
     print(" COMPILACIÓN Y DESPLIEGUE BEREA INTERLINEAL v1.4.0 (CONSOLIDADA)")
     print("==================================================================")
     compile_v140()
-    deploy_v140()
-    print("\n[ÉXITO COMPLETO] v1.4.0 compilada y desplegada como BORRADOR en GitHub.")
+    if deploy:
+        deploy_v140()
+    else:
+        print("\n[INFO] Saltando publicación en GitHub (--no-deploy activo).")
+    print("\n[ÉXITO COMPLETO] v1.4.0 procesada correctamente.")
 
 if __name__ == "__main__":
     main()
