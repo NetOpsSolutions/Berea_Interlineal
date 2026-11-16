@@ -30,39 +30,35 @@ ROOT = Path(__file__).resolve().parent.parent
 WT = ROOT / "wt_v135"
 DEST = ROOT / "release_builds" / "v1.3.5"
 TAG_NAME = "v1.3.5"
-RELEASE_TITLE = "📜 Berea Interlineal v1.3.5 [BORRADOR] • Edición Léxica"
+RELEASE_TITLE = "📜 Berea Interlineal v1.3.5 [BORRADOR] - Edición Léxica e Integridad Bíblica"
 
-RELEASE_NOTES = """# 📜 Berea Interlineal v1.3.5 — Edición Léxica
+RELEASE_NOTES = """# 📜 Berea Interlineal v1.3.5 — Edición Léxica e Integridad Bíblica
 
 > **ESTADO DE PUBLICACIÓN**: **BORRADOR PRIVADO (DRAFT: TRUE)**.  
 > Esta versión se encuentra en fase de validación técnica y no dispara alertas OTA a los usuarios de producción v1.3.1.
 
 ---
 
-## 🧭 Novedades de la Versión 1.3.5: Edición Léxica
+## 🧭 Novedades de la Versión 1.3.5: Edición Léxica e Integridad Bíblica
 
-### 1. Poblado Integral de Derivaciones y Etimologías (14.197 términos)
-* Cobertura del 100% en las 8.674 palabras en Hebreo (AT) y 5.523 palabras en Griego (NT).
-* Cada entrada ahora contiene su etimología y raíz semítica o griega precisa.
+### 1. 📖 Restauración Canónica de la Biblia (100% Íntegra)
+* **Restauración Canónica de la Biblia**: Se incorpora el capítulo completo de **Hageo 2** (23 versículos) y se restablecen los 323 versículos omitidos en Salmos 104, Salmos 105, Nehemías 7, y los Evangelios y Epístolas (Mateo, Marcos, Lucas, Juan, Hechos y Romanos), completando el 100% de los 1.189 capítulos y 31.102 versículos de las Sagradas Escrituras con interlineal y traducción completa.
+* Cero huecos en versículos y verificación estricta de continuidad en todos los libros canónicos.
 
-### 2. Léxico Académico Extendido (STEPBible / Tyndale House Cambridge)
-* Integración de las definiciones contextuales y académicas modernas en español desarrolladas por Tyndale House (Cambridge).
-* Eliminación definitiva del vacío lexicográfico anterior.
+### 2. 🎨 Lectura Despejada e Inmersiva (Limpieza de UI)
+* **Lectura Despejada e Inmersiva**: Se eliminaron los botones redundantes de cambio de capítulo al pie del texto (`[ ← Cap. Anterior ]` y `[ Cap. Siguiente → ]`), permitiendo una lectura más limpia y fluida sobre el pergamino alejandrino. La navegación continúa sumamente ágil mediante el selector superior del AppBar, controles de cabecera y el deslizamiento horizontal táctil (swipe).
 
-### 3. Supresión Total de Guiones Secos «—» y Ocultamiento Inteligente
-* Si una palabra es una **raíz primaria**, la ficha muestra con distinción: *«Raíz primaria (no proviene de otra palabra bíblica)»*.
-* Los campos que no apliquen a un término no se renderizan, manteniendo una interfaz limpia y libre de guiones vacíos.
+### 3. 📚 Diccionario Strong Enriquecido y Derivaciones al 100% (14.197 términos)
+* **Diccionario Strong Enriquecido**: Se completaron todas las derivaciones y raíces etimológicas en hebreo y griego (8.674 en AT y 5.523 en NT), junto con el léxico académico STEPBible / Tyndale House Cambridge, eliminando los campos vacíos con guiones y habilitando hipervínculos táctiles entre palabras relacionadas.
+* Distintivo de dignidad para raíces primarias: *«Raíz primaria (no proviene de otra palabra bíblica)»*.
 
-### 4. Hipervínculos Táctiles en Derivaciones
-* Toda referencia cruzada a otros códigos Strong citados en las derivaciones se convierte en un botón interactivo para navegación inmediata.
-
-### 5. ⚡ Corrección de Despliegue de Versículos y Sincronización Sol/Luna (☀️/🌙)
+### 4. ⚡ Corrección de Despliegue de Versículos y Sincronización Sol/Luna (☀️/🌙)
 * **Despliegue y contracción de versículos ultra-fluido**: Eliminado el destello oscuro en modo claro y los saltos abruptos de texto (remoción de AnimatedContainer y AnimatedSize por renderizado directo y Text.rich ligero).
 * **Sincronización instantánea Sol/Luna**: Alternancia a 0 ms con themeModeNotifier sin latencia visual.
 * **Pantalla de Ajustes depurada**: Eliminado switch redundante de modo oscuro y enlaces externos a repositorio.
 * **Guía de uso calibrada**: Recorrido de 6 pasos estrictamente funcionales sin elementos ficticios.
 
-### 6. Navegación Clásica Preservada
+### 5. 🏛️ Navegación Clásica Preservada
 * Mantiene la barra de navegación clásica de 5 botones (Biblia, Búsqueda, Diccionario, Mi Estudio, Ajustes).
 
 ---
@@ -103,6 +99,10 @@ def setup_worktree():
 
 def patch_worktree():
     print("\n[2/5] Aplicando componentes específicos de v1.3.5 a wt_v135...")
+
+    # Copiar base de datos reparada e íntegra
+    shutil.copy2(ROOT / "assets" / "data" / "logos_k_logos.db", WT / "assets" / "data" / "logos_k_logos.db")
+    print("  [OK] Base de datos íntegra copiada a wt_v135.")
 
     # 1. Actualizar versión en pubspec.yaml a 1.3.5+8
     pub_file = WT / "pubspec.yaml"
@@ -440,14 +440,15 @@ def compile_v135():
     print("  -> Compilando Split APKs (arm64-v8a, armeabi-v7a, x86_64)...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=WT)
 
-    # Instalar inmediatamente en emulador si está conectado
+    # Instalar limpiamente en emulador si está conectado
     x86_apk = WT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
     adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
     if x86_apk.exists() and adb_path.exists():
-        print("\n  -> Instalando automáticamente v1.3.5 en emulator-5554...")
+        print("\n  -> Instalación limpia desde cero de v1.3.5 en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "uninstall", "com.netopssolutions.berea_interlineal"])
         subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
         subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
-        print("  [OK] v1.3.5 instalada y abierta en emulador.\n")
+        print("  [OK] v1.3.5 instalada limpia y abierta en emulador.\n")
 
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=WT)

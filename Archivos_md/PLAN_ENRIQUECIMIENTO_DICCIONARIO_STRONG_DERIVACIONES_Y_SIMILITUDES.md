@@ -99,6 +99,8 @@ La versión **1.3.5** se enfoca exclusivamente en **resolver de raíz el vacío 
    * Cada mención de un código (ej. `(de H7218)` o `(comparar 5368)`) se convierte automáticamente en un botón táctil que navega a esa palabra.
 5. **Navegación e Interfaz**:
    * Mantiene la barra inferior clásica de 5 botones sin modificaciones estructurales.
+6. **Integridad Bíblica y Limpieza de UI**:
+   * Incorpora el parchado total de la Biblia (Hageo 2 + 323 versículos faltantes en BD) y la eliminación de los botones inferiores redundantes `[ ← Cap. Anterior ]` y `[ Cap. Siguiente → ]` en `bible_screen.dart` (ver detalle en `PLAN_CORRECCION_BIBLIA_Y_LIMPIEZA_UI_V135_V137_V140.md`).
 
 ### 3.2. Despliegue de la v1.3.5:
 * **Directorio local de compilación**: `release_builds/v1.3.5/` conteniendo:

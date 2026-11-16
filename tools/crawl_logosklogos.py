@@ -48,7 +48,7 @@ NT_BOOKS = ["Mt","Mr","Lc","Jn","Hch","Ro","1Co","2Co","Ga","Ef","Fil","Col","1T
 CHAPTERS = {"Gn":50,"Ex":40,"Lv":27,"Nm":36,"Dt":34,"Jos":24,"Jue":21,"Rt":4,"1S":31,"2S":24,
     "1R":22,"2R":25,"1Cr":29,"2Cr":36,"Esd":10,"Neh":13,"Est":10,"Job":42,"Sal":150,"Pr":31,
     "Ec":12,"Cnt":8,"Is":66,"Jer":52,"Lm":5,"Ez":48,"Dn":12,"Os":14,"Jl":3,"Am":9,"Abd":1,
-    "Jon":4,"Mi":7,"Nah":3,"Hab":3,"Sof":3,"Ha":1,"Zac":14,"Mal":4,
+    "Jon":4,"Mi":7,"Nah":3,"Hab":3,"Sof":3,"Ha":2,"Zac":14,"Mal":4,
     "Mt":28,"Mr":16,"Lc":24,"Jn":21,"Hch":28,"Ro":16,"1Co":16,"2Co":13,"Ga":6,"Ef":6,
     "Fil":4,"Col":4,"1Ts":5,"2Ts":3,"1Ti":6,"2Ti":4,"Tit":3,"Flm":1,"He":13,"Stg":5,
     "1P":5,"2P":3,"1Jn":5,"2Jn":1,"3Jn":1,"Jud":1,"Ap":22}

@@ -881,29 +881,7 @@ class BibleScreenState extends State<BibleScreen> {
               );
             }),
 
-            const SizedBox(height: 18),
-
-            // Botones inferiores de navegación rápida entre capítulos
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _hasPrevChapter ? _prevChapter : null,
-                    icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                    label: const Text('Cap. Anterior'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton.tonalIcon(
-                    onPressed: _hasNextChapter ? _nextChapter : null,
-                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                    iconAlignment: IconAlignment.end,
-                    label: const Text('Cap. Siguiente'),
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(height: 48), // Espacio de aire inferior para lectura relajada
           ],
         ),
       ),

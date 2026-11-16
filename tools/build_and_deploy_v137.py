@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parent.parent
 WT = ROOT / "wt_v137"
 DEST = ROOT / "release_builds" / "v1.3.7"
 TAG_NAME = "v1.3.7"
-RELEASE_TITLE = "📜 Berea Interlineal v1.3.7 [BORRADOR] • Edición Exegética"
+RELEASE_TITLE = "⚖️ Berea Interlineal v1.3.7 [BORRADOR] - Edición Exegética y Relaciones Strong"
 
 RELEASE_NOTES = """# 📜 Berea Interlineal v1.3.7 — Edición Exegética
 
@@ -108,6 +108,10 @@ def setup_worktree():
 
 def patch_worktree():
     print("\n[2/5] Aplicando componentes específicos de v1.3.7 a wt_v137...")
+
+    # Copiar base de datos reparada e íntegra
+    shutil.copy2(ROOT / "assets" / "data" / "logos_k_logos.db", WT / "assets" / "data" / "logos_k_logos.db")
+    print("  [OK] Base de datos íntegra copiada a wt_v137.")
 
     # 1. Actualizar versión en pubspec.yaml a 1.3.7+9
     pub_file = WT / "pubspec.yaml"
@@ -430,14 +434,15 @@ def compile_v137():
     print("  -> Compilando Split APKs (arm64-v8a, armeabi-v7a, x86_64)...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=WT)
 
-    # Instalar inmediatamente en emulador si está conectado
+    # Instalar limpiamente en emulador si está conectado
     x86_apk = WT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
     adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
     if x86_apk.exists() and adb_path.exists():
-        print("\n  -> Instalando automáticamente v1.3.7 en emulator-5554...")
+        print("\n  -> Instalación limpia desde cero de v1.3.7 en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "uninstall", "com.netopssolutions.berea_interlineal"])
         subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
         subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
-        print("  [OK] v1.3.7 instalada y abierta en emulador.\n")
+        print("  [OK] v1.3.7 instalada limpia y abierta en emulador.\n")
 
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=WT)

@@ -28,7 +28,7 @@ from deploy_draft_release import upload_draft_release
 ROOT = Path(__file__).resolve().parent.parent
 DEST = ROOT / "release_builds" / "v1.4.0"
 TAG_NAME = "v1.4.0"
-RELEASE_TITLE = "📜 Berea Interlineal v1.4.0 [BORRADOR EN DESARROLLO] • Edición Enciclopedia y Persiana"
+RELEASE_TITLE = "🏛️ Berea Interlineal v1.4.0 [BORRADOR] - Edición Enciclopedia y Persiana"
 
 RELEASE_NOTES = """# 📜 Berea Interlineal v1.4.0 — Edición Enciclopedia Histórica y Persiana de Estudio
 
@@ -90,14 +90,15 @@ def compile_v140():
     print("  -> Compilando Split APKs...")
     run_cmd(["flutter", "build", "apk", "--release", "--split-per-abi"], cwd=ROOT)
 
-    # Instalar automáticamente en el emulador x86_64 si está en línea
+    # Instalar automáticamente en el emulador x86_64 si está en línea (instalación limpia)
     x86_apk = ROOT / "build" / "app" / "outputs" / "flutter-apk" / "app-x86_64-release.apk"
     adb_path = Path(os.environ.get("LOCALAPPDATA", "")) / "Android/Sdk/platform-tools/adb.exe"
     if x86_apk.exists() and adb_path.exists():
-        print("\n  -> Instalando automáticamente v1.4.0 en emulator-5554...")
+        print("\n  -> Instalación limpia desde cero de v1.4.0 en emulator-5554...")
+        subprocess.run([str(adb_path), "-s", "emulator-5554", "uninstall", "com.netopssolutions.berea_interlineal"])
         subprocess.run([str(adb_path), "-s", "emulator-5554", "install", "-r", "-d", str(x86_apk)])
         subprocess.run([str(adb_path), "-s", "emulator-5554", "shell", "monkey", "-p", "com.netopssolutions.berea_interlineal", "-c", "android.intent.category.LAUNCHER", "1"])
-        print("  [OK] v1.4.0 instalada y abierta en emulador.\n")
+        print("  [OK] v1.4.0 instalada limpia y abierta en emulador.\n")
 
     print("  -> Compilando Universal APK...")
     run_cmd(["flutter", "build", "apk", "--release"], cwd=ROOT)
